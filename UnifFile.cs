@@ -73,8 +73,8 @@ namespace com.clusterrr.Famicom.Containers
                 var name = StringToUTF8N(dumperName);
                 Array.Copy(name, dinf, name.Length);
                 var dt = DateTime.Now;
-                dinf[100] = (byte)dt.Month;
-                dinf[101] = (byte)dt.Day;
+                dinf[100] = (byte)dt.Day;
+                dinf[101] = (byte)dt.Month;
                 dinf[102] = (byte)(dt.Year & 0xFF);
                 dinf[103] = (byte)(dt.Year >> 8);
                 var software = UnifFile.StringToUTF8N("Famicom dumper by Cluster");
