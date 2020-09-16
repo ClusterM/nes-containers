@@ -18,6 +18,7 @@ namespace com.clusterrr.Famicom.Containers
 
         public UnifFile()
         {
+            DumpDate = DateTime.Now;
         }
 
         /// <summary>
@@ -290,9 +291,9 @@ namespace com.clusterrr.Famicom.Containers
         }
 
         /// <summary>
-        /// Calculate CRC32 for PRG and CHR fields and fill CRC32 fields
+        /// Calculate CRC32 for PRG and CHR fields and store it into PCKx and CCKx fields
         /// </summary>
-        public void CalculateCRCs()
+        public void CalculateAndStoreCRCs()
         {
             foreach (var key in Fields.Keys.Where(k => k.StartsWith("PRG")))
             {
@@ -317,6 +318,16 @@ namespace com.clusterrr.Famicom.Containers
                 };
             }
         }
+
+        /// <summary>
+        /// Calculate overall CRC32
+        /// </summary>
+        /// <returns></returns>
+        public uint CalculateCRC32()
+            => Crc32Calculator.CalculateCRC32(
+                Enumerable.Concat(Fields.Where(k => k.Key.StartsWith("PRG")).OrderBy(k => k.Key).SelectMany(i => i.Value),
+                                  Fields.Where(k => k.Key.StartsWith("CHR")).OrderBy(k => k.Key).SelectMany(i => i.Value)).ToArray()
+            );
 
         [Flags]
         public enum Controller

@@ -42,6 +42,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Crc32Calculator.cs" />
     <Compile Include="NesFile.cs" />
     <Compile Include="NesHeaderFixer.cs" />
     <Compile Include="UnifFile.cs" />
