@@ -49,7 +49,7 @@ namespace com.clusterrr.Famicom.Containers
             {
                 if (value != iNesVersion.iNES && value != iNesVersion.NES20)
                     throw new ArgumentException("Only version 1 and 2 allowed", nameof(Version));
-                Version = value;
+                version = value;
             }
         }
         /// <summary>
@@ -569,13 +569,13 @@ namespace com.clusterrr.Famicom.Containers
                 header[2] != 'S' ||
                 header[3] != 0x1A) throw new InvalidDataException("Invalid iNES header");
 
-            if (!(header[12] == 0 && header[13] == 0 && header[14] == 0 && header[15] == 0))
+            if ((header[7] & 0x0C) == 0x08)
+                Version = iNesVersion.NES20;
+            else if (!(header[12] == 0 && header[13] == 0 && header[14] == 0 && header[15] == 0))
             {
                 // archaic iNES
                 header[7] = header[8] = header[9] = header[10] = header[11] = header[12] = header[13] = header[14] = header[15] = 0;
             }
-            if ((header[7] & 0x0C) == 0x08)
-                Version = iNesVersion.NES20;
 
             uint prgSize = 0;
             uint chrSize = 0;
@@ -611,10 +611,14 @@ namespace com.clusterrr.Famicom.Containers
                 Mapper = (ushort)((header[6] >> 4) | (header[7] & 0xF0) | ((header[8] & 0x0F) << 12));
                 Submapper = (byte)(header[8] >> 4);
                 Console = (ConsoleType)(header[7] & 3);
-                PrgRamSize = (uint)(64 << (header[10] & 0x0F));
-                PrgNvRamSize = (uint)(64 << ((header[10] & 0xF0) >> 4));
-                ChrRamSize = (uint)(64 << (header[11] & 0x0F));
-                ChrNvRamSize = (uint)(64 << ((header[11] & 0xF0) >> 4));
+                if ((header[10] & 0x0F) > 0)
+                    PrgRamSize = (uint)(64 << (header[10] & 0x0F));
+                if ((header[10] & 0xF0) > 0)
+                    PrgNvRamSize = (uint)(64 << ((header[10] & 0xF0) >> 4));
+                if ((header[11] & 0x0F) > 0)
+                    ChrRamSize = (uint)(64 << (header[11] & 0x0F));
+                if ((header[11] & 0xF0) > 0)
+                    ChrNvRamSize = (uint)(64 << ((header[11] & 0xF0) >> 4));
                 Region = (Timing)header[12];
                 switch (Console)
                 {
@@ -679,16 +683,16 @@ namespace com.clusterrr.Famicom.Containers
             header[3] = 0x1A;
             if (PRG == null) PRG = new byte[0];
             if (CHR == null) CHR = new byte[0];
-            if ((PRG.Length % 4000) != 0)
+            if ((PRG.Length % 0x4000) != 0)
             {
-                var padding = 4000 - (PRG.Length % 4000);
+                var padding = 0x4000 - (PRG.Length % 4000);
                 var newprg = new byte[PRG.Length + padding];
                 Array.Copy(PRG, newprg, PRG.Length);
                 PRG = newprg;
             }
-            if ((CHR.Length % 2000) != 0)
+            if ((CHR.Length % 0x2000) != 0)
             {
-                var padding = 2000 - (CHR.Length % 2000);
+                var padding = 0x2000 - (CHR.Length % 2000);
                 var newchr = new byte[CHR.Length + padding];
                 Array.Copy(CHR, newchr, CHR.Length);
                 CHR = newchr;
@@ -704,13 +708,13 @@ namespace com.clusterrr.Famicom.Containers
                 header[4] = (byte)(PRG.Length / 0x4000);
                 header[5] = (byte)(CHR.Length / 0x2000);
                 // Hard-wired nametable mirroring type
-                if (Mirroring == MirroringType.Vertical) 
+                if (Mirroring == MirroringType.Vertical)
                     header[6] |= 1;
                 // "Battery" and other non-volatile memory
-                if (Battery) 
+                if (Battery)
                     header[6] |= (1 << 1);
                 // 512-byte Trainer
-                if (Trainer != null) 
+                if (Trainer != null)
                     header[6] |= (1 << 2);
                 // Hard-wired four-screen mode
                 if (Mirroring == MirroringType.FourScreenVram)
@@ -730,7 +734,6 @@ namespace com.clusterrr.Famicom.Containers
             }
             else if (Version == iNesVersion.NES20)
             {
-
                 var length16k = PRG.Length / 0x4000;
                 if (length16k <= 0xEFF)
                 {
@@ -768,10 +771,10 @@ namespace com.clusterrr.Famicom.Containers
                     header[9] |= 0xF0;
                 }
                 // Hard-wired nametable mirroring type
-                if (Mirroring == MirroringType.Vertical) 
+                if (Mirroring == MirroringType.Vertical)
                     header[6] |= 1;
                 // "Battery" and other non-volatile memory
-                if (Battery) 
+                if (Battery)
                     header[6] |= (1 << 1);
                 // 512-byte Trainer
                 if (Trainer != null)
@@ -783,6 +786,8 @@ namespace com.clusterrr.Famicom.Containers
                 header[6] |= (byte)(Mapper << 4);
                 // Console type
                 header[7] |= (byte)((byte)Console & 3);
+                // NES 2.0 identifier
+                header[7] |= 1 << 3;
                 // Mapper Number D4..D7
                 header[7] |= (byte)(Mapper & 0xF0);
                 // Mapper number D8..D11

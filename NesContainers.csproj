@@ -43,6 +43,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="NesFile.cs" />
+    <Compile Include="NesHeaderFixer.cs" />
     <Compile Include="UnifFile.cs" />
   </ItemGroup>
   <ItemGroup>
