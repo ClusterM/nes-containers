@@ -116,15 +116,39 @@ namespace com.clusterrr.Famicom.Containers
         /// </summary>
         public byte MiscellaneousROMsCount { get; set; } = 0;
 
+        /// <summary>
+        /// What CIRAM A10 is connected to
+        /// </summary>
         public enum MirroringType
         {
+            /// <summary>
+            /// PPU A11 (horizontal mirroring)
+            /// </summary>
             Horizontal = 0,
+            /// <summary>
+            /// PPU A10 (vertical mirroring)
+            /// </summary>
             Vertical = 1,
-            FourScreenVram = 2,
-            OneScreenA = 3,
-            OneScreenB = 4,
-            Unknown_both = 0xfe,
-            Unknown_none = 0xff
+            /// <summary>
+            /// Ground (one-screen A)
+            /// </summary>
+            OneScreenA = 2,
+            /// <summary>
+            /// Vcc (one-screen B)
+            /// </summary>
+            OneScreenB = 3,
+            /// <summary>
+            /// Extra memory has been added (four-screen)
+            /// </summary>
+            FourScreenVram = 4,
+            /// <summary>
+            /// Mapper controlled
+            /// </summary>
+            MapperControlled = 5, // for UNIF
+            /// <summary>
+            /// Unknown value
+            /// </summary>
+            Unknown = 0xff
         };
 
         /// <summary>

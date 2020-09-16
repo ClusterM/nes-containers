@@ -50,13 +50,13 @@ namespace com.clusterrr.Famicom.Containers.HeaderFixer
 					}
 					if (mirroring >= 0)
 					{
-						// Anything but hard-wired(four screen)
 						if (mirroring == 8 && nes.Mirroring == NesFile.MirroringType.FourScreenVram)
 						{
+							// no four-screen
 							nes.Mirroring = NesFile.MirroringType.Horizontal;
 							fixType |= NesFixType.Mirroring;
 						}
-						NesFile.MirroringType needMirroring = NesFile.MirroringType.Unknown_none;
+						NesFile.MirroringType needMirroring = NesFile.MirroringType.Unknown;
 						switch (mirroring)
 						{
 							case 0:
@@ -69,7 +69,7 @@ namespace com.clusterrr.Famicom.Containers.HeaderFixer
 								needMirroring = NesFile.MirroringType.FourScreenVram;
 								break;
 						}
-						if (needMirroring != NesFile.MirroringType.Unknown_none && needMirroring != nes.Mirroring)
+						if (needMirroring != NesFile.MirroringType.Unknown && needMirroring != nes.Mirroring)
 						{
 							nes.Mirroring = needMirroring;
 							fixType |= NesFixType.Mirroring;
