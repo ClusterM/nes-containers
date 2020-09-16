@@ -5,6 +5,9 @@ using System.Security.Cryptography;
 
 namespace com.clusterrr.Famicom.Containers
 {
+    /// <summary>
+    /// iNES file container for NES/Famicom games
+    /// </summary>
     public class NesFile
     {
         /// <summary>
@@ -602,7 +605,7 @@ namespace com.clusterrr.Famicom.Containers
                 Mapper = (byte)((header[6] >> 4) | (header[7] & 0xF0));
                 Console = (ConsoleType)(header[7] & 3);
                 if (Console == ConsoleType.Extended)
-                    throw new InvalidDataException("Invalid system type value: 3");
+                    throw new InvalidDataException($"Invalid system type value: {Console}, use NES 2.0 for it");
                 PrgRamSize = (uint)(header[8] == 0 ? 0x2000 : header[8] * 0x2000);
             }
             else if (Version == iNesVersion.NES20) // NES 2.0
@@ -925,32 +928,7 @@ namespace com.clusterrr.Famicom.Containers
             var alldata = new byte[PRG.Length + CHR.Length];
             Array.Copy(PRG, 0, alldata, 0, PRG.Length);
             Array.Copy(CHR, 0, alldata, PRG.Length, CHR.Length);
-            uint poly = 0xedb88320;
-            uint[] table = new uint[256];
-            uint temp = 0;
-            for (uint i = 0; i < table.Length; ++i)
-            {
-                temp = i;
-                for (int j = 8; j > 0; --j)
-                {
-                    if ((temp & 1) == 1)
-                    {
-                        temp = (uint)((temp >> 1) ^ poly);
-                    }
-                    else
-                    {
-                        temp >>= 1;
-                    }
-                }
-                table[i] = temp;
-            }
-            uint crc = 0xffffffff;
-            for (int i = 0; i < alldata.Length; ++i)
-            {
-                byte index = (byte)(((crc) & 0xff) ^ alldata[i]);
-                crc = (uint)((crc >> 8) ^ table[index]);
-            }
-            return ~crc;
+            return Crc32Calculator.CalculateCRC32(alldata);
         }
     }
 }
