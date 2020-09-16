@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Net.NetworkInformation;
-using System.Runtime.InteropServices;
-using System.Security;
 using System.Security.Cryptography;
 
 namespace com.clusterrr.Famicom.Containers
@@ -90,12 +87,6 @@ namespace com.clusterrr.Famicom.Containers
         /// Mirroring type
         /// </summary>
         public MirroringType Mirroring { get; set; } = MirroringType.Horizontal;
-        /*
-        /// <summary>
-        /// TV system type
-        /// </summary>
-        public TvSystemType TvSystem { get; set; } = TvSystemType.Ntsc;
-        */
         /// <summary>
         /// For non-homebrew NES/Famicom games, this field's value is always a function of the region in which a game was released (NES 2.0 only)
         /// </summary>        
@@ -135,13 +126,6 @@ namespace com.clusterrr.Famicom.Containers
             Unknown_both = 0xfe,
             Unknown_none = 0xff
         };
-
-        /*
-        public enum TvSystemType { 
-            Ntsc = 0, 
-            Pal = 1 
-        };
-        */
 
         /// <summary>
         /// Version of iNES format
@@ -596,7 +580,6 @@ namespace com.clusterrr.Famicom.Containers
                 if (Console == ConsoleType.Extended)
                     throw new InvalidDataException("Invalid system type value: 3");
                 PrgRamSize = (uint)(header[8] == 0 ? 0x2000 : header[8] * 0x2000);
-                //TvSystem = (TvSystemType)(header[9] & 1);
             }
             else if (Version == iNesVersion.NES20) // NES 2.0
             {
