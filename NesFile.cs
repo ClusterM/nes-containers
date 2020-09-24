@@ -716,7 +716,11 @@ namespace com.clusterrr.Famicom.Containers
                     throw new InvalidDataException("Mapper > 255 supported by NES 2.0 only");
                 if (Submapper != 0)
                     throw new InvalidDataException("Submapper supported by NES 2.0 only");
+                var length16k = PRG.Length / 0x4000;
+                if (length16k > 0xFF) throw new ArgumentOutOfRangeException("PRG size is too big for iNES, use NES 2.0 instead");
                 header[4] = (byte)(PRG.Length / 0x4000);
+                var length8k = CHR.Length / 0x2000;
+                if (length8k > 0xFF) throw new ArgumentOutOfRangeException("CHR size is too big for iNES, use NES 2.0 instead");
                 header[5] = (byte)(CHR.Length / 0x2000);
                 // Hard-wired nametable mirroring type
                 if (Mirroring == MirroringType.Vertical)

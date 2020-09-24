@@ -59,7 +59,7 @@ namespace com.clusterrr.Famicom.Containers
         /// </summary>
         /// <param name="fileName">Target filename</param>
         /// <param name="dumperName"></param>
-        public void Save(string fileName, string dumperName = null)
+        public void Save(string fileName)
         {
             var data = new List<byte>();
             var header = new byte[32];
