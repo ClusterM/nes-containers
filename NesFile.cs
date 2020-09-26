@@ -13,11 +13,11 @@ namespace com.clusterrr.Famicom.Containers
         /// <summary>
         /// PRG data
         /// </summary>
-        public byte[] PRG { get; set; } = null;
+        public byte[] PRG { get => prg; set => prg = value; }
         /// <summary>
         /// CHR data (can be null if none)
         /// </summary>
-        public byte[] CHR { get; set; } = null;
+        public byte[] CHR { get => chr; set => chr = value; }
         /// <summary>
         /// Trainer (can be null if none)
         /// </summary>
@@ -74,6 +74,9 @@ namespace com.clusterrr.Famicom.Containers
         /// </summary>
         public uint ChrRamSize { get; set; } = 0;
         private uint chrNvRamSize = 0;
+        private byte[] prg = null;
+        private byte[] chr = null;
+
         /// <summary>
         /// CHR NVRAM Size (NES 2.0 only)
         /// </summary>
@@ -696,16 +699,14 @@ namespace com.clusterrr.Famicom.Containers
             if ((PRG.Length % 0x4000) != 0)
             {
                 var padding = 0x4000 - (PRG.Length % 4000);
-                var newprg = new byte[PRG.Length + padding];
-                Array.Copy(PRG, newprg, PRG.Length);
-                PRG = newprg;
+                if (padding > 0)
+                    Array.Resize(ref prg, prg.Length + padding);
             }
             if ((CHR.Length % 0x2000) != 0)
             {
                 var padding = 0x2000 - (CHR.Length % 2000);
-                var newchr = new byte[CHR.Length + padding];
-                Array.Copy(CHR, newchr, CHR.Length);
-                CHR = newchr;
+                if (padding > 0)
+                    Array.Resize(ref chr, chr.Length + padding);
             }
             if (Version == iNesVersion.iNES)
             {
@@ -758,11 +759,7 @@ namespace com.clusterrr.Famicom.Containers
                 {
                     (long padding, int exponent, int multiplier) = CalculateExponent(PRG.Length);
                     if (padding > 0)
-                    {
-                        var newprg = new byte[PRG.Length + padding];
-                        Array.Copy(PRG, newprg, PRG.Length);
-                        PRG = newprg;
-                    }
+                        Array.Resize(ref prg, (int)(prg.Length + padding));
                     header[4] = (byte)((exponent << 2) | (multiplier & 3));
                     header[9] |= 0x0F;
                 }
@@ -776,11 +773,7 @@ namespace com.clusterrr.Famicom.Containers
                 {
                     (long padding, int exponent, int multiplier) = CalculateExponent(CHR.Length);
                     if (padding > 0)
-                    {
-                        var newchr = new byte[CHR.Length + padding];
-                        Array.Copy(CHR, newchr, CHR.Length);
-                        CHR = newchr;
-                    }
+                        Array.Resize(ref chr, (int)(chr.Length + padding));
                     header[5] = (byte)((exponent << 2) | (multiplier & 3));
                     header[9] |= 0xF0;
                 }
