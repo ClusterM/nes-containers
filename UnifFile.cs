@@ -148,7 +148,7 @@ namespace com.clusterrr.Famicom.Containers
                 for (int i = 0; i < 100; i++)
                     Fields["DINF"][i] = 0;
                 var name = StringToUTF8N(value);
-                Array.Copy(name, 0, Fields["DINF"], 0, Math.Max(100, name.Length));
+                Array.Copy(name, 0, Fields["DINF"], 0, Math.Min(100, name.Length));
             }
         }
 
@@ -170,7 +170,7 @@ namespace com.clusterrr.Famicom.Containers
                 for (int i = 104; i < 104 + 100; i++)
                     Fields["DINF"][i] = 0;
                 var name = StringToUTF8N(value);
-                Array.Copy(name, 0, Fields["DINF"], 104, Math.Max(100, name.Length));
+                Array.Copy(name, 0, Fields["DINF"], 104, Math.Min(100, name.Length));
             }
         }
 
