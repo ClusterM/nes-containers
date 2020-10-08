@@ -286,7 +286,7 @@ namespace com.clusterrr.Famicom.Containers
             }
             set
             {
-                Fields["TVCI"] = new byte[] { (byte)value };
+                Fields["MIRR"] = new byte[] { (byte)value };
             }
         }
 
