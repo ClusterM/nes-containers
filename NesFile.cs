@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Security.Cryptography;
 
 namespace com.clusterrr.Famicom.Containers
@@ -13,11 +14,11 @@ namespace com.clusterrr.Famicom.Containers
         /// <summary>
         /// PRG data
         /// </summary>
-        public byte[] PRG { get => prg; set => prg = value; }
+        public IEnumerable<byte> PRG { get => Array.AsReadOnly(prg); set => prg = value.ToArray(); }
         /// <summary>
         /// CHR data (can be null if none)
         /// </summary>
-        public byte[] CHR { get => chr; set => chr = value; }
+        public IEnumerable<byte> CHR { get => Array.AsReadOnly(chr); set => chr = value.ToArray(); }
         /// <summary>
         /// Trainer (can be null if none)
         /// </summary>
@@ -654,12 +655,12 @@ namespace com.clusterrr.Famicom.Containers
                 offset += (uint)Trainer.Length;
             }
 
-            PRG = new byte[prgSize];
-            Array.Copy(data, offset, PRG, 0, Math.Max(0, Math.Min(prgSize, data.Length - offset))); // Ignore end for some bad ROMs
+            prg = new byte[prgSize];
+            Array.Copy(data, offset, prg, 0, Math.Max(0, Math.Min(prgSize, data.Length - offset))); // Ignore end for some bad ROMs
             offset += prgSize;
 
-            CHR = new byte[chrSize];
-            Array.Copy(data, offset, CHR, 0, Math.Max(0, Math.Min(chrSize, data.Length - offset)));
+            chr = new byte[chrSize];
+            Array.Copy(data, offset, chr, 0, Math.Max(0, Math.Min(chrSize, data.Length - offset)));
             offset += chrSize;
 
             if (MiscellaneousROMsCount > 0)
@@ -686,7 +687,7 @@ namespace com.clusterrr.Famicom.Containers
         /// Returns iNES data (header + PRG + CHR)
         /// </summary>
         /// <returns>iNES data</returns>
-        public byte[] GetINes()
+        public byte[] ToBytes()
         {
             var data = new List<byte>();
             var header = new byte[16];
@@ -694,17 +695,17 @@ namespace com.clusterrr.Famicom.Containers
             header[1] = (byte)'E';
             header[2] = (byte)'S';
             header[3] = 0x1A;
-            if (PRG == null) PRG = new byte[0];
-            if (CHR == null) CHR = new byte[0];
-            if ((PRG.Length % 0x4000) != 0)
+            if (prg == null) prg = new byte[0];
+            if (chr == null) chr = new byte[0];
+            if ((prg.Length % 0x4000) != 0)
             {
-                var padding = 0x4000 - (PRG.Length % 4000);
+                var padding = 0x4000 - (prg.Length % 4000);
                 if (padding > 0)
                     Array.Resize(ref prg, prg.Length + padding);
             }
-            if ((CHR.Length % 0x2000) != 0)
+            if ((chr.Length % 0x2000) != 0)
             {
-                var padding = 0x2000 - (CHR.Length % 2000);
+                var padding = 0x2000 - (chr.Length % 2000);
                 if (padding > 0)
                     Array.Resize(ref chr, chr.Length + padding);
             }
@@ -716,12 +717,12 @@ namespace com.clusterrr.Famicom.Containers
                     throw new InvalidDataException("Mapper > 255 supported by NES 2.0 only");
                 if (Submapper != 0)
                     throw new InvalidDataException("Submapper supported by NES 2.0 only");
-                var length16k = PRG.Length / 0x4000;
+                var length16k = prg.Length / 0x4000;
                 if (length16k > 0xFF) throw new ArgumentOutOfRangeException("PRG size is too big for iNES, use NES 2.0 instead");
-                header[4] = (byte)(PRG.Length / 0x4000);
-                var length8k = CHR.Length / 0x2000;
+                header[4] = (byte)(prg.Length / 0x4000);
+                var length8k = chr.Length / 0x2000;
                 if (length8k > 0xFF) throw new ArgumentOutOfRangeException("CHR size is too big for iNES, use NES 2.0 instead");
-                header[5] = (byte)(CHR.Length / 0x2000);
+                header[5] = (byte)(CHR.Count() / 0x2000);
                 // Hard-wired nametable mirroring type
                 if (Mirroring == MirroringType.Vertical)
                     header[6] |= 1;
@@ -744,12 +745,12 @@ namespace com.clusterrr.Famicom.Containers
                 data.AddRange(header);
                 if (Trainer != null)
                     data.AddRange(Trainer);
-                data.AddRange(PRG);
-                data.AddRange(CHR);
+                data.AddRange(prg);
+                data.AddRange(chr);
             }
             else if (Version == iNesVersion.NES20)
             {
-                var length16k = PRG.Length / 0x4000;
+                var length16k = prg.Length / 0x4000;
                 if (length16k <= 0xEFF)
                 {
                     header[4] = (byte)(length16k & 0xFF);
@@ -757,13 +758,13 @@ namespace com.clusterrr.Famicom.Containers
                 }
                 else
                 {
-                    (long padding, int exponent, int multiplier) = CalculateExponent(PRG.Length);
+                    (long padding, int exponent, int multiplier) = CalculateExponent(prg.Length);
                     if (padding > 0)
                         Array.Resize(ref prg, (int)(prg.Length + padding));
                     header[4] = (byte)((exponent << 2) | (multiplier & 3));
                     header[9] |= 0x0F;
                 }
-                var length8k = CHR.Length / 0x2000;
+                var length8k = CHR.Count() / 0x2000;
                 if (length8k <= 0xEFF)
                 {
                     header[5] = (byte)(length8k & 0xFF);
@@ -771,7 +772,7 @@ namespace com.clusterrr.Famicom.Containers
                 }
                 else
                 {
-                    (long padding, int exponent, int multiplier) = CalculateExponent(CHR.Length);
+                    (long padding, int exponent, int multiplier) = CalculateExponent(CHR.Count());
                     if (padding > 0)
                         Array.Resize(ref chr, (int)(chr.Length + padding));
                     header[5] = (byte)((exponent << 2) | (multiplier & 3));
@@ -837,8 +838,8 @@ namespace com.clusterrr.Famicom.Containers
                 data.AddRange(header);
                 if (Trainer != null)
                     data.AddRange(Trainer);
-                data.AddRange(PRG);
-                data.AddRange(CHR);
+                data.AddRange(prg);
+                data.AddRange(chr);
                 if (MiscellaneousROMsCount > 0 || (MiscellaneousROM != null && MiscellaneousROM.Length > 0))
                 {
                     if (MiscellaneousROMsCount == 0)
@@ -898,7 +899,7 @@ namespace com.clusterrr.Famicom.Containers
         /// <param name="fileName">Target filename</param>
         public void Save(string fileName)
         {
-            File.WriteAllBytes(fileName, GetINes());
+            File.WriteAllBytes(fileName, ToBytes());
         }
 
         /// <summary>
@@ -907,11 +908,11 @@ namespace com.clusterrr.Famicom.Containers
         public byte[] CalculateMD5()
         {
             var md5 = MD5.Create();
-            if (PRG == null) PRG = new byte[0];
-            if (CHR == null) CHR = new byte[0];
-            var alldata = new byte[PRG.Length + CHR.Length];
-            Array.Copy(PRG, 0, alldata, 0, PRG.Length);
-            Array.Copy(CHR, 0, alldata, PRG.Length, CHR.Length);
+            if (prg == null) prg = new byte[0];
+            if (chr == null) chr = new byte[0];
+            var alldata = new byte[prg.Length + chr.Length];
+            Array.Copy(prg, 0, alldata, 0, prg.Length);
+            Array.Copy(chr, 0, alldata, prg.Length, chr.Count());
             return md5.ComputeHash(alldata);
         }
 
@@ -920,11 +921,11 @@ namespace com.clusterrr.Famicom.Containers
         /// </summary>
         public uint CalculateCRC32()
         {
-            if (PRG == null) PRG = new byte[0];
-            if (CHR == null) CHR = new byte[0];
-            var alldata = new byte[PRG.Length + CHR.Length];
-            Array.Copy(PRG, 0, alldata, 0, PRG.Length);
-            Array.Copy(CHR, 0, alldata, PRG.Length, CHR.Length);
+            if (prg == null) prg = new byte[0];
+            if (chr == null) chr = new byte[0];
+            var alldata = new byte[prg.Length + chr.Length];
+            Array.Copy(prg, 0, alldata, 0, prg.Length);
+            Array.Copy(chr, 0, alldata, prg.Length, chr.Length);
             return Crc32Calculator.CalculateCRC32(alldata);
         }
     }

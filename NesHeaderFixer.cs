@@ -36,7 +36,7 @@ namespace com.clusterrr.Famicom.Containers.HeaderFixer
 					if (mapper >= 0)
 					{
 						// no CHR
-						if (((mapper & 0x800) != 0) && (nes.CHR?.Length ?? 0) > 0)
+						if (((mapper & 0x800) != 0) && (nes.CHR?.Count() ?? 0) > 0)
 						{
 							nes.CHR = new byte[0];
 							fixType |= NesFixType.NoChr;
