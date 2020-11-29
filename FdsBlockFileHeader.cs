@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace com.clusterrr.Famicom.Containers
 {
     [StructLayout(LayoutKind.Sequential, Size = 18, Pack = 1, CharSet = CharSet.Ansi)]
-    public class FdsFileHeaderBlock : IFdsBlock
+    public class FdsBlockFileHeader : IFdsBlock
     {
         public enum Kind
         {
@@ -20,6 +20,10 @@ namespace com.clusterrr.Famicom.Containers
 
         [MarshalAs(UnmanagedType.U1)]
         private byte blockType = 3;
+        /// <summary>
+        /// True if block type ID is valid
+        /// </summary>
+        public bool IsValid { get => blockType == 3; }
 
         [MarshalAs(UnmanagedType.U1)]
         private byte fileNumber;
@@ -32,7 +36,7 @@ namespace com.clusterrr.Famicom.Containers
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 8)]
         private char[] fileName;
-        public string FileName { get => new string(fileName).Trim(new char[] { '\0', ' ' }); set => fileName = value.PadRight(0).ToCharArray(); }
+        public string FileName { get => new string(fileName).Trim(new char[] { '\0', ' ' }); set => fileName = value.PadRight(0).ToCharArray(0, value.Length > 8 ? 8 : value.Length); }
 
         [MarshalAs(UnmanagedType.U2)]
         // the destination address when loading
@@ -48,16 +52,22 @@ namespace com.clusterrr.Famicom.Containers
         public Kind FileKind { get => (Kind)fileKind; set => fileKind = (byte)value; }
 
         [MarshalAs(UnmanagedType.U1)]
-        private bool crcOk;
+        private bool crcOk = true;
+        /// <summary>
+        /// Set by dumper. True when checksum is ok
+        /// </summary>
         public bool CrcOk { get => crcOk; set => crcOk = value; }
 
         [MarshalAs(UnmanagedType.U1)]
-        private bool endOfHeadMeet;
+        private bool endOfHeadMeet = false;
+        /// <summary>
+        /// Set by dumper. True when "end of head" flag was meet during dumping
+        /// </summary>
         public bool EndOfHeadMeet { get => endOfHeadMeet; set => endOfHeadMeet = value; }
 
-        public static FdsFileHeaderBlock FromBytes(byte[] rawData, int position = 0)
+        public static FdsBlockFileHeader FromBytes(byte[] rawData, int position = 0)
         {
-            int rawsize = Marshal.SizeOf(typeof(FdsFileHeaderBlock));
+            int rawsize = Marshal.SizeOf(typeof(FdsBlockFileHeader));
             if (rawsize > rawData.Length - position)
             {
                 if (rawsize <= rawData.Length - position + 2)
@@ -74,10 +84,8 @@ namespace com.clusterrr.Famicom.Containers
             }
             IntPtr buffer = Marshal.AllocHGlobal(rawsize);
             Marshal.Copy(rawData, position, buffer, rawsize);
-            FdsFileHeaderBlock retobj = (FdsFileHeaderBlock)Marshal.PtrToStructure(buffer, typeof(FdsFileHeaderBlock));
+            FdsBlockFileHeader retobj = (FdsBlockFileHeader)Marshal.PtrToStructure(buffer, typeof(FdsBlockFileHeader));
             Marshal.FreeHGlobal(buffer);
-            if (retobj.blockType != 3)
-                throw new InvalidDataException("Invalid block type");
             return retobj;
         }
 

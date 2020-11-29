@@ -44,11 +44,13 @@
   <ItemGroup>
     <Compile Include="Crc32Calculator.cs" />
     <Compile Include="FdsFile.cs" />
+    <Compile Include="FdsDiskSide.cs" />
+    <Compile Include="FdsGame.cs" />
     <Compile Include="IFdsBlock.cs" />
-    <Compile Include="FdsDiskInfoBlock.cs" />
-    <Compile Include="FdsFileAmountBlock.cs" />
-    <Compile Include="FdsFileDataBlock.cs" />
-    <Compile Include="FdsFileHeaderBlock.cs" />
+    <Compile Include="FdsBlockDiskInfo.cs" />
+    <Compile Include="FdsBlockFileAmount.cs" />
+    <Compile Include="FdsBlockFileData.cs" />
+    <Compile Include="FdsBlockFileHeader.cs" />
     <Compile Include="NesFile.cs" />
     <Compile Include="NesHeaderFixer.cs" />
     <Compile Include="UnifFile.cs" />

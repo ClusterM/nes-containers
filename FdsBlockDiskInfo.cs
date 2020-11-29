@@ -9,58 +9,87 @@ using System.Threading.Tasks;
 namespace com.clusterrr.Famicom.Containers
 {
     [StructLayout(LayoutKind.Sequential, Size = 58, Pack = 1, CharSet = CharSet.Ansi)]
-    public class FdsDiskInfoBlock : IFdsBlock
+    public class FdsBlockDiskInfo : IFdsBlock
     {
-        public enum DiskSizes
+        public enum DiskSides
         {
-            SideA = 0,
-            SideB = 1,
+            A = 0,
+            B = 1,
         }
         public enum DiskTypes
         {
             FMS = 0, // Normal
             FSC = 1, // With shutter
         }
+        public enum Country
+        {
+            Japan = 0x49
+        }
 
         [MarshalAs(UnmanagedType.U1)]
         // Raw byte: 0x01
         private byte blockType = 1;
+        /// <summary>
+        /// True if block type ID is valid
+        /// </summary>
+        public bool IsValid { get => blockType == 1; }
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 14)]
-        // Literal ASCII string: *NINTENDO-HVC*
-        char[] diskVerification;
-        public string DiskVerification { get => new string(diskVerification).Trim(new char[] { '\0', ' ' }); set => diskVerification = value.PadRight(14).ToCharArray(); }
+        char[] diskVerification = "*NINTENDO-HVC*".ToCharArray();
+        /// <summary>
+        /// Literal ASCII string: *NINTENDO-HVC*
+        /// </summary>
+        public string DiskVerification { get => new string(diskVerification).Trim(new char[] { '\0', ' ' }); /*set => diskVerification = value.PadRight(14).ToCharArray(0, value.Length > 14 ? 14 : value.Length);*/ }
 
         [MarshalAs(UnmanagedType.U1)]
         private byte manufacturerCode;
+        /// <summary>
+        /// Manufacturer code. $00 = Unlicensed, $01 = Nintendo
+        /// </summary>
         public byte ManufacturerCode { get => manufacturerCode; set => manufacturerCode = value; }
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3)]
-        // 3-letter ASCII code per game (e.g. ZEL for The Legend of Zelda)
         char[] gameName;
-        public string GameName { get => new string(gameName).Trim(new char[] { '\0', ' ' }); set => gameName = value.PadRight(3).ToCharArray(); }
+        /// <summary>
+        /// 3-letter ASCII code per game (e.g. ZEL for The Legend of Zelda)
+        /// </summary>
+        public string GameName { get => new string(gameName).Trim(new char[] { '\0', ' ' }); set => gameName = value.PadRight(3).ToCharArray(0, value.Length > 3 ? 3 : value.Length); }
 
         [MarshalAs(UnmanagedType.U1)]
         char gameType;
+        /// <summary>
+        /// $20 = " " — Normal disk
+        /// $45 = "E" — Event(e.g.Japanese national DiskFax tournaments)
+        /// $52 = "R" — Reduction in price via advertising
+        /// </summary>
         public char GameType { get => gameType; set => gameType = value; }
 
         [MarshalAs(UnmanagedType.U1)]
         byte gameVersion;
+        /// <summary>
+        /// Game version/revision number. Starts at $00, increments per revision
+        /// </summary>
         public byte GameVersion { get => gameVersion; set => gameVersion = value; }
 
         [MarshalAs(UnmanagedType.U1)]
-        // $00 = Side A, $01 = Side B. Single-sided disks use $00
         byte diskSide;
-        public DiskSizes DiskSide { get => (DiskSizes)diskSide; set => diskSide = (byte)value; }
+        /// <summary>
+        /// Side number. Single-sided disks use A
+        /// </summary>
+        public DiskSides DiskSide { get => (DiskSides)diskSide; set => diskSide = (byte)value; }
 
         [MarshalAs(UnmanagedType.U1)]
-        // First disk is $00, second is $01, etc.
         byte diskNumber;
+        /// <summary>
+        /// Disk number. First disk is $00, second is $01, etc.
+        /// </summary>
         public byte DiskNumber { get => diskNumber; set => diskNumber = value; }
 
         [MarshalAs(UnmanagedType.U1)]
-        // $00 = FMC ("normal card"), $01 = FSC ("card with shutter"). May correlate with FMC and FSC product codes
         byte diskType;
+        /// <summary>
+        /// Disk type. $00 = FMC ("normal card"), $01 = FSC ("card with shutter"). May correlate with FMC and FSC product codes
+        /// </summary>
         public DiskTypes DiskType { get => (DiskTypes)diskType; set => diskType = (byte)value; }
 
         [MarshalAs(UnmanagedType.U1)]
@@ -68,8 +97,11 @@ namespace com.clusterrr.Famicom.Containers
         // Speculative: $00 = yellow disk, $01 = blue or gold disk, $FE = white disk, $FF = blue disk
         byte unknown01 = 0x00;
         [MarshalAs(UnmanagedType.U1)]
-        // Refers to the file code/file number to load upon boot/start-up
         byte bootFile;
+        /// <summary>
+        /// Boot read file code. Refers to the file code/file number to load upon boot/start-up
+        /// </summary>
+        public byte BootFile { get => bootFile; set => bootFile = value; }
         [MarshalAs(UnmanagedType.U1)]
         byte unknown02 = 0xFF;
         [MarshalAs(UnmanagedType.U1)]
@@ -83,6 +115,9 @@ namespace com.clusterrr.Famicom.Containers
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3)]
         byte[] manufacturingDate;
+        /// <summary>
+        /// Manufacturing date
+        /// </summary>
         public DateTime ManufacturingDate
         {
             get
@@ -113,8 +148,11 @@ namespace com.clusterrr.Famicom.Containers
 
         [MarshalAs(UnmanagedType.U1)]
         // $49 = Japan
-        byte countryCode = 0x49;
-        public byte CountryCode { get => countryCode; set => countryCode = value; }
+        byte countryCode = (byte)Country.Japan;
+        /// <summary>
+        /// Country code. $49 = Japan
+        /// </summary>
+        public Country CountryCode { get => (Country)countryCode; set => countryCode = (byte)value; }
 
         [MarshalAs(UnmanagedType.U1)]
         // Raw byte: $61. Speculative: Region code?
@@ -131,9 +169,11 @@ namespace com.clusterrr.Famicom.Containers
         byte unknown10 = 0x02;
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3)]
-        // It's speculated this refers to the date the disk was formatted and rewritten by something like a Disk Writer kiosk.
-        // In the case of an original (non-copied) disk, this should be the same as Manufacturing date.
         byte[] rewrittenDate;
+        /// <summary>
+        /// "Rewritten disk" date. It's speculated this refers to the date the disk was formatted and rewritten by something like a Disk Writer kiosk.
+        /// In the case of an original (non-copied) disk, this should be the same as Manufacturing date
+        /// </summary>
         public DateTime RewrittenDate
         {
             get
@@ -170,6 +210,9 @@ namespace com.clusterrr.Famicom.Containers
         [MarshalAs(UnmanagedType.U2)]
 
         ushort diskWriterSerialNumber;
+        /// <summary>
+        /// Disk Writer serial number
+        /// </summary>
         public ushort DiskWriterSerialNumber { get => diskWriterSerialNumber; set => diskWriterSerialNumber = value; }
 
         [MarshalAs(UnmanagedType.U1)]
@@ -177,8 +220,10 @@ namespace com.clusterrr.Famicom.Containers
         byte unknown13 = 0x07;
 
         [MarshalAs(UnmanagedType.U1)]
-        // Value stored in BCD format. $00 = Original (no copies).
         byte diskRewriteCount = 0x00;
+        /// <summary>
+        /// Disk rewrite count. $00 = Original (no copies)
+        /// </summary>
         public byte DiskRewriteCount
         {
             get
@@ -192,28 +237,39 @@ namespace com.clusterrr.Famicom.Containers
         }
 
         [MarshalAs(UnmanagedType.U1)]
-        // $00 = Side A, $01 = Side B
         byte actualDiskSide = 0x00;
-        public DiskSizes ActualDiskSide { get => (DiskSizes)actualDiskSide; set => actualDiskSide = (byte)value; }
+        /// <summary>
+        /// Actual disk side
+        /// </summary>
+        public DiskSides ActualDiskSide { get => (DiskSides)actualDiskSide; set => actualDiskSide = (byte)value; }
 
         [MarshalAs(UnmanagedType.U1)]
         byte unknown14 = 0x00;
 
         [MarshalAs(UnmanagedType.U1)]
         byte price = 0x00;
+        /// <summary>
+        /// Price code
+        /// </summary>
         public byte Price { get => price; set => price = value; }
 
         [MarshalAs(UnmanagedType.U1)]
-        private bool crcOk;
+        private bool crcOk = true;
+        /// <summary>
+        /// Set by dumper. True when checksum is ok
+        /// </summary>
         public bool CrcOk { get => crcOk; set => crcOk = value; }
 
         [MarshalAs(UnmanagedType.U1)]
-        private bool endOfHeadMeet;
+        private bool endOfHeadMeet = false;
+        /// <summary>
+        /// Set by dumper. True when "end of head" flag was meet during dumping
+        /// </summary>
         public bool EndOfHeadMeet { get => endOfHeadMeet; set => endOfHeadMeet = value; }
 
-        public static FdsDiskInfoBlock FromBytes(byte[] rawData, int position = 0)
+        public static FdsBlockDiskInfo FromBytes(byte[] rawData, int position = 0)
         {
-            int rawsize = Marshal.SizeOf(typeof(FdsDiskInfoBlock));
+            int rawsize = Marshal.SizeOf(typeof(FdsBlockDiskInfo));
             if (rawsize > rawData.Length - position)
             {
                 if (rawsize <= rawData.Length - position + 2)
@@ -230,10 +286,8 @@ namespace com.clusterrr.Famicom.Containers
             }
             IntPtr buffer = Marshal.AllocHGlobal(rawsize);
             Marshal.Copy(rawData, position, buffer, rawsize);
-            FdsDiskInfoBlock retobj = (FdsDiskInfoBlock)Marshal.PtrToStructure(buffer, typeof(FdsDiskInfoBlock));
+            FdsBlockDiskInfo retobj = (FdsBlockDiskInfo)Marshal.PtrToStructure(buffer, typeof(FdsBlockDiskInfo));
             Marshal.FreeHGlobal(buffer);
-            if (retobj.blockType != 1)
-                throw new InvalidDataException("Invalid block type");
             return retobj;
         }
 
