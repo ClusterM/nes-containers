@@ -683,6 +683,11 @@ namespace com.clusterrr.Famicom.Containers
         {
         }
 
+        public static NesFile FromBytes(byte[] data)
+        {
+            return new NesFile(data);
+        }
+
         /// <summary>
         /// Returns iNES data (header + PRG + CHR)
         /// </summary>

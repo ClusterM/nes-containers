@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,39 +9,60 @@ namespace com.clusterrr.Famicom.Containers
 {
     public class FdsFile
     {
-        private FdsBlockFileHeader headerBlock;
-        private FdsBlockFileData dataBlock;
-
-        public byte FileNumber { get => headerBlock.FileNumber; set => headerBlock.FileNumber = value; }
-        public byte FileIndicateCode { get => headerBlock.FileIndicateCode; set => headerBlock.FileIndicateCode = value; }
-        public string FileName { get => headerBlock.FileName; set => headerBlock.FileName = value; }
-        public ushort FileAddress { get => headerBlock.FileAddress; set => headerBlock.FileAddress = value; }
-        public ushort FileSize { get => (ushort)dataBlock.Data.Count(); }
-        public FdsBlockFileHeader.Kind FileKind { get => headerBlock.FileKind; set => headerBlock.FileKind = value; }
-        public IEnumerable<byte> Data
-        {
-            get => dataBlock.Data;
-            set
-            {
-                dataBlock.Data = value;
-                headerBlock.FileSize = (ushort)dataBlock.Data.Count();
-            }
-        }
-
-        public FdsFile(FdsBlockFileHeader headerBlock, FdsBlockFileData dataBlock)
-        {
-            this.headerBlock = headerBlock;
-            this.dataBlock = dataBlock;
-            headerBlock.FileSize = (ushort)dataBlock.Data.Count();
-        }
+        IList<FdsDiskSide> sides;
+        /// <summary>
+        /// Disk Side Images
+        /// </summary>
+        public IList<FdsDiskSide> Sides { get => sides; set => sides = value; }
 
         public FdsFile()
         {
-            this.headerBlock = new FdsBlockFileHeader();
-            this.dataBlock = new FdsBlockFileData();
-            headerBlock.FileSize = (ushort)dataBlock.Data.Count();
+            sides = new List<FdsDiskSide>();
         }
 
-        public byte[] ToBytes() => Enumerable.Concat(headerBlock.ToBytes(), dataBlock.ToBytes()).ToArray();
+        public FdsFile(string filename) : this(File.ReadAllBytes(filename))
+        {
+        }
+
+        public FdsFile(byte[] data) : this()
+        {
+            if (data[0] == (byte)'F' && data[1] == (byte)'D' && data[2] == (byte)'S')
+                data = data.Skip(16).ToArray(); // skip header
+            for (int i = 0; i < data.Length; i += 65500)
+            {
+                var sideData = data.Skip(i).Take(66500).ToArray();
+                sides.Add(FdsDiskSide.FromBytes(sideData));
+            }
+        }
+
+        public FdsFile(IEnumerable<FdsDiskSide> sides)
+        {
+            this.sides = new List<FdsDiskSide>(sides);
+        }
+
+        public static FdsFile FromBytes(byte[] data)
+        {
+            return new FdsFile(data);
+        }
+
+        public byte[] ToBytes(bool useHeader = false)
+        {
+            var data = sides.SelectMany(s => s.ToBytes());
+            if (useHeader)
+            {
+                var header = new byte[16];
+                header[0] = (byte)'F';
+                header[1] = (byte)'D';
+                header[2] = (byte)'S';
+                header[3] = (byte)sides.Count();
+                data = Enumerable.Concat(header, data);
+            }
+            return data.ToArray();
+        }
+
+        public void Save(string filename, bool useHeader = false)
+        {
+            File.WriteAllBytes(filename, ToBytes(useHeader));
+        }
     }
 }

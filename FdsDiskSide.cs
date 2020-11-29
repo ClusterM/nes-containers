@@ -81,21 +81,21 @@ namespace com.clusterrr.Famicom.Containers
         /// </summary>
         public byte FileAmount { get => fileAmountBlock.FileAmount; set => fileAmountBlock.FileAmount = value; }
 
-        IList<FdsFile> files;
+        IList<FdsDiskFile> files;
 
         /// <summary>
         /// Files on disk
         /// </summary>
-        public IList<FdsFile> Files { get => files; }
+        public IList<FdsDiskFile> Files { get => files; }
 
         public FdsDiskSide()
         {
             diskInfoBlock = new FdsBlockDiskInfo();
             fileAmountBlock = new FdsBlockFileAmount();
-            files = new List<FdsFile>();
+            files = new List<FdsDiskFile>();
         }
 
-        public FdsDiskSide(FdsBlockDiskInfo diskInfoBlock, FdsBlockFileAmount fileAmountBlock, IEnumerable<FdsFile> files)
+        public FdsDiskSide(FdsBlockDiskInfo diskInfoBlock, FdsBlockFileAmount fileAmountBlock, IEnumerable<FdsDiskFile> files)
         {
             this.diskInfoBlock = diskInfoBlock;
             this.fileAmountBlock = fileAmountBlock;
@@ -108,11 +108,11 @@ namespace com.clusterrr.Famicom.Containers
         {
             this.diskInfoBlock = (FdsBlockDiskInfo)blocks.First();
             this.fileAmountBlock = (FdsBlockFileAmount)blocks.Skip(1).First();
-            files = new List<FdsFile>();
+            files = new List<FdsDiskFile>();
             var fileBlocks = blocks.Skip(2).ToArray();
             for (int i = 0; i < fileBlocks.Length / 2; i++)
             {
-                files.Add(new FdsFile((FdsBlockFileHeader)fileBlocks[i * 2], (FdsBlockFileData)fileBlocks[i * 2 + 1]));
+                files.Add(new FdsDiskFile((FdsBlockFileHeader)fileBlocks[i * 2], (FdsBlockFileData)fileBlocks[i * 2 + 1]));
             }
         }
 
@@ -133,7 +133,7 @@ namespace com.clusterrr.Famicom.Containers
                 if (!fileDataBlock.IsValid)
                     break;
                 pos += fileHeaderBlock.FileSize + 1;
-                files.Add(new FdsFile(fileHeaderBlock, fileDataBlock));
+                files.Add(new FdsDiskFile(fileHeaderBlock, fileDataBlock));
             }
         }
 
