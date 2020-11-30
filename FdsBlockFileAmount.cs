@@ -29,6 +29,8 @@ namespace com.clusterrr.Famicom.Containers
         /// </summary>
         public bool EndOfHeadMeet { get; set; } = false;
 
+        public uint Length => 2;
+
         public static FdsBlockFileAmount FromBytes(byte[] rawData, int position = 0)
         {
             var retobj = new FdsBlockFileAmount();

@@ -33,6 +33,8 @@ namespace com.clusterrr.Famicom.Containers
         /// </summary>
         public bool EndOfHeadMeet { get; set; } = false;
 
+        public uint Length => (uint)(data.Length + 1);
+
         public static FdsBlockFileData FromBytes(byte[] rawData, int position = 0, int size = -1)
         {
             var retobj = new FdsBlockFileData();

@@ -9,12 +9,15 @@ namespace com.clusterrr.Famicom.Containers
     public class FdsDiskSide
     {
         FdsBlockDiskInfo diskInfoBlock;
-
+        /// <summary>
+        /// Disk info block
+        /// </summary>
+        public FdsBlockDiskInfo DiskInfoBlock { get => diskInfoBlock; }
         public string DiskVerification { get => diskInfoBlock.DiskVerification; }
         /// <summary>
         /// Manufacturer code. $00 = Unlicensed, $01 = Nintendo
         /// </summary>
-        public byte ManufacturerCode { get => diskInfoBlock.ManufacturerCode; set => diskInfoBlock.ManufacturerCode = value; }
+        public FdsBlockDiskInfo.Manufacturer ManufacturerCode { get => diskInfoBlock.ManufacturerCode; set => diskInfoBlock.ManufacturerCode = value; }
         /// <summary>
         /// 3-letter ASCII code per game (e.g. ZEL for The Legend of Zelda)
         /// </summary>
@@ -125,15 +128,23 @@ namespace com.clusterrr.Famicom.Containers
             pos += 2;
             while (pos < data.Length)
             {
-                var fileHeaderBlock = FdsBlockFileHeader.FromBytes(data.Skip(pos).Take(16).ToArray());
-                if (!fileHeaderBlock.IsValid)
+                try
+                {
+                    var fileHeaderBlock = FdsBlockFileHeader.FromBytes(data.Skip(pos).Take(16).ToArray());
+                    if (!fileHeaderBlock.IsValid)
+                        break;
+                    pos += 16;
+                    var fileDataBlock = FdsBlockFileData.FromBytes(data.Skip(pos).Take(fileHeaderBlock.FileSize + 1).ToArray());
+                    if (!fileDataBlock.IsValid)
+                        break;
+                    pos += fileHeaderBlock.FileSize + 1;
+                    files.Add(new FdsDiskFile(fileHeaderBlock, fileDataBlock));
+                }
+                catch
+                {
+                    // just break on out of range
                     break;
-                pos += 16;
-                var fileDataBlock = FdsBlockFileData.FromBytes(data.Skip(pos).Take(fileHeaderBlock.FileSize + 1).ToArray());
-                if (!fileDataBlock.IsValid)
-                    break;
-                pos += fileHeaderBlock.FileSize + 1;
-                files.Add(new FdsDiskFile(fileHeaderBlock, fileDataBlock));
+                }
             }
         }
 
@@ -141,6 +152,15 @@ namespace com.clusterrr.Famicom.Containers
         {
             for (var i = 0; i < files.Count; i++)
                 files[i].FileNumber = (byte)i;
+        }
+
+        public IEnumerable<IFdsBlock> GetBlocks()
+        {
+            var blocks = new List<IFdsBlock>();
+            blocks.Add(diskInfoBlock);
+            blocks.Add(fileAmountBlock);
+            blocks.AddRange(files.SelectMany(f => new IFdsBlock[] { f.HeaderBlock, f.DataBlock }));
+            return blocks;
         }
 
         public static FdsDiskSide FromBytes(byte[] data)

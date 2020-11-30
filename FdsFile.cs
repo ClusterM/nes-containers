@@ -26,7 +26,7 @@ namespace com.clusterrr.Famicom.Containers
 
         public FdsFile(byte[] data) : this()
         {
-            if (data[0] == (byte)'F' && data[1] == (byte)'D' && data[2] == (byte)'S')
+            if (data[0] == (byte)'F' && data[1] == (byte)'D' && data[2] == (byte)'S' && data[3] == 0x1A)
                 data = data.Skip(16).ToArray(); // skip header
             for (int i = 0; i < data.Length; i += 65500)
             {
@@ -54,7 +54,8 @@ namespace com.clusterrr.Famicom.Containers
                 header[0] = (byte)'F';
                 header[1] = (byte)'D';
                 header[2] = (byte)'S';
-                header[3] = (byte)sides.Count();
+                header[3] = 0x1A;
+                header[4] = (byte)sides.Count();
                 data = Enumerable.Concat(header, data);
             }
             return data.ToArray();

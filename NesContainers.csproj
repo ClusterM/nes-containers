@@ -43,9 +43,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Crc32Calculator.cs" />
-    <Compile Include="FdsFile.cs" />
+    <Compile Include="FdsDiskFile.cs" />
     <Compile Include="FdsDiskSide.cs" />
-    <Compile Include="FdsGame.cs" />
+    <Compile Include="FdsFile.cs" />
     <Compile Include="IFdsBlock.cs" />
     <Compile Include="FdsBlockDiskInfo.cs" />
     <Compile Include="FdsBlockFileAmount.cs" />

@@ -65,6 +65,8 @@ namespace com.clusterrr.Famicom.Containers
         /// </summary>
         public bool EndOfHeadMeet { get => endOfHeadMeet; set => endOfHeadMeet = value; }
 
+        public uint Length => 16;
+
         public static FdsBlockFileHeader FromBytes(byte[] rawData, int position = 0)
         {
             int rawsize = Marshal.SizeOf(typeof(FdsBlockFileHeader));

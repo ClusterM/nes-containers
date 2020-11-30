@@ -54,6 +54,11 @@ namespace com.clusterrr.Famicom.Containers
         {
         }
 
+        public static UnifFile FromBytes(byte[] data)
+        {
+            return new UnifFile(data);
+        }
+
         /// <summary>
         /// Save UNIF file
         /// </summary>

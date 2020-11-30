@@ -10,37 +10,39 @@ namespace com.clusterrr.Famicom.Containers
     {
         private FdsBlockFileHeader headerBlock;
         private FdsBlockFileData dataBlock;
+        public FdsBlockFileHeader HeaderBlock { get => headerBlock; set => headerBlock = value; }
+        public FdsBlockFileData DataBlock { get => dataBlock; set => dataBlock = value; }
 
-        public byte FileNumber { get => headerBlock.FileNumber; set => headerBlock.FileNumber = value; }
-        public byte FileIndicateCode { get => headerBlock.FileIndicateCode; set => headerBlock.FileIndicateCode = value; }
-        public string FileName { get => headerBlock.FileName; set => headerBlock.FileName = value; }
-        public ushort FileAddress { get => headerBlock.FileAddress; set => headerBlock.FileAddress = value; }
-        public ushort FileSize { get => (ushort)dataBlock.Data.Count(); }
-        public FdsBlockFileHeader.Kind FileKind { get => headerBlock.FileKind; set => headerBlock.FileKind = value; }
+        public byte FileNumber { get => HeaderBlock.FileNumber; set => HeaderBlock.FileNumber = value; }
+        public byte FileIndicateCode { get => HeaderBlock.FileIndicateCode; set => HeaderBlock.FileIndicateCode = value; }
+        public string FileName { get => HeaderBlock.FileName; set => HeaderBlock.FileName = value; }
+        public ushort FileAddress { get => HeaderBlock.FileAddress; set => HeaderBlock.FileAddress = value; }
+        public ushort FileSize { get => (ushort)DataBlock.Data.Count(); }
+        public FdsBlockFileHeader.Kind FileKind { get => HeaderBlock.FileKind; set => HeaderBlock.FileKind = value; }
         public IEnumerable<byte> Data
         {
-            get => dataBlock.Data;
+            get => DataBlock.Data;
             set
             {
-                dataBlock.Data = value;
-                headerBlock.FileSize = (ushort)dataBlock.Data.Count();
+                DataBlock.Data = value;
+                HeaderBlock.FileSize = (ushort)DataBlock.Data.Count();
             }
         }
 
         public FdsDiskFile(FdsBlockFileHeader headerBlock, FdsBlockFileData dataBlock)
         {
-            this.headerBlock = headerBlock;
-            this.dataBlock = dataBlock;
+            this.HeaderBlock = headerBlock;
+            this.DataBlock = dataBlock;
             headerBlock.FileSize = (ushort)dataBlock.Data.Count();
         }
 
         public FdsDiskFile()
         {
-            this.headerBlock = new FdsBlockFileHeader();
-            this.dataBlock = new FdsBlockFileData();
-            headerBlock.FileSize = (ushort)dataBlock.Data.Count();
+            this.HeaderBlock = new FdsBlockFileHeader();
+            this.DataBlock = new FdsBlockFileData();
+            HeaderBlock.FileSize = (ushort)DataBlock.Data.Count();
         }
 
-        public byte[] ToBytes() => Enumerable.Concat(headerBlock.ToBytes(), dataBlock.ToBytes()).ToArray();
+        public byte[] ToBytes() => Enumerable.Concat(HeaderBlock.ToBytes(), DataBlock.ToBytes()).ToArray();
     }
 }
