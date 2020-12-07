@@ -39,9 +39,8 @@ namespace com.clusterrr.Famicom.Containers
             return retobj;
         }
 
-        public byte[] ToBytes()
-        {
-            return new byte[] { blockType, fileAmount };
-        }
+        public byte[] ToBytes() => new byte[] { blockType, fileAmount };
+
+        public override string ToString() => $"{FileAmount}";
     }
 }

@@ -173,5 +173,7 @@ namespace com.clusterrr.Famicom.Containers
             var data = Enumerable.Concat(Enumerable.Concat(diskInfoBlock.ToBytes(), fileAmountBlock.ToBytes()), files.SelectMany(f => f.ToBytes())).ToArray();
             return Enumerable.Concat(data, new byte[65500 - data.Count()]).ToArray();
         }
+
+        public override string ToString() => $"{GameName} - disk {DiskNumber + 1}, side {DiskSide}";
     }
 }

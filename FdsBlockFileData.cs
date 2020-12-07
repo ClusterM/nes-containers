@@ -51,5 +51,7 @@ namespace com.clusterrr.Famicom.Containers
             result.AddRange(Data);
             return result.ToArray();
         }
+
+        public override string ToString() => $"{data.Length} bytes";
     }
 }

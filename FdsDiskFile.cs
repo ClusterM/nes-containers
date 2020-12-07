@@ -44,5 +44,7 @@ namespace com.clusterrr.Famicom.Containers
         }
 
         public byte[] ToBytes() => Enumerable.Concat(HeaderBlock.ToBytes(), DataBlock.ToBytes()).ToArray();
+
+        public override string ToString() => $"{FileName} ({FileKind}, {dataBlock})";
     }
 }

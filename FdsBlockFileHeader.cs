@@ -101,5 +101,7 @@ namespace com.clusterrr.Famicom.Containers
             Marshal.FreeHGlobal(buffer);
             return rawDatas;
         }
+
+        public override string ToString() => $"{FileName} ({FileKind})";
     }
 }
