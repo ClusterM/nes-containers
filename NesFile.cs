@@ -22,7 +22,15 @@ namespace com.clusterrr.Famicom.Containers
         /// <summary>
         /// Trainer (can be null if none)
         /// </summary>
-        public byte[] Trainer { get; set; } = null;
+        public IEnumerable<byte> Trainer
+        {
+            get => Array.AsReadOnly(trainer); set
+            {
+                if (value != null && value.Count() != 0 && value.Count() != 512)
+                    throw new ArgumentOutOfRangeException("Trainer size must be 512 bytes");
+                chr = trainer.ToArray();
+            }
+        }
         /// <summary>
         /// Miscellaneous ROM (NES 2.0 only, can be null if none)
         /// </summary>
@@ -77,6 +85,7 @@ namespace com.clusterrr.Famicom.Containers
         private uint chrNvRamSize = 0;
         private byte[] prg = null;
         private byte[] chr = null;
+        private byte[] trainer = null;
 
         /// <summary>
         /// CHR NVRAM Size (NES 2.0 only)
@@ -597,9 +606,9 @@ namespace com.clusterrr.Famicom.Containers
             Mirroring = (MirroringType)(header[6] & 1);
             Battery = (header[6] & (1 << 1)) != 0;
             if ((header[6] & (1 << 2)) != 0)
-                Trainer = new byte[512];
+                trainer = new byte[512];
             else
-                Trainer = null;
+                trainer = new byte[0];
             if ((header[6] & (1 << 3)) != 0)
                 Mirroring = MirroringType.FourScreenVram;
             if (Version == iNesVersion.iNES)
@@ -649,10 +658,10 @@ namespace com.clusterrr.Famicom.Containers
             }
 
             uint offset = (uint)header.Length;
-            if (Trainer != null)
+            if (trainer != null && trainer.Length > 0)
             {
-                Array.Copy(data, offset, Trainer, 0, Trainer.Length);
-                offset += (uint)Trainer.Length;
+                Array.Copy(data, offset, trainer, 0, trainer.Length);
+                offset += (uint)trainer.Length;
             }
 
             prg = new byte[prgSize];
