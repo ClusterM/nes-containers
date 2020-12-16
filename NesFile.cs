@@ -83,9 +83,9 @@ namespace com.clusterrr.Famicom.Containers
         /// </summary>
         public uint ChrRamSize { get; set; } = 0;
         private uint chrNvRamSize = 0;
-        private byte[] prg = null;
-        private byte[] chr = null;
-        private byte[] trainer = null;
+        private byte[] prg = new byte[0];
+        private byte[] chr = new byte[0];
+        private byte[] trainer = new byte[0];
 
         /// <summary>
         /// CHR NVRAM Size (NES 2.0 only)
@@ -711,6 +711,7 @@ namespace com.clusterrr.Famicom.Containers
             header[3] = 0x1A;
             if (prg == null) prg = new byte[0];
             if (chr == null) chr = new byte[0];
+            if (trainer == null) trainer = new byte[0];
             if ((prg.Length % 0x4000) != 0)
             {
                 var padding = 0x4000 - (prg.Length % 4000);
@@ -744,7 +745,7 @@ namespace com.clusterrr.Famicom.Containers
                 if (Battery)
                     header[6] |= (1 << 1);
                 // 512-byte Trainer
-                if (Trainer != null)
+                if (trainer.Length > 0)
                     header[6] |= (1 << 2);
                 // Hard-wired four-screen mode
                 if (Mirroring == MirroringType.FourScreenVram)
@@ -757,8 +758,8 @@ namespace com.clusterrr.Famicom.Containers
                 header[7] |= (byte)(Mapper & 0xF0);
 
                 data.AddRange(header);
-                if (Trainer != null)
-                    data.AddRange(Trainer);
+                if (trainer.Length > 0)
+                    data.AddRange(trainer);
                 data.AddRange(prg);
                 data.AddRange(chr);
             }
