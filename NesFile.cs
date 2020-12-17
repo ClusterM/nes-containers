@@ -660,16 +660,19 @@ namespace com.clusterrr.Famicom.Containers
             uint offset = (uint)header.Length;
             if (trainer != null && trainer.Length > 0)
             {
-                Array.Copy(data, offset, trainer, 0, trainer.Length);
+                if (offset < data.Length)
+                    Array.Copy(data, offset, trainer, 0, Math.Max(0, Math.Min(trainer.Length, data.Length - offset)));
                 offset += (uint)trainer.Length;
             }
 
             prg = new byte[prgSize];
-            Array.Copy(data, offset, prg, 0, Math.Max(0, Math.Min(prgSize, data.Length - offset))); // Ignore end for some bad ROMs
+            if (offset < data.Length)
+                Array.Copy(data, offset, prg, 0, Math.Max(0, Math.Min(prgSize, data.Length - offset))); // Ignore end for some bad ROMs
             offset += prgSize;
 
             chr = new byte[chrSize];
-            Array.Copy(data, offset, chr, 0, Math.Max(0, Math.Min(chrSize, data.Length - offset)));
+            if (offset < data.Length)
+                Array.Copy(data, offset, chr, 0, Math.Max(0, Math.Min(chrSize, data.Length - offset)));
             offset += chrSize;
 
             if (MiscellaneousROMsCount > 0)
