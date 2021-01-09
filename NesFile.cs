@@ -34,7 +34,7 @@ namespace com.clusterrr.Famicom.Containers
         /// <summary>
         /// Miscellaneous ROM (NES 2.0 only, can be null if none)
         /// </summary>
-        public byte[] MiscellaneousROM { get; set; } = null;
+        public IEnumerable<byte> MiscellaneousROM { get => Array.AsReadOnly(miscellaneousROM); set => miscellaneousROM = value.ToArray(); }
         /// <summary>
         /// Mapper number
         /// </summary>
@@ -86,6 +86,7 @@ namespace com.clusterrr.Famicom.Containers
         private byte[] prg = new byte[0];
         private byte[] chr = new byte[0];
         private byte[] trainer = new byte[0];
+        private byte[] miscellaneousROM = new byte[0];
 
         /// <summary>
         /// CHR NVRAM Size (NES 2.0 only)
@@ -678,11 +679,11 @@ namespace com.clusterrr.Famicom.Containers
             if (MiscellaneousROMsCount > 0)
             {
                 MiscellaneousROM = new byte[data.Length - offset];
-                Array.Copy(data, offset, MiscellaneousROM, 0, MiscellaneousROM.Length);
+                Array.Copy(data, offset, miscellaneousROM, 0, miscellaneousROM.Length);
             }
             else
             {
-                MiscellaneousROM = null;
+                MiscellaneousROM = new byte[0];
             }
         }
 
@@ -858,7 +859,7 @@ namespace com.clusterrr.Famicom.Containers
                     data.AddRange(Trainer);
                 data.AddRange(prg);
                 data.AddRange(chr);
-                if (MiscellaneousROMsCount > 0 || (MiscellaneousROM != null && MiscellaneousROM.Length > 0))
+                if (MiscellaneousROMsCount > 0 || (MiscellaneousROM != null && MiscellaneousROM.Count() > 0))
                 {
                     if (MiscellaneousROMsCount == 0)
                         throw new InvalidDataException("MiscellaneousROMsCount is zero while MiscellaneousROM is not empty");
