@@ -803,7 +803,7 @@ namespace com.clusterrr.Famicom.Containers
                 if (Battery)
                     header[6] |= (1 << 1);
                 // 512-byte Trainer
-                if (Trainer != null)
+                if (trainer.Length > 0)
                     header[6] |= (1 << 2);
                 // Hard-wired four-screen mode
                 if (Mirroring == MirroringType.FourScreenVram)
