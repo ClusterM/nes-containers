@@ -205,13 +205,12 @@ namespace com.clusterrr.Famicom.Containers
         [MarshalAs(UnmanagedType.U1)]
         // Raw byte: $00. Speculative: Location/site?
         byte unknown08 = 0x00;
-        [MarshalAs(UnmanagedType.U1)]
-        // Raw byte: $00
-        byte unknown09 = 0x00;
-        [MarshalAs(UnmanagedType.U1)]
-        // Raw byte: $02
+        [MarshalAs(UnmanagedType.U2)]
+        // Raw bytes: $00 $02
+        ushort unknown09 = 0x0200;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 5)]
         // Speculative: some kind of game information representation?
-        byte unknown10 = 0x02;
+        byte[] unknown10;
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3)]
         byte[] rewrittenDate;

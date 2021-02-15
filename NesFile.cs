@@ -822,7 +822,7 @@ namespace com.clusterrr.Famicom.Containers
                 header[8] |= (byte)(Submapper << 4);
                 var prgRamBitSize = GetBitSize((int)PrgRamSize);
                 var prgNvRamBitSize = GetBitSize((int)PrgNvRamSize);
-                // PRG-RAM (volatile) shift count
+                // PRG RAM (volatile) shift count
                 header[10] |= (byte)(Math.Max(prgRamBitSize - 7, 0) & 0x0F);
                 // PRG-NVRAM/EEPROM (non-volatile) shift count
                 header[10] |= (byte)((Math.Max(prgNvRamBitSize - 7, 0) << 4) & 0xF0);
