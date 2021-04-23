@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace com.clusterrr.Famicom.Containers
 {
     [StructLayout(LayoutKind.Sequential, Size = 18, Pack = 1, CharSet = CharSet.Ansi)]
-    public class FdsBlockFileHeader : IFdsBlock
+    public class FdsBlockFileHeader : IFdsBlock, IEquatable<FdsBlockFileHeader>
     {
         public enum Kind
         {
@@ -103,5 +103,10 @@ namespace com.clusterrr.Famicom.Containers
         }
 
         public override string ToString() => $"{FileName} ({FileKind})";
+
+        public bool Equals(FdsBlockFileHeader other)
+        {
+            return Enumerable.SequenceEqual(this.ToBytes(), other.ToBytes());
+        }
     }
 }

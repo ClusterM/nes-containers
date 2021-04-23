@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace com.clusterrr.Famicom.Containers
 {
     [StructLayout(LayoutKind.Sequential, Size = 58, Pack = 1, CharSet = CharSet.Ansi)]
-    public class FdsBlockDiskInfo : IFdsBlock
+    public class FdsBlockDiskInfo : IFdsBlock, IEquatable<FdsBlockDiskInfo>
     {
         public enum DiskSides
         {
@@ -80,11 +80,11 @@ namespace com.clusterrr.Famicom.Containers
         public bool IsValid { get => blockType == 1; }
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 14)]
-        char[] diskVerification = "*NINTENDO-HVC*".ToCharArray();
+        byte[] diskVerification = Encoding.ASCII.GetBytes("*NINTENDO-HVC*");
         /// <summary>
         /// Literal ASCII string: *NINTENDO-HVC*
         /// </summary>
-        public string DiskVerification { get => new string(diskVerification).Trim(new char[] { '\0', ' ' }); /*set => diskVerification = value.PadRight(14).ToCharArray(0, value.Length > 14 ? 14 : value.Length);*/ }
+        public string DiskVerification => Encoding.ASCII.GetString(diskVerification).Trim(new char[] { '\0', ' ' }); /*set => diskVerification = value.PadRight(14).ToCharArray(0, value.Length > 14 ? 14 : value.Length);*/
 
         [MarshalAs(UnmanagedType.U1)]
         private byte manufacturerCode;
@@ -349,5 +349,10 @@ namespace com.clusterrr.Famicom.Containers
         }
 
         public override string ToString() => GameName;
+
+        public bool Equals(FdsBlockDiskInfo other)
+        {
+            return Enumerable.SequenceEqual(this.ToBytes(), other.ToBytes());
+        }
     }
 }

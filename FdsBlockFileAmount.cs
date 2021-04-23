@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace com.clusterrr.Famicom.Containers
 {
-    public class FdsBlockFileAmount : IFdsBlock
+    public class FdsBlockFileAmount : IFdsBlock, IEquatable<FdsBlockFileAmount>
     {
         private byte blockType = 2;
         /// <summary>
@@ -42,5 +42,10 @@ namespace com.clusterrr.Famicom.Containers
         public byte[] ToBytes() => new byte[] { blockType, fileAmount };
 
         public override string ToString() => $"{FileAmount}";
+
+        public bool Equals(FdsBlockFileAmount other)
+        {
+            return Enumerable.SequenceEqual(this.ToBytes(), other.ToBytes());
+        }
     }
 }
