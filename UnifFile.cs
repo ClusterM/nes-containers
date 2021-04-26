@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
-using System.IO;
-using System.ComponentModel;
-using System.Net.NetworkInformation;
 
 namespace com.clusterrr.Famicom.Containers
 {
@@ -13,7 +11,14 @@ namespace com.clusterrr.Famicom.Containers
     /// </summary>
     public class UnifFile
     {
+        /// <summary>
+        /// UNIF fields
+        /// </summary>
         public Dictionary<string, byte[]> Fields = new Dictionary<string, byte[]>();
+
+        /// <summary>
+        /// UNIF version
+        /// </summary>
         public int Version = 7;
 
         public UnifFile()
