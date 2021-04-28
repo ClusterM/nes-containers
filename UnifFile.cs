@@ -309,11 +309,11 @@ namespace com.clusterrr.Famicom.Containers
             {
                 var num = key[3];
                 var crc32 = Crc32Calculator.CalculateCRC32(Fields[key]);
-                Fields[$"PCK{num}"] = new byte[] { 
-                    (byte)(crc32 & 0xFF), 
-                    (byte)((crc32 >> 8) & 0xFF), 
-                    (byte)((crc32 >> 16) & 0xFF), 
-                    (byte)((crc32 >> 24) & 0xFF) 
+                Fields[$"PCK{num}"] = new byte[] {
+                    (byte)(crc32 & 0xFF),
+                    (byte)((crc32 >> 8) & 0xFF),
+                    (byte)((crc32 >> 16) & 0xFF),
+                    (byte)((crc32 >> 24) & 0xFF)
                 };
             }
             foreach (var key in Fields.Keys.Where(k => k.StartsWith("CHR")))
