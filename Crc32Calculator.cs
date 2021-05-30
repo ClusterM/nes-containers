@@ -33,7 +33,7 @@
         /// <param name="data">Input data</param>
         /// <param name="offset">Data offset</param>
         /// <param name="length">Length</param>
-        /// <returns></returns>
+        /// <returns>CRC32 checksum</returns>
         public static uint CalculateCRC32(byte[] data, int offset, int length)
         {
             // Calculate CRC32
@@ -50,7 +50,7 @@
         /// Calculate CRC32 checksum
         /// </summary>
         /// <param name="data">Input date</param>
-        /// <returns></returns>
+        /// <returns>CRC32 checksum</returns>
         public static uint CalculateCRC32(byte[] data)
             => CalculateCRC32(data, 0, data.Length);
     }
