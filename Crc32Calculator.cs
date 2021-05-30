@@ -2,7 +2,7 @@
 {
     public static class Crc32Calculator
     {
-        static uint[] table = new uint[256];
+        static readonly uint[] table = new uint[256];
 
         static Crc32Calculator()
         {

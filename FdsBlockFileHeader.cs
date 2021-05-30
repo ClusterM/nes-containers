@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace com.clusterrr.Famicom.Containers
 {
-    [StructLayout(LayoutKind.Sequential, Size = 18, Pack = 1, CharSet = CharSet.Ansi)]
+    [StructLayout(LayoutKind.Sequential, Size = 18, Pack = 1)]
     public class FdsBlockFileHeader : IFdsBlock, IEquatable<FdsBlockFileHeader>
     {
         public enum Kind
@@ -15,7 +16,8 @@ namespace com.clusterrr.Famicom.Containers
         }
 
         [MarshalAs(UnmanagedType.U1)]
-        private byte blockType = 3;
+        private readonly byte blockType = 3;
+        public byte ValidTypeID { get => 3; }
         /// <summary>
         /// True if block type ID is valid
         /// </summary>
@@ -31,8 +33,8 @@ namespace com.clusterrr.Famicom.Containers
         public byte FileIndicateCode { get => fileIndicateCode; set => fileIndicateCode = value; }
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 8)]
-        private char[] fileName;
-        public string FileName { get => new string(fileName).Trim(new char[] { '\0', ' ' }); set => fileName = value.PadRight(0).ToCharArray(0, value.Length > 8 ? 8 : value.Length); }
+        private byte[] fileName;
+        public string FileName { get => Encoding.ASCII.GetString(fileName).Trim(new char[] { '\0', ' ' }); set => fileName = Encoding.ASCII.GetBytes(value.PadRight(8)).Take(8).ToArray(); }
 
         [MarshalAs(UnmanagedType.U2)]
         // the destination address when loading

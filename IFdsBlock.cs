@@ -2,9 +2,8 @@
 {
     public interface IFdsBlock
     {
+        byte ValidTypeID { get;  }
         bool IsValid { get; }
-        bool CrcOk { get; set; }
-        bool EndOfHeadMeet { get; set; }
         uint Length { get; }
         byte[] ToBytes();
     }

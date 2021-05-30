@@ -6,7 +6,7 @@ namespace com.clusterrr.Famicom.Containers
 {
     public class FdsDiskSide
     {
-        FdsBlockDiskInfo diskInfoBlock;
+        readonly FdsBlockDiskInfo diskInfoBlock;
         /// <summary>
         /// Disk info block
         /// </summary>
@@ -76,13 +76,13 @@ namespace com.clusterrr.Famicom.Containers
         /// </summary>
         public byte Price { get => diskInfoBlock.Price; set => diskInfoBlock.Price = value; }
 
-        FdsBlockFileAmount fileAmountBlock;
+        readonly FdsBlockFileAmount fileAmountBlock;
         /// <summary>
         /// Non-hidden file amount
         /// </summary>
         public byte FileAmount { get => fileAmountBlock.FileAmount; set => fileAmountBlock.FileAmount = value; }
 
-        IList<FdsDiskFile> files;
+        readonly IList<FdsDiskFile> files;
 
         /// <summary>
         /// Files on disk
@@ -154,9 +154,11 @@ namespace com.clusterrr.Famicom.Containers
 
         public IEnumerable<IFdsBlock> GetBlocks()
         {
-            var blocks = new List<IFdsBlock>();
-            blocks.Add(diskInfoBlock);
-            blocks.Add(fileAmountBlock);
+            var blocks = new List<IFdsBlock>
+            {
+                diskInfoBlock,
+                fileAmountBlock
+            };
             blocks.AddRange(files.SelectMany(f => new IFdsBlock[] { f.HeaderBlock, f.DataBlock }));
             return blocks;
         }

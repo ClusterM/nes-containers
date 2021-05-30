@@ -6,10 +6,11 @@ namespace com.clusterrr.Famicom.Containers
     public class FdsBlockFileAmount : IFdsBlock, IEquatable<FdsBlockFileAmount>
     {
         private byte blockType = 2;
+        public byte ValidTypeID { get => 2; }
         /// <summary>
         /// True if block type ID is valid
         /// </summary>
-        public bool IsValid { get => blockType == 2; }
+        public bool IsValid { get => blockType == ValidTypeID; }
 
         private byte fileAmount;
         public byte FileAmount { get => fileAmount; set => fileAmount = value; }
@@ -28,9 +29,11 @@ namespace com.clusterrr.Famicom.Containers
 
         public static FdsBlockFileAmount FromBytes(byte[] rawData, int position = 0)
         {
-            var retobj = new FdsBlockFileAmount();
-            retobj.blockType = rawData[position];
-            retobj.fileAmount = rawData[position + 1];
+            var retobj = new FdsBlockFileAmount
+            {
+                blockType = rawData[position],
+                fileAmount = rawData[position + 1]
+            };
             return retobj;
         }
 

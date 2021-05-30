@@ -7,10 +7,11 @@ namespace com.clusterrr.Famicom.Containers
     public class FdsBlockFileData : IFdsBlock, IEquatable<FdsBlockFileData>
     {
         private byte blockType = 4;
+        public byte ValidTypeID { get => 4; }
         /// <summary>
         /// True if block type ID is valid
         /// </summary>
-        public bool IsValid { get => blockType == 4; }
+        public bool IsValid { get => blockType == ValidTypeID; }
 
         private byte[] data = new byte[0];
         public IEnumerable<byte> Data
@@ -33,17 +34,21 @@ namespace com.clusterrr.Famicom.Containers
 
         public static FdsBlockFileData FromBytes(byte[] rawData, int position = 0, int size = -1)
         {
-            var retobj = new FdsBlockFileData();
-            retobj.blockType = rawData[position];
-            retobj.data = new byte[size < 0 ? rawData.Length - position - 1 : size - 1];
+            var retobj = new FdsBlockFileData
+            {
+                blockType = rawData[position],
+                data = new byte[size < 0 ? rawData.Length - position - 1 : size - 1]
+            };
             Array.Copy(rawData, position + 1, retobj.data, 0, retobj.data.Length);
             return retobj;
         }
 
         public byte[] ToBytes()
         {
-            var result = new List<byte>();
-            result.Add(blockType);
+            var result = new List<byte>
+            {
+                blockType
+            };
             result.AddRange(Data);
             return result.ToArray();
         }

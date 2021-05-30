@@ -5,7 +5,7 @@ using System.Text;
 
 namespace com.clusterrr.Famicom.Containers
 {
-    [StructLayout(LayoutKind.Sequential, Size = 58, Pack = 1, CharSet = CharSet.Ansi)]
+    [StructLayout(LayoutKind.Sequential, Size = 58, Pack = 1)]
     public class FdsBlockDiskInfo : IFdsBlock, IEquatable<FdsBlockDiskInfo>
     {
         public enum DiskSides
@@ -70,14 +70,15 @@ namespace com.clusterrr.Famicom.Containers
 
         [MarshalAs(UnmanagedType.U1)]
         // Raw byte: 0x01
-        private byte blockType = 1;
+        private readonly byte blockType = 1;
+        public byte ValidTypeID { get => 1; }
         /// <summary>
         /// True if block type ID is valid
         /// </summary>
-        public bool IsValid { get => blockType == 1; }
+        public bool IsValid { get => blockType == ValidTypeID; }
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 14)]
-        byte[] diskVerification = Encoding.ASCII.GetBytes("*NINTENDO-HVC*");
+        readonly byte[] diskVerification = Encoding.ASCII.GetBytes("*NINTENDO-HVC*");
         /// <summary>
         /// Literal ASCII string: *NINTENDO-HVC*
         /// </summary>
@@ -91,20 +92,20 @@ namespace com.clusterrr.Famicom.Containers
         public Manufacturer ManufacturerCode { get => (Manufacturer)manufacturerCode; set => manufacturerCode = (byte)value; }
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3)]
-        char[] gameName;
+        byte[] gameName;
         /// <summary>
         /// 3-letter ASCII code per game (e.g. ZEL for The Legend of Zelda)
         /// </summary>
-        public string GameName { get => new string(gameName).Trim(new char[] { '\0', ' ' }); set => gameName = value.PadRight(3).ToCharArray(0, value.Length > 3 ? 3 : value.Length); }
+        public string GameName { get => Encoding.ASCII.GetString(gameName).Trim(new char[] { '\0', ' ' }); set => gameName = Encoding.ASCII.GetBytes(value.PadRight(3)).Take(3).ToArray(); }
 
         [MarshalAs(UnmanagedType.U1)]
-        char gameType;
+        byte gameType;
         /// <summary>
         /// = = 0x20, " " — Normal disk
         /// = = 0x45, "E" — Event(e.g.Japanese national DiskFax tournaments)
         /// = = 0x52, "R" — Reduction in price via advertising
         /// </summary>
-        public char GameType { get => gameType; set => gameType = value; }
+        public char GameType { get => (char)gameType; set => gameType = (byte)value; }
 
         [MarshalAs(UnmanagedType.U1)]
         byte gameVersion;
@@ -137,7 +138,7 @@ namespace com.clusterrr.Famicom.Containers
         [MarshalAs(UnmanagedType.U1)]
         // Speculative: (Err.10) Possibly indicates disk #; usually $00
         // Speculative: = = 0x00, yellow disk, = = 0x01, blue or gold disk, = = 0xFE, white disk, = = 0xFF, blue disk
-        byte unknown01 = 0x00;
+        readonly byte unknown01 = 0x00;
         [MarshalAs(UnmanagedType.U1)]
         byte bootFile;
         /// <summary>
@@ -145,15 +146,15 @@ namespace com.clusterrr.Famicom.Containers
         /// </summary>
         public byte BootFile { get => bootFile; set => bootFile = value; }
         [MarshalAs(UnmanagedType.U1)]
-        byte unknown02 = 0xFF;
+        readonly byte unknown02 = 0xFF;
         [MarshalAs(UnmanagedType.U1)]
-        byte unknown03 = 0xFF;
+        readonly byte unknown03 = 0xFF;
         [MarshalAs(UnmanagedType.U1)]
-        byte unknown04 = 0xFF;
+        readonly byte unknown04 = 0xFF;
         [MarshalAs(UnmanagedType.U1)]
-        byte unknown05 = 0xFF;
+        readonly byte unknown05 = 0xFF;
         [MarshalAs(UnmanagedType.U1)]
-        byte unknown06 = 0xFF;
+        readonly byte unknown06 = 0xFF;
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3)]
         byte[] manufacturingDate;
@@ -198,16 +199,16 @@ namespace com.clusterrr.Famicom.Containers
 
         [MarshalAs(UnmanagedType.U1)]
         // Raw byte: $61. Speculative: Region code?
-        byte unknown07 = 0x61;
+        readonly byte unknown07 = 0x61;
         [MarshalAs(UnmanagedType.U1)]
         // Raw byte: $00. Speculative: Location/site?
-        byte unknown08 = 0x00;
+        readonly byte unknown08 = 0x00;
         [MarshalAs(UnmanagedType.U2)]
         // Raw bytes: $00 $02
-        ushort unknown09 = 0x0200;
+        readonly ushort unknown09 = 0x0200;
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 5)]
         // Speculative: some kind of game information representation?
-        byte[] unknown10;
+        readonly byte[] unknown10;
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3)]
         byte[] rewrittenDate;
@@ -244,10 +245,10 @@ namespace com.clusterrr.Famicom.Containers
         }
 
         [MarshalAs(UnmanagedType.U1)]
-        byte unknown11 = 0x00;
+        readonly byte unknown11 = 0x00;
         [MarshalAs(UnmanagedType.U1)]
         // Raw byte: $80
-        byte unknown12 = 0x80;
+        readonly byte unknown12 = 0x80;
         [MarshalAs(UnmanagedType.U2)]
 
         ushort diskWriterSerialNumber;
@@ -258,7 +259,7 @@ namespace com.clusterrr.Famicom.Containers
 
         [MarshalAs(UnmanagedType.U1)]
         // Raw byte: $07
-        byte unknown13 = 0x07;
+        readonly byte unknown13 = 0x07;
 
         [MarshalAs(UnmanagedType.U1)]
         byte diskRewriteCount = 0x00;
@@ -285,7 +286,7 @@ namespace com.clusterrr.Famicom.Containers
         public DiskSides ActualDiskSide { get => (DiskSides)actualDiskSide; set => actualDiskSide = (byte)value; }
 
         [MarshalAs(UnmanagedType.U1)]
-        byte unknown14 = 0x00;
+        readonly byte unknown14 = 0x00;
 
         [MarshalAs(UnmanagedType.U1)]
         byte price = 0x00;
