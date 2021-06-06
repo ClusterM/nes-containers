@@ -30,7 +30,7 @@ namespace com.clusterrr.Famicom.Containers.HeaderFixer
                     var mapper = correct[i, 1] & 0x3FF;
 					var mask = ((correct[i, 1] & 0x1000) != 0) ? 0xFFF : 0xFF;
 						var mirroring = correct[i, 2];
-                    if ((mapper >= 0) && (nes.Mapper != (mapper & mask)))
+                    if ((correct[i, 1] >= 0) && (mapper >= 0) && (nes.Mapper != (mapper & mask)))
                     {
                         // invalid mapper
                         nes.Mapper = (ushort)(mapper & mask);
@@ -63,7 +63,7 @@ namespace com.clusterrr.Famicom.Containers.HeaderFixer
                             fixType |= NesFixType.Mirroring;
                         }
                     }
-                    if (((correct[i, 1] & 0x800) != 0) && (nes.CHR.Count() > 0))
+                    if ((correct[i, 1] >= 0) && ((correct[i, 1] & 0x800) != 0) && (nes.CHR.Count() > 0))
                     {
                         // no CHR
                         nes.CHR = Array.Empty<byte>();
@@ -216,7 +216,6 @@ namespace com.clusterrr.Famicom.Containers.HeaderFixer
 			{0x054bd3e9,     74,       -1},	/* Di 4 Ci - Ji Qi Ren Dai Zhan (As) */
 			{0x496ac8f7,     74,       -1},	/* Ji Jia Zhan Shi (As) */
 			{0xae854cef,     74,       -1},	/* Jia A Fung Yun (Chinese) */
-			{0xba51ac6f,     78,        2},
 			{0x3d1c3137,     78,        8},	/* Uchuusen - Cosmo Carrier */
 			{0xa4fbb438,     79,        0},
 			{0xd4a76b07,     79,        0},	/* F-15 City Wars*/
