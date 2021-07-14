@@ -28,8 +28,8 @@ namespace com.clusterrr.Famicom.Containers.HeaderFixer
                 if (crc32 == correct[i, 0])
                 {
                     var mapper = correct[i, 1] & 0x3FF;
-					var mask = ((correct[i, 1] & 0x1000) != 0) ? 0xFFF : 0xFF;
-						var mirroring = correct[i, 2];
+                    var mask = ((correct[i, 1] & 0x1000) != 0) ? 0xFFF : 0xFF;
+                    var mirroring = correct[i, 2];
                     if ((correct[i, 1] >= 0) && (mapper >= 0) && (nes.Mapper != (mapper & mask)))
                     {
                         // invalid mapper
@@ -69,8 +69,8 @@ namespace com.clusterrr.Famicom.Containers.HeaderFixer
                         nes.CHR = Array.Empty<byte>();
                         fixType |= NesFixType.NoChr;
                     }
-				}
-			}
+                }
+            }
 
             var md5 = nes.CalculateMD5();
             ulong partialmd5 = 0;
@@ -89,9 +89,9 @@ namespace com.clusterrr.Famicom.Containers.HeaderFixer
             return fixType;
         }
 
-		static long[,] correct = new long[,]
-		{
-			{0xaf5d7aa2,     -1,        0},	/* Clu Clu Land */
+        static long[,] correct = new long[,]
+        {
+            {0xaf5d7aa2,     -1,        0},	/* Clu Clu Land */
 			{0xcfb224e6,     -1,        1},	/* Dragon Ninja (J) [p1][!].nes */
 			{0x4f2f1846,     -1,        1},	/* Famista '89 - Kaimaku Han!! (J) */
 			{0x82f204ae,     -1,        1},	/* Liang Shan Ying Xiong (NJ023) (Ch) [!] */
@@ -156,7 +156,7 @@ namespace com.clusterrr.Famicom.Containers.HeaderFixer
 			{0xc9ee15a7,      3,       -1},	/* 3 is probably best.  41 WILL NOT WORK. */
 			{0x13e09d7a,      4,        0}, /*Dragon Wars (U) (proto) - comes with erroneous 4-screen mirroring set*/
 			{0x22d6d5bd,      4,        1},
-			{0xd97c31b0,      4,        1},	//Rasaaru Ishii no Childs Quest (J)
+            {0xd97c31b0,      4,        1},	//Rasaaru Ishii no Childs Quest (J)
 			{0x404b2e8b,      4,        2},	/* Rad Racer 2 */
 			{0x15141401,      4,        8},	/* Asmik Kun Land */
 			{0x4cccd878,      4,        8},	/* Cat Ninden Teyandee */
@@ -173,7 +173,7 @@ namespace com.clusterrr.Famicom.Containers.HeaderFixer
 			{0x5e66eaea,     13,        1},	/* Videomation */
 			{0xcd373baa,     14,       -1},	/* Samurai Spirits (Rex Soft) */
 			{0xbfc7a2e9,     16,        8},
-			{0x6e68e31a,     16,        8},	/* Dragon Ball 3*/
+            {0x6e68e31a,     16,        8},	/* Dragon Ball 3*/
 			{0x33b899c9,     16,       -1},	/* Dragon Ball - Dai Maou Fukkatsu (J) [!] */
 			{0xa262a81f,     16,       -1},	/* Rokudenashi Blues (J) */
 			{0xe4a291ce,     23,       -1},	/* World Hero (Unl) [!] */
@@ -184,7 +184,7 @@ namespace com.clusterrr.Famicom.Containers.HeaderFixer
 			{0x5b3de3d1,     27,       -1},	/* -- */
 			{0x511e73f8,     27,       -1},	/* -- */
 			{0x5555fca3,     32,        8},
-			{0x283ad224,     32,        8},	/* Ai Sensei no Oshiete */
+            {0x283ad224,     32,        8},	/* Ai Sensei no Oshiete */
 			{0x243a8735,     32,   0x10|4},	/* Major League */
 			{0xbc7b1d0f,     33,       -1}, /* Bakushou!! Jinsei Gekijou 2 (J) [!] */
 			{0xc2730c30,     34,        0},	/* Deadly Towers */
@@ -204,7 +204,7 @@ namespace com.clusterrr.Famicom.Containers.HeaderFixer
 			{0xb19a55dd,     64,        8},	/* Road Runner */
 			{0xf92be3ec,     64,       -1},	/* Rolling Thunder */
 			{0xe84274c5,     66,        1},
-			{0xbde3ae9b,     66,        1},	/* Doraemon */
+            {0xbde3ae9b,     66,        1},	/* Doraemon */
 			{0x9552e8df,     66,        1},	/* Dragon Ball */
 			{0x811f06d9,     66,        1},	/* Dragon Power */
 			{0xd26efd78,     66,        1},	/* SMB Duck Hunt */
@@ -218,7 +218,7 @@ namespace com.clusterrr.Famicom.Containers.HeaderFixer
 			{0xae854cef,     74,       -1},	/* Jia A Fung Yun (Chinese) */
 			{0x3d1c3137,     78,        8},	/* Uchuusen - Cosmo Carrier */
 			{0xa4fbb438,     79,        0},
-			{0xd4a76b07,     79,        0},	/* F-15 City Wars*/
+            {0xd4a76b07,     79,        0},	/* F-15 City Wars*/
 			{0x1eb4a920,     79,        1},	/* Double Strike */
 			{0x3e1271d5,     79,        1},	/* Tiles of Fate */
 			{0xd2699893,     88,        0},	/*  Dragon Spirit */
@@ -226,11 +226,11 @@ namespace com.clusterrr.Famicom.Containers.HeaderFixer
 			{0x0da5e32e,    101,       -1},	/* new Uruusey Yatsura */
 			{0x8eab381c,    113,        1},	/* Death Bots */
 			{0x6a03d3f3,    114,       -1},
-			{0x0d98db53,    114,       -1},	/* Pocahontas */
+            {0x0d98db53,    114,       -1},	/* Pocahontas */
 			{0x4e7729ff,    114,       -1},	/* Super Donkey Kong */
 			{0xc5e5c5b2,    115,       -1},	/* Bao Qing Tian (As).nes */
 			{0xa1dc16c0,    116,       -1},
-			{0xe40dfb7e,    116,       -1},	/* Somari (P conf.) */
+            {0xe40dfb7e,    116,       -1},	/* Somari (P conf.) */
 			{0xc9371ebb,    116,       -1},	/* Somari (W conf.) */
 			{0xcbf4366f,    118,        8},	/* Alien Syndrome (U.S. unlicensed) */
 			{0x78b657ac,    118,       -1},	/* Armadillo */
@@ -251,8 +251,8 @@ namespace com.clusterrr.Famicom.Containers.HeaderFixer
 			{0xa62b79e1,    146,       -1},	/* Side Winder (HES) [!] */
 			{0xcc868d4e,    149,       -1},	/* 16 Mahjong [p1][!] */
 			{0x29582ca1,    150,       -1},
-			{0x40dbf7a2,    150,       -1},
-			{0x73fb55ac,    150,       -1},	/* 2-in-1 Cosmo Cop + Cyber Monster (Sachen) [!] */
+            {0x40dbf7a2,    150,       -1},
+            {0x73fb55ac,    150,       -1},	/* 2-in-1 Cosmo Cop + Cyber Monster (Sachen) [!] */
 			{0xddcbda16,    150,       -1},	/* 2-in-1 Tough Cop + Super Tough Cop (Sachen) [!] */
 			{0x47918d84,    150,       -1},	/* auto-upturn */
 			{0x0f141525,    152,        8},	/* Arkanoid 2 (Japanese) */
@@ -264,7 +264,7 @@ namespace com.clusterrr.Famicom.Containers.HeaderFixer
 			{0xcfd4a281,    155,        8},	/* Money Game.  Yay for money! */
 			{0x2f27cdef,    155,        8},	/* Tatakae!! Rahmen Man */
 			{0xccc03440,    156,       -1},
-			{0x983d8175,    157,        8},	/* Datach Battle Rush */
+            {0x983d8175,    157,        8},	/* Datach Battle Rush */
 			{0x894efdbc,    157,        8},	/* Datach Crayon Shin Chan */
 			{0x19e81461,    157,        8},	/* Datach DBZ */
 			{0xbe06853f,    157,        8},	/* Datach J-League */
@@ -286,27 +286,27 @@ namespace com.clusterrr.Famicom.Containers.HeaderFixer
 			{0x0f05ff0a,    181,       -1},	/* Seicross  (redump) */
 			{0x96ce586e,    189,        8},	/* Street Fighter 2 YOKO */
 			{0x555a555e,    191,       -1},
-			{0x2cc381f6,    191,       -1},	/* Sugoro Quest - Dice no Senshitachi (As) */
+            {0x2cc381f6,    191,       -1},	/* Sugoro Quest - Dice no Senshitachi (As) */
 			{0xa145fae6,    192,       -1},
-			{0xa9115bc1,    192,       -1},
-			{0x4c7bbb0e,    192,       -1},
-			{0x98c1cd4b,    192,       -1},	/* Ying Lie Qun Xia Zhuan (Chinese) */
+            {0xa9115bc1,    192,       -1},
+            {0x4c7bbb0e,    192,       -1},
+            {0x98c1cd4b,    192,       -1},	/* Ying Lie Qun Xia Zhuan (Chinese) */
 			{0xee810d55,    192,       -1},	/* You Ling Xing Dong (Ch) */
 			{0x442f1a29,    192,       -1},	/* Young chivalry */
 			{0x637134e8,    193,        1},	/* Fighting Hero */
 			{0xa925226c,    194,       -1},	/* Dai-2-Ji - Super Robot Taisen (As) */
 			{0x7f3dbf1b,    195,        0},
-			{0xb616885c,    195,        0},	/* CHaos WOrld (Ch)*/
+            {0xb616885c,    195,        0},	/* CHaos WOrld (Ch)*/
 			{0x33c5df92,    195,       -1},
-			{0x1bc0be6c,    195,       -1},	/* Captain Tsubasa Vol 2 - Super Striker (C) */
+            {0x1bc0be6c,    195,       -1},	/* Captain Tsubasa Vol 2 - Super Striker (C) */
 			{0xd5224fde,    195,       -1},	/* Crystalis (c) */
 			{0xfdec419f,    196,       -1},	/* Street Fighter VI 16 Peoples (Unl) [!] */
 			{0x700705f4,    198,       -1},
-			{0x9a2cf02c,    198,       -1},
-			{0xd8b401a7,    198,       -1},
-			{0x28192599,    198,       -1},
-			{0x19b9e732,    198,       -1},
-			{0xdd431ba7,    198,       -1},	/* Tenchi wo kurau 2 (c) */
+            {0x9a2cf02c,    198,       -1},
+            {0xd8b401a7,    198,       -1},
+            {0x28192599,    198,       -1},
+            {0x19b9e732,    198,       -1},
+            {0xdd431ba7,    198,       -1},	/* Tenchi wo kurau 2 (c) */
 			{0xd871d3e6,    199,       -1},	/* Dragon Ball Z 2 - Gekishin Freeza! (C) */
 			{0xed481b7c,    199,       -1},	/* Dragon Ball Z Gaiden - Saiya Jin Zetsumetsu Keikaku (C) */
 			{0x44c20420,    199,       -1},	/* San Guo Zhi 2 (C) */
@@ -360,56 +360,57 @@ namespace com.clusterrr.Famicom.Containers.HeaderFixer
 
 			{0x99d4464f,    260|0x1000,-1}, /* HP10xx/HP20xx board dumps */
 			{0xb72b2cf4,    260|0x1000,-1},
-			{0x4dc6107d,    260|0x1000,-1},
-			{0x0073dbd8,    260|0x1000,-1},
-			{0x3b098344,    260|0x1000,-1},
-			{0x1fc640c0,    260|0x1000,-1},
-			{0x2f1ad1fc,    260|0x1000,-1},
-			{0xa22214bb,    260|0x1000,-1},
-			{0x5dd9073b,    260|0x1000,-1},
-			{0x26a36cc2,    260|0x1000,-1},
-			{0xd1e52b37,    260|0x1000,-1},
-			{0x4d4a0e1b,    260|0x1000,-1},
-			{0xb6dd2c9d,    260|0x1000,-1},
+            {0x4dc6107d,    260|0x1000,-1},
+            {0x0073dbd8,    260|0x1000,-1},
+            {0x3b098344,    260|0x1000,-1},
+            {0x1fc640c0,    260|0x1000,-1},
+            {0x2f1ad1fc,    260|0x1000,-1},
+            {0xa22214bb,    260|0x1000,-1},
+            {0x5dd9073b,    260|0x1000,-1},
+            {0x26a36cc2,    260|0x1000,-1},
+            {0xd1e52b37,    260|0x1000,-1},
+            {0x4d4a0e1b,    260|0x1000,-1},
+            {0xb6dd2c9d,    260|0x1000,-1},
 
-			{0xb02fcb57,    406|0x1000,-1} /* Haradius Zero ver 1.2a 2019 */
+            {0xb02fcb57,    406|0x1000,-1} /* Haradius Zero ver 1.2a 2019 */
 		};
 
 
         static ulong[] savie = new ulong[]
         {
             0xc04361e499748382,	/* AD&D Heroes of the Lance */
-		    0xb72ee2337ced5792,	/* AD&D Hillsfar */
-		    0x2b7103b7a27bd72f,	/* AD&D Pool of Radiance */
-		    0x498c10dc463cfe95,	/* Battle Fleet */
-		    0x854d7947a3177f57,	/* Crystalis */
-		    0x4a1f5336b86851b6,	/* DW */
-		    0xb0bcc02c843c1b79,	/* DW */
-		    0x2dcf3a98c7937c22,	/* DW 2 */
-		    0x98e55e09dfcc7533,	/* DW 4*/
-		    0x733026b6b72f2470,	/* Dw 3 */
-		    0x6917ffcaca2d8466,	/* Famista '90 */
-		    0x8da46db592a1fcf4,	/* Faria */
-		    0xedba17a2c4608d20,	/* Final Fantasy */
-		    0x91a6846d3202e3d6,	/* Final Fantasy */
-		    0x012df596e2b31174,	/* Final Fantasy 1+2 */
-		    0xf6b359a720549ecd,	/* Final Fantasy 2 */
-		    0x5a30da1d9b4af35d,	/* Final Fantasy 3 */
-		    0xd63dcc68c2b20adc,	/* Final Fantasy J */
-		    0x2ee3417ba8b69706,	/* Hydlide 3*/
-		    0xebbce5a54cf3ecc0,	/* Justbreed */
-		    0x6a858da551ba239e,	/* Kaijuu Monogatari */
-		    0x2db8f5d16c10b925,	/* Kyonshiizu 2 */
-		    0x04a31647de80fdab,	/* Legend of Zelda */
-		    0x94b9484862a26cba,	/* Legend of Zelda */
-		    0xa40666740b7d22fe,	/* Mindseeker */
-		    0x82000965f04a71bb,	/* Mirai Shinwa Jarvas */
-		    0x77b811b2760104b9,	/* Mouryou Senki Madara */
-		    0x11b69122efe86e8c,	/* RPG Jinsei Game */
-		    0x9aa1dc16c05e7de5,	/* Startropics */
-		    0x1b084107d0878bd0,	/* Startropics 2*/
-		    0xa70b495314f4d075,	/* Ys 3 */
-		    0x836c0ff4f3e06e45, /* Zelda 2 */
+			0xb72ee2337ced5792,	/* AD&D Hillsfar */
+			0x2b7103b7a27bd72f,	/* AD&D Pool of Radiance */
+			0x498c10dc463cfe95,	/* Battle Fleet */
+			0x854d7947a3177f57,	/* Crystalis */
+			0xfad22d265cd70820, /* Downtown Special: Kunio-kun no Jidaigeki Dayo Zenin Shuugou! */
+			0x4a1f5336b86851b6,	/* DW */
+			0xb0bcc02c843c1b79,	/* DW */
+			0x2dcf3a98c7937c22,	/* DW 2 */
+			0x98e55e09dfcc7533,	/* DW 4*/
+			0x733026b6b72f2470,	/* Dw 3 */
+			0x6917ffcaca2d8466,	/* Famista '90 */
+			0x8da46db592a1fcf4,	/* Faria */
+			0xedba17a2c4608d20,	/* Final Fantasy */
+			0x91a6846d3202e3d6,	/* Final Fantasy */
+			0x012df596e2b31174,	/* Final Fantasy 1+2 */
+			0xf6b359a720549ecd,	/* Final Fantasy 2 */
+			0x5a30da1d9b4af35d,	/* Final Fantasy 3 */
+			0xd63dcc68c2b20adc,	/* Final Fantasy J */
+			0x2ee3417ba8b69706,	/* Hydlide 3*/
+			0xebbce5a54cf3ecc0,	/* Justbreed */
+			0x6a858da551ba239e,	/* Kaijuu Monogatari */
+			0x2db8f5d16c10b925,	/* Kyonshiizu 2 */
+			0x04a31647de80fdab,	/* Legend of Zelda */
+			0x94b9484862a26cba,	/* Legend of Zelda */
+			0xa40666740b7d22fe,	/* Mindseeker */
+			0x82000965f04a71bb,	/* Mirai Shinwa Jarvas */
+			0x77b811b2760104b9,	/* Mouryou Senki Madara */
+			0x11b69122efe86e8c,	/* RPG Jinsei Game */
+			0x9aa1dc16c05e7de5,	/* Startropics */
+			0x1b084107d0878bd0,	/* Startropics 2*/
+			0xa70b495314f4d075,	/* Ys 3 */
+			0x836c0ff4f3e06e45,	/* Zelda 2 */
         };
     }
 }
