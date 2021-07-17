@@ -787,7 +787,7 @@ namespace com.clusterrr.Famicom.Containers
                 if (length8k <= 0xEFF)
                 {
                     header[5] = (byte)(length8k & 0xFF);
-                    header[9] = (byte)((length8k >> 4) & 0xF0);
+                    header[9] |= (byte)((length8k >> 4) & 0xF0);
                 }
                 else
                 {
