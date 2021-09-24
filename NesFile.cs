@@ -14,27 +14,37 @@ namespace com.clusterrr.Famicom.Containers
         /// <summary>
         /// PRG data
         /// </summary>
-        public IEnumerable<byte> PRG { get => Array.AsReadOnly(prg); set => prg = value.ToArray(); }
+        public IEnumerable<byte> PRG { 
+            get => Array.AsReadOnly(prg); 
+            set => prg = (value ?? new byte[0]).ToArray(); 
+        }
         /// <summary>
         /// CHR data (can be null if none)
         /// </summary>
-        public IEnumerable<byte> CHR { get => Array.AsReadOnly(chr); set => chr = value.ToArray(); }
+        public IEnumerable<byte> CHR { 
+            get => Array.AsReadOnly(chr); 
+            set => chr = (value ?? new byte[0]).ToArray(); 
+        }
         /// <summary>
         /// Trainer (can be null if none)
         /// </summary>
         public IEnumerable<byte> Trainer
         {
-            get => Array.AsReadOnly(trainer); set
+            get => Array.AsReadOnly(trainer); 
+            set
             {
                 if (value != null && value.Count() != 0 && value.Count() != 512)
                     throw new ArgumentOutOfRangeException("Trainer size must be 512 bytes");
-                chr = trainer.ToArray();
+                chr = (value ?? new byte[0]).ToArray();
             }
         }
         /// <summary>
         /// Miscellaneous ROM (NES 2.0 only, can be null if none)
         /// </summary>
-        public IEnumerable<byte> MiscellaneousROM { get => Array.AsReadOnly(miscellaneousROM); set => miscellaneousROM = value.ToArray(); }
+        public IEnumerable<byte> MiscellaneousROM { 
+            get => Array.AsReadOnly(miscellaneousROM); 
+            set => miscellaneousROM = (value ?? new byte[0]).ToArray(); 
+        }
         /// <summary>
         /// Mapper number
         /// </summary>
