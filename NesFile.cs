@@ -14,23 +14,25 @@ namespace com.clusterrr.Famicom.Containers
         /// <summary>
         /// PRG data
         /// </summary>
-        public IEnumerable<byte> PRG { 
-            get => Array.AsReadOnly(prg); 
-            set => prg = (value ?? new byte[0]).ToArray(); 
+        public IEnumerable<byte> PRG
+        {
+            get => Array.AsReadOnly(prg);
+            set => prg = (value ?? new byte[0]).ToArray();
         }
         /// <summary>
         /// CHR data (can be null if none)
         /// </summary>
-        public IEnumerable<byte> CHR { 
-            get => Array.AsReadOnly(chr); 
-            set => chr = (value ?? new byte[0]).ToArray(); 
+        public IEnumerable<byte> CHR
+        {
+            get => Array.AsReadOnly(chr);
+            set => chr = (value ?? new byte[0]).ToArray();
         }
         /// <summary>
         /// Trainer (can be null if none)
         /// </summary>
         public IEnumerable<byte> Trainer
         {
-            get => Array.AsReadOnly(trainer); 
+            get => Array.AsReadOnly(trainer);
             set
             {
                 if (value != null && value.Count() != 0 && value.Count() != 512)
@@ -41,9 +43,10 @@ namespace com.clusterrr.Famicom.Containers
         /// <summary>
         /// Miscellaneous ROM (NES 2.0 only, can be null if none)
         /// </summary>
-        public IEnumerable<byte> MiscellaneousROM { 
-            get => Array.AsReadOnly(miscellaneousROM); 
-            set => miscellaneousROM = (value ?? new byte[0]).ToArray(); 
+        public IEnumerable<byte> MiscellaneousROM
+        {
+            get => Array.AsReadOnly(miscellaneousROM);
+            set => miscellaneousROM = (value ?? new byte[0]).ToArray();
         }
         /// <summary>
         /// Mapper number
@@ -726,6 +729,7 @@ namespace com.clusterrr.Famicom.Containers
             if (prg == null) prg = new byte[0];
             if (chr == null) chr = new byte[0];
             if (trainer == null) trainer = new byte[0];
+            /*
             if ((prg.Length % 0x4000) != 0)
             {
                 var padding = 0x4000 - (prg.Length % 4000);
@@ -738,6 +742,8 @@ namespace com.clusterrr.Famicom.Containers
                 if (padding > 0)
                     Array.Resize(ref chr, chr.Length + padding);
             }
+            */
+            ulong prgSizePadded, chrSizePadded;
             if (Version == iNesVersion.iNES)
             {
                 if (Console == ConsoleType.Extended)
@@ -748,10 +754,12 @@ namespace com.clusterrr.Famicom.Containers
                     throw new InvalidDataException("Submapper supported by NES 2.0 only");
                 var length16k = prg.Length / 0x4000;
                 if (length16k > 0xFF) throw new ArgumentOutOfRangeException("PRG size is too big for iNES, use NES 2.0 instead");
-                header[4] = (byte)(prg.Length / 0x4000);
+                header[4] = (byte)Math.Ceiling((double)prg.Length / 0x4000);
+                prgSizePadded = header[4] * 0x4000UL;
                 var length8k = chr.Length / 0x2000;
                 if (length8k > 0xFF) throw new ArgumentOutOfRangeException("CHR size is too big for iNES, use NES 2.0 instead");
-                header[5] = (byte)(CHR.Count() / 0x2000);
+                header[5] = (byte)Math.Ceiling((double)chr.Length / 0x2000);
+                chrSizePadded = header[5] * 0x2000UL;
                 // Hard-wired nametable mirroring type
                 if (Mirroring == MirroringType.Vertical)
                     header[6] |= 1;
@@ -779,31 +787,31 @@ namespace com.clusterrr.Famicom.Containers
             }
             else if (Version == iNesVersion.NES20)
             {
-                var length16k = prg.Length / 0x4000;
+                var length16k = (uint)Math.Ceiling((double)prg.Length / 0x4000);
                 if (length16k <= 0xEFF)
                 {
                     header[4] = (byte)(length16k & 0xFF);
                     header[9] |= (byte)(length16k >> 8);
+                    prgSizePadded = length16k * 0x4000;
                 }
                 else
                 {
-                    (long padding, int exponent, int multiplier) = CalculateExponent(prg.Length);
-                    if (padding > 0)
-                        Array.Resize(ref prg, (int)(prg.Length + padding));
+                    byte exponent, multiplier;
+                    (exponent, multiplier, prgSizePadded) = SizeToExponent((ulong)prg.Length);
                     header[4] = (byte)((exponent << 2) | (multiplier & 3));
                     header[9] |= 0x0F;
                 }
-                var length8k = CHR.Count() / 0x2000;
+                var length8k = (uint)Math.Ceiling((double)chr.Length / 0x2000);
                 if (length8k <= 0xEFF)
                 {
                     header[5] = (byte)(length8k & 0xFF);
                     header[9] |= (byte)((length8k >> 4) & 0xF0);
+                    chrSizePadded = length8k * 0x2000;
                 }
                 else
                 {
-                    (long padding, int exponent, int multiplier) = CalculateExponent(CHR.Count());
-                    if (padding > 0)
-                        Array.Resize(ref chr, (int)(chr.Length + padding));
+                    byte exponent, multiplier;
+                    (exponent, multiplier, chrSizePadded) = SizeToExponent((ulong)chr.Length);
                     header[5] = (byte)((exponent << 2) | (multiplier & 3));
                     header[9] |= 0xF0;
                 }
@@ -830,18 +838,18 @@ namespace com.clusterrr.Famicom.Containers
                 // Mapper number D8..D11
                 header[8] |= (byte)((Mapper >> 8) & 0x0F);
                 header[8] |= (byte)(Submapper << 4);
-                var prgRamBitSize = GetBitSize((int)PrgRamSize);
-                var prgNvRamBitSize = GetBitSize((int)PrgNvRamSize);
                 // PRG RAM (volatile) shift count
-                header[10] |= (byte)(Math.Max(prgRamBitSize - 7, 0) & 0x0F);
+                var prgRamBitSize = PrgRamSize > 0 ? Math.Max(1, (int)Math.Ceiling(Math.Log(PrgRamSize, 2)) - 6) : 0;
+                header[10] |= (byte)(prgRamBitSize & 0x0F);
                 // PRG-NVRAM/EEPROM (non-volatile) shift count
-                header[10] |= (byte)((Math.Max(prgNvRamBitSize - 7, 0) << 4) & 0xF0);
-                var chrRamBitSize = GetBitSize((int)ChrRamSize);
-                var chrNvRamBitSize = GetBitSize((int)ChrNvRamSize);
+                var prgNvRamBitSize = PrgNvRamSize > 0 ? Math.Max(1, (int)Math.Ceiling(Math.Log(PrgNvRamSize, 2)) - 6) : 0;
+                header[10] |= (byte)((prgNvRamBitSize << 4) & 0xF0);
                 // CHR-RAM size (volatile) shift count
-                header[11] |= (byte)(Math.Max(chrRamBitSize - 7, 0) & 0x0F);
+                var chrRamBitSize = ChrRamSize > 0 ? Math.Max(1, (int)Math.Ceiling(Math.Log(ChrRamSize, 2)) - 6) : 0;
+                header[11] |= (byte)(chrRamBitSize & 0x0F);
                 // CHR-NVRAM size (non-volatile) shift count
-                header[11] |= (byte)((Math.Max(chrNvRamBitSize - 7, 0) << 4) & 0xF0);
+                var chrNvRamBitSize = ChrNvRamSize > 0 ? Math.Max(1, (int)Math.Ceiling(Math.Log(ChrNvRamSize, 2)) - 6) : 0;
+                header[11] |= (byte)((chrNvRamBitSize << 4) & 0xF0);
                 // CPU/PPU timing mode
                 header[12] |= (byte)((byte)Region & 3);
                 switch (Console)
@@ -868,58 +876,72 @@ namespace com.clusterrr.Famicom.Containers
                 if (Trainer != null)
                     data.AddRange(Trainer);
                 data.AddRange(prg);
+                data.AddRange(Enumerable.Repeat<byte>(0xFF, (int)prgSizePadded - prg.Length));
                 data.AddRange(chr);
+                data.AddRange(Enumerable.Repeat<byte>(0xFF, (int)chrSizePadded - chr.Length));
                 if (MiscellaneousROMsCount > 0 || (MiscellaneousROM != null && MiscellaneousROM.Count() > 0))
                 {
                     if (MiscellaneousROMsCount == 0)
                         throw new InvalidDataException("MiscellaneousROMsCount is zero while MiscellaneousROM is not empty");
                     if (MiscellaneousROM == null)
-                        throw new InvalidDataException("MiscellaneousROM is null while MiscellaneousROMsCount is not zero");
+                        throw new InvalidDataException("MiscellaneousROM is empty while MiscellaneousROMsCount is not zero");
                     data.AddRange(MiscellaneousROM);
                 }
             }
             return data.ToArray();
         }
 
-        private static (long Padding, int Exponent, int Multiplier) CalculateExponent(long value)
-        {
-            // calculating bits required to store number
-            int bitsize = GetBitSize(value);
-            // check if we need to add padding
-            long padding = 0;
-            if ((value & ((1 << (bitsize - 3)) - 1)) != 0)
-            {
-                // pad to round value
-                padding = (1L << bitsize) - (value & ((1L << bitsize) - 1));
-                bitsize = GetBitSize(value + padding);
-            }
-            int multiplier = 0;
-            switch (value >> (bitsize - 3))
-            {
-                case 4: // 100
-                    multiplier = 0;
-                    break;
-                case 5: // 101
-                    bitsize -= 2;
-                    multiplier = 2; // m*2+1 = 5
-                    break;
-                case 6: // 110
-                    bitsize -= 1;
-                    multiplier = 1; // m*2+1 = 3;
-                    break;
-                case 7: // 111
-                    bitsize -= 2;
-                    multiplier = 3; // m*2+1 = 7
-                    break;
-            }
-            return (padding, bitsize - 1, multiplier);
-        }
+        private static ulong ExponentToSize(byte exponent, byte multiplier)
+            => (1UL << exponent) * (ulong)(multiplier * 2 + 1);
 
-        private static int GetBitSize(long value)
+        private static (byte Exponent, byte Multiplier, ulong Padded) SizeToExponent(ulong value)
         {
-            int bitsize = 0;
+            if (value == 0) return (0, 0, 1);
+            if (value < 8)
+            {
+                var r = SizeToExponent(value << 3);
+                return ((byte)(r.Exponent - 3), r.Multiplier, r.Padded >> 3);
+            }
+
+            // Calculate bits required to store number
+            byte bitsize = 0;
             while (value >> bitsize > 0) bitsize++;
-            return bitsize;
+
+            // Split it into two parts
+            var major = value >> (bitsize - 3);
+            var minor = value & (ulong)~(0b111 << (bitsize - 3));
+
+            // Round up
+            if (minor != 0) major++;
+
+            byte e, m;
+            switch (major)
+            {
+                case 0b100:
+                    e = (byte)(bitsize - 1);
+                    m = 0; // 0*2+1=1
+                    break;
+                case 0b101:
+                    e = (byte)(bitsize - 3);
+                    m = 2; // 2*2+1=5
+                    break;
+                case 0b110:
+                    e = (byte)(bitsize - 2);
+                    m = 1; // 1*2+1=3
+                    break;
+                case 0b111:
+                    e = (byte)(bitsize - 3);
+                    m = 3; // 3*2+1=7
+                    break;
+                case 0b1000:
+                    e = (byte)bitsize;
+                    m = 0; // 0*2+1=1
+                    break;
+                default:
+                    throw new InvalidProgramException();
+            }
+
+            return (e, m, ExponentToSize(e, m));
         }
 
         /// <summary>
