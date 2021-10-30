@@ -645,7 +645,7 @@ namespace com.clusterrr.Famicom.Containers
                     chrSize = (uint)((((header[9] & 0xF0) << 4) | header[5]) * 0x2000);
                 else
                     chrSize = (uint)((1 << (header[5] >> 2)) * ((header[5] & 3) * 2 + 1));
-                Mapper = (ushort)((header[6] >> 4) | (header[7] & 0xF0) | ((header[8] & 0x0F) << 12));
+                Mapper = (ushort)((header[6] >> 4) | (header[7] & 0xF0) | ((header[8] & 0x0F) << 8));
                 Submapper = (byte)(header[8] >> 4);
                 Console = (ConsoleType)(header[7] & 3);
                 if ((header[10] & 0x0F) > 0)
@@ -729,20 +729,6 @@ namespace com.clusterrr.Famicom.Containers
             if (prg == null) prg = new byte[0];
             if (chr == null) chr = new byte[0];
             if (trainer == null) trainer = new byte[0];
-            /*
-            if ((prg.Length % 0x4000) != 0)
-            {
-                var padding = 0x4000 - (prg.Length % 4000);
-                if (padding > 0)
-                    Array.Resize(ref prg, prg.Length + padding);
-            }
-            if ((chr.Length % 0x2000) != 0)
-            {
-                var padding = 0x2000 - (chr.Length % 2000);
-                if (padding > 0)
-                    Array.Resize(ref chr, chr.Length + padding);
-            }
-            */
             ulong prgSizePadded, chrSizePadded;
             if (Version == iNesVersion.iNES)
             {
@@ -837,6 +823,7 @@ namespace com.clusterrr.Famicom.Containers
                 header[7] |= (byte)(Mapper & 0xF0);
                 // Mapper number D8..D11
                 header[8] |= (byte)((Mapper >> 8) & 0x0F);
+                // Submapper
                 header[8] |= (byte)(Submapper << 4);
                 // PRG RAM (volatile) shift count
                 var prgRamBitSize = PrgRamSize > 0 ? Math.Max(1, (int)Math.Ceiling(Math.Log(PrgRamSize, 2)) - 6) : 0;
