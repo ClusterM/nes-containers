@@ -49,7 +49,7 @@
         /// <summary>
         /// Calculate CRC32 checksum
         /// </summary>
-        /// <param name="data">Input date</param>
+        /// <param name="data">Input data</param>
         /// <returns>CRC32 checksum</returns>
         public static uint CalculateCRC32(byte[] data)
             => CalculateCRC32(data, 0, data.Length);
