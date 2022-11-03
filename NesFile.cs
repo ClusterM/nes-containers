@@ -631,8 +631,6 @@ namespace com.clusterrr.Famicom.Containers
                 chrSize = (uint)(header[5] * 0x2000);
                 Mapper = (byte)((header[6] >> 4) | (header[7] & 0xF0));
                 Console = (ConsoleType)(header[7] & 3);
-                //if (Console == ConsoleType.Extended)
-                //    throw new InvalidDataException($"Invalid system type value: {Console}, use NES 2.0 for it");
                 PrgRamSize = (uint)(header[8] == 0 ? 0x2000 : header[8] * 0x2000);
             }
             else if (Version == iNesVersion.NES20) // NES 2.0
@@ -709,6 +707,10 @@ namespace com.clusterrr.Famicom.Containers
         {
         }
 
+        /// <summary>
+        /// Create NesFile object from specified .nes file 
+        /// </summary>
+        /// <param name="fileName">Path to .nes file</param>
         public static NesFile FromBytes(byte[] data)
         {
             return new NesFile(data);
@@ -733,11 +735,11 @@ namespace com.clusterrr.Famicom.Containers
             if (Version == iNesVersion.iNES)
             {
                 if (Console == ConsoleType.Extended)
-                    throw new InvalidDataException("Extended console type supported by NES 2.0 only");
+                    throw new InvalidDataException("Extended console type is supported by NES 2.0 only");
                 if (Mapper > 255)
-                    throw new InvalidDataException("Mapper > 255 supported by NES 2.0 only");
+                    throw new InvalidDataException("Mapper number > 255 is supported by NES 2.0 only");
                 if (Submapper != 0)
-                    throw new InvalidDataException("Submapper supported by NES 2.0 only");
+                    throw new InvalidDataException("Submapper number is supported by NES 2.0 only");
                 var length16k = prg.Length / 0x4000;
                 if (length16k > 0xFF) throw new ArgumentOutOfRangeException("PRG size is too big for iNES, use NES 2.0 instead");
                 header[4] = (byte)Math.Ceiling((double)prg.Length / 0x4000);
