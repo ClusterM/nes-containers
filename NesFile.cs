@@ -62,7 +62,7 @@ namespace com.clusterrr.Famicom.Containers
         public bool Battery { get; set; } = false;
         private iNesVersion version = NesFile.iNesVersion.iNES;
         /// <summary>
-        /// Version of iNES format: 1 or 2
+        /// Version of .nes file format: iNES or NES 2.0
         /// </summary>
         public iNesVersion Version
         {
