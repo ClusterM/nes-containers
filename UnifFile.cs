@@ -17,12 +17,12 @@ namespace com.clusterrr.Famicom.Containers
         /// <summary>
         /// UNIF fields
         /// </summary>
-        private Dictionary<string, byte[]?> fields = new Dictionary<string, byte[]?>();
+        private Dictionary<string, byte[]> fields = new Dictionary<string, byte[]>();
 
         /// <summary>
         /// UNIF version
         /// </summary>
-        public int Version { get; set; } = 7;
+        public uint Version { get; set; } = 7;
 
         /// <summary>
         /// Get/set UNIF field
@@ -87,7 +87,7 @@ namespace com.clusterrr.Famicom.Containers
             Array.Copy(data, header, 32);
             if (header[0] != 'U' || header[1] != 'N' || header[2] != 'I' || header[3] != 'F')
                 throw new InvalidDataException("Invalid UNIF header");
-            Version = header[4] | (header[5] << 8) | (header[6] << 16) | (header[7] << 24);
+            Version = BitConverter.ToUInt32(header, 4);
             int pos = 32;
             while (pos < data.Length)
             {
@@ -131,13 +131,9 @@ namespace com.clusterrr.Famicom.Containers
         public byte[] ToBytes()
         {
             var data = new List<byte>();
-            var header = new byte[32];
-            Array.Copy(Encoding.UTF8.GetBytes("UNIF"), header, 4);
-            header[4] = (byte)(Version & 0xFF);
-            header[5] = (byte)((Version >> 8) & 0xFF);
-            header[6] = (byte)((Version >> 16) & 0xFF);
-            header[7] = (byte)((Version >> 24) & 0xFF);
-            data.AddRange(header);
+            data.AddRange(Encoding.UTF8.GetBytes("UNIF"));
+            data.AddRange(BitConverter.GetBytes(Version));
+            data.AddRange(Enumerable.Repeat<byte>(0, 24).ToArray());
 
             foreach (var kv in this)
             {
@@ -179,7 +175,7 @@ namespace com.clusterrr.Famicom.Containers
         /// <param name="maxLength">Maximum number of bytes to parse</param>
         /// <param name="offset">Start offset</param>
         /// <returns></returns>
-        private static string? UTF8NToString(byte[]? data, int maxLength = int.MaxValue, int offset = 0)
+        private static string? UTF8NToString(byte[] data, int maxLength = int.MaxValue, int offset = 0)
         {
             if (data == null || data.Length == 0) return null;
             int length = 0;
@@ -193,7 +189,7 @@ namespace com.clusterrr.Famicom.Containers
         /// </summary>
         public string? Mapper
         {
-            get => UTF8NToString(this["MAPR"]?.ToArray());
+            get => ContainsField("MAPR") ? UTF8NToString(this["MAPR"].ToArray()) : null;
             set { 
                 if (value == null) 
                     RemoveField("MAPR");
@@ -283,7 +279,7 @@ namespace com.clusterrr.Famicom.Containers
         /// </summary>
         public string? GameName
         {
-            get => UTF8NToString(this["NAME"]?.ToArray());
+            get => ContainsField("NAME") ? UTF8NToString(this["NAME"].ToArray()) : null;
             set
             {
                 if (value == null)
