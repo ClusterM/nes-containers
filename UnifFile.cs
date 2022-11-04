@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -10,7 +11,7 @@ namespace com.clusterrr.Famicom.Containers
     /// <summary>
     /// UNIF file container for NES/Famicom games
     /// </summary>
-    public class UnifFile
+    public class UnifFile : IEnumerable<KeyValuePair<string, IEnumerable<byte>>>
     {
         /// <summary>
         /// UNIF fields
@@ -43,6 +44,15 @@ namespace com.clusterrr.Famicom.Containers
                     fields[key] = value.ToArray();
             }
         }
+
+        /// <summary>
+        /// Returns enumerator that iterates throught fields
+        /// </summary>
+        /// <returns>IEnumerable object</returns>
+        public IEnumerator<KeyValuePair<string, IEnumerable<byte>>> GetEnumerator()
+            => fields.Select(kv => new KeyValuePair<string,IEnumerable<byte>>(kv.Key, Array.AsReadOnly(kv.Value))).GetEnumerator();
+
+        IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
 
         /// <summary>
         /// Constructor to create empty UnifFile object
