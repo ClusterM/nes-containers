@@ -9,7 +9,7 @@ namespace com.clusterrr.Famicom.Containers
     /// <summary>
     /// Disk info FDS block (block type 1)
     /// </summary>
-    [StructLayout(LayoutKind.Sequential, Size = 58, Pack = 1)]
+    [StructLayout(LayoutKind.Sequential, Size = 56, Pack = 1)]
     public class FdsBlockDiskInfo : IFdsBlock, IEquatable<FdsBlockDiskInfo>
     {
         /// <summary>
@@ -856,20 +856,6 @@ namespace com.clusterrr.Famicom.Containers
         /// </summary>
         public byte Price { get => price; set => price = value; }
 
-        [MarshalAs(UnmanagedType.U1)]
-        private bool crcOk = true;
-        /// <summary>
-        /// Set by dumper. True when checksum is ok
-        /// </summary>
-        public bool CrcOk { get => crcOk; set => crcOk = value; }
-
-        [MarshalAs(UnmanagedType.U1)]
-        private bool endOfHeadMeet = false;
-        /// <summary>
-        /// Set by dumper. True when "end of head" flag was meet during dumping
-        /// </summary>
-        public bool EndOfHeadMeet { get => endOfHeadMeet; set => endOfHeadMeet = value; }
-
         /// <summary>
         /// Length of the block
         /// </summary>
@@ -886,19 +872,7 @@ namespace com.clusterrr.Famicom.Containers
         {
             int rawsize = Marshal.SizeOf(typeof(FdsBlockDiskInfo));
             if (rawsize > data.Length - offset)
-            {
-                if (rawsize <= data.Length - offset + 2)
-                {
-                    var newRawData = new byte[rawsize];
-                    Array.Copy(data, offset, newRawData, 0, rawsize - 2);
-                    data = newRawData;
-                    offset = 0;
-                }
-                else
-                {
-                    throw new InvalidDataException("Not enough data to fill FdsDiskInfoBlock class. Array length from position: " + (data.Length - offset) + ", struct length: " + rawsize);
-                }
-            }
+                throw new InvalidDataException("Not enough data to fill FdsDiskInfoBlock class. Array length from position: " + (data.Length - offset) + ", struct length: " + rawsize);
             IntPtr buffer = Marshal.AllocHGlobal(rawsize);
             Marshal.Copy(data, offset, buffer, rawsize);
             FdsBlockDiskInfo retobj = (FdsBlockDiskInfo)Marshal.PtrToStructure(buffer, typeof(FdsBlockDiskInfo));
@@ -915,10 +889,10 @@ namespace com.clusterrr.Famicom.Containers
             int rawSize = Marshal.SizeOf(this);
             IntPtr buffer = Marshal.AllocHGlobal(rawSize);
             Marshal.StructureToPtr(this, buffer, false);
-            byte[] rawDatas = new byte[rawSize - 2];
-            Marshal.Copy(buffer, rawDatas, 0, rawSize - 2);
+            byte[] data = new byte[rawSize];
+            Marshal.Copy(buffer, data, 0, rawSize);
             Marshal.FreeHGlobal(buffer);
-            return rawDatas;
+            return data;
         }
 
         /// <summary>

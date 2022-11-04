@@ -68,7 +68,7 @@ namespace com.clusterrr.Famicom.Containers
         }
 
         /// <summary>
-        /// Construcor for empty file
+        /// Construcor for empty FdsDiskFile object
         /// </summary>
         public FdsDiskFile()
         {

@@ -9,7 +9,7 @@ namespace com.clusterrr.Famicom.Containers
     /// <summary>
     /// File header FDS block (block type 3)
     /// </summary>
-    [StructLayout(LayoutKind.Sequential, Size = 18, Pack = 1)]
+    [StructLayout(LayoutKind.Sequential, Size = 16, Pack = 1)]
     public class FdsBlockFileHeader : IFdsBlock, IEquatable<FdsBlockFileHeader>
     {
         /// <summary>
@@ -85,20 +85,6 @@ namespace com.clusterrr.Famicom.Containers
         /// </summary>
         public Kind FileKind { get => (Kind)fileKind; set => fileKind = (byte)value; }
 
-        [MarshalAs(UnmanagedType.U1)]
-        private bool crcOk = true;
-        /// <summary>
-        /// Set by dumper. True when checksum is ok
-        /// </summary>
-        public bool CrcOk { get => crcOk; set => crcOk = value; }
-
-        [MarshalAs(UnmanagedType.U1)]
-        private bool endOfHeadMeet = false;
-        /// <summary>
-        /// Set by dumper. True when "end of head" flag was meet during dumping
-        /// </summary>
-        public bool EndOfHeadMeet { get => endOfHeadMeet; set => endOfHeadMeet = value; }
-
         /// <summary>
         /// Length of the block
         /// </summary>
@@ -144,10 +130,10 @@ namespace com.clusterrr.Famicom.Containers
             int rawSize = Marshal.SizeOf(this);
             IntPtr buffer = Marshal.AllocHGlobal(rawSize);
             Marshal.StructureToPtr(this, buffer, false);
-            byte[] rawDatas = new byte[rawSize - 2];
-            Marshal.Copy(buffer, rawDatas, 0, rawSize - 2);
+            byte[] data = new byte[rawSize];
+            Marshal.Copy(buffer, data, 0, rawSize);
             Marshal.FreeHGlobal(buffer);
-            return rawDatas;
+            return data;
         }
 
         /// <summary>

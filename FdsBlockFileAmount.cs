@@ -26,16 +26,6 @@ namespace com.clusterrr.Famicom.Containers
         public byte FileAmount { get => fileAmount; set => fileAmount = value; }
 
         /// <summary>
-        /// Set by dumper. True when checksum is ok
-        /// </summary>
-        public bool CrcOk { get; set; } = true;
-
-        /// <summary>
-        /// Set by dumper. True when "end of head" flag was meet during dumping
-        /// </summary>
-        public bool EndOfHeadMeet { get; set; } = false;
-
-        /// <summary>
         /// Length of the block
         /// </summary>
         public uint Length { get => 2; }
