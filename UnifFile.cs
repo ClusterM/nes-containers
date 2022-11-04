@@ -63,7 +63,7 @@ namespace com.clusterrr.Famicom.Containers
         }
 
         /// <summary>
-        /// Create UnifFile object from raw data
+        /// Create UnifFile object from raw .unf file contents
         /// </summary>
         /// <param name="data">Raw UNIF data</param>
         public UnifFile(byte[] data)
@@ -90,7 +90,7 @@ namespace com.clusterrr.Famicom.Containers
         /// <summary>
         /// Create UnifFile object from specified file
         /// </summary>
-        /// <param name="fileName"></param>
+        /// <param name="fileName">Path to the .unf file</param>
         public UnifFile(string fileName) : this(File.ReadAllBytes(fileName))
         {
         }
@@ -99,17 +99,21 @@ namespace com.clusterrr.Famicom.Containers
         /// Create UnifFile object from raw .unf file contents
         /// </summary>
         /// <param name="data"></param>
-        /// <returns></returns>
-        public static UnifFile FromBytes(byte[] data)
-        {
-            return new UnifFile(data);
-        }
+        /// <returns>UnifFile object</returns>
+        public static UnifFile FromBytes(byte[] data) => new UnifFile(data);
 
         /// <summary>
-        /// Save UNIF file
+        /// Create UnifFile object from specified file
         /// </summary>
-        /// <param name="fileName">Target filename</param>
-        public void Save(string fileName)
+        /// <param name="filename">Path to the .unf file</param>
+        /// <returns>UnifFile object</returns>
+        public static UnifFile FromFile(string filename) => new UnifFile(filename);
+
+        /// <summary>
+        /// Returns .unf file contents
+        /// </summary>
+        /// <returns></returns>
+        public byte[] ToBytes()
         {
             var data = new List<byte>();
             var header = new byte[32];
@@ -130,9 +134,14 @@ namespace com.clusterrr.Famicom.Containers
                 data.Add((byte)((len >> 24) & 0xFF));
                 data.AddRange(fields[name]);
             }
-
-            File.WriteAllBytes(fileName, data.ToArray());
+            return data.ToArray();
         }
+
+        /// <summary>
+        /// Save as .unf file
+        /// </summary>
+        /// <param name="filename">Target filename</param>
+        public void Save(string filename) => File.WriteAllBytes(filename, ToBytes());
 
         /// <summary>
         /// Convert string to null-terminated UTF string

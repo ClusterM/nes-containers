@@ -582,7 +582,7 @@ namespace com.clusterrr.Famicom.Containers
         }
 
         /// <summary>
-        /// Create NesFile object from raw .nes file data
+        /// Create NesFile object from raw .nes file contents
         /// </summary>
         /// <param name="data">Raw .nes file data</param>
         public NesFile(byte[] data)
@@ -698,15 +698,20 @@ namespace com.clusterrr.Famicom.Containers
         /// Create NesFile object from raw .nes file contents
         /// </summary>
         /// <param name="data">Raw ROM data</param>
-        public static NesFile FromBytes(byte[] data)
-        {
-            return new NesFile(data);
-        }
+        /// <returns>NesFile object</returns>
+        public static NesFile FromBytes(byte[] data) => new NesFile(data);
 
         /// <summary>
-        /// Return iNES file contents (header + PRG + CHR)
+        /// Create NesFile object from the specified .nes file 
         /// </summary>
-        /// <returns>iNES file contents</returns>
+        /// <param name="filename">Path to the .nes file</param>
+        /// <returns>NesFile object</returns>
+        public static NesFile FromFile(string filename) => new NesFile(filename);
+
+        /// <summary>
+        /// Returns .nes file contents (header + PRG + CHR)
+        /// </summary>
+        /// <returns>.nes file contents</returns>
         public byte[] ToBytes()
         {
             var data = new List<byte>();
@@ -735,6 +740,16 @@ namespace com.clusterrr.Famicom.Containers
                 if (length8k > 0xFF) throw new ArgumentOutOfRangeException("CHR size is too big for iNES, use NES 2.0 instead");
                 header[5] = (byte)Math.Ceiling((double)chr.Length / 0x2000);
                 chrSizePadded = header[5] * 0x2000UL;
+                switch (Mirroring)
+                {
+                    case MirroringType.Unknown:
+                    case MirroringType.Horizontal:
+                    case MirroringType.Vertical:
+                    case MirroringType.FourScreenVram:
+                        break;
+                    default:
+                        throw new InvalidDataException($"{Mirroring} mirroring is not supported by iNES");
+                }
                 // Hard-wired nametable mirroring type
                 if (Mirroring == MirroringType.Vertical)
                     header[6] |= 1;
@@ -867,6 +882,12 @@ namespace com.clusterrr.Famicom.Containers
             return data.ToArray();
         }
 
+        /// <summary>
+        /// Save as .nes file
+        /// </summary>
+        /// <param name="filename">Target filename</param>
+        public void Save(string filename) => File.WriteAllBytes(filename, ToBytes());
+
         private static ulong ExponentToSize(byte exponent, byte multiplier)
             => (1UL << exponent) * (ulong)(multiplier * 2 + 1);
 
@@ -918,15 +939,6 @@ namespace com.clusterrr.Famicom.Containers
             }
 
             return (e, m, ExponentToSize(e, m));
-        }
-
-        /// <summary>
-        /// Save iNES file
-        /// </summary>
-        /// <param name="fileName">Target filename</param>
-        public void Save(string fileName)
-        {
-            File.WriteAllBytes(fileName, ToBytes());
         }
 
         /// <summary>

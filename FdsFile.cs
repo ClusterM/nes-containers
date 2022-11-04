@@ -59,14 +59,18 @@ namespace com.clusterrr.Famicom.Containers
         /// Create FdsFile object from raw .fds file contents
         /// </summary>
         /// <param name="data"></param>
-        /// <returns></returns>
-        public static FdsFile FromBytes(byte[] data)
-        {
-            return new FdsFile(data);
-        }
+        /// <returns>FdsFile object</returns>
+        public static FdsFile FromBytes(byte[] data) =>new FdsFile(data);
 
         /// <summary>
-        /// Return FDS file contents
+        /// Create FileFile object from the specified .nes file 
+        /// </summary>
+        /// <param name="filename">Path to the .fds file</param>
+        /// <returns>FdsFile object</returns>
+        public static FdsFile FromFile(string filename) => new FdsFile(filename);
+
+        /// <summary>
+        /// Returns .fds file contents
         /// </summary>
         /// <returns>FDS file contents</returns>
         public byte[] ToBytes(bool useHeader = false)
@@ -86,13 +90,10 @@ namespace com.clusterrr.Famicom.Containers
         }
 
         /// <summary>
-        /// Save to .fds file
+        /// Save as .fds file
         /// </summary>
         /// <param name="filename">Target filename</param>
         /// <param name="useHeader">Option to add .fds file header (ignored by most emulators)</param>
-        public void Save(string filename, bool useHeader = false)
-        {
-            File.WriteAllBytes(filename, ToBytes(useHeader));
-        }
+        public void Save(string filename, bool useHeader = false) => File.WriteAllBytes(filename, ToBytes(useHeader));
     }
 }

@@ -59,26 +59,26 @@ namespace com.clusterrr.Famicom.Containers.HeaderFixer
                     }
                     if (mirroring >= 0)
                     {
-                        if (mirroring == 8 && nes.Mirroring == NesFile.MirroringType.FourScreenVram)
+                        if (mirroring == 8 && nes.Mirroring == MirroringType.FourScreenVram)
                         {
                             // no four-screen
-                            nes.Mirroring = NesFile.MirroringType.Horizontal;
+                            nes.Mirroring = MirroringType.Horizontal;
                             fixType |= NesFixType.Mirroring;
                         }
-                        NesFile.MirroringType needMirroring = NesFile.MirroringType.Unknown;
+                        MirroringType needMirroring = MirroringType.Unknown;
                         switch (mirroring)
                         {
                             case 0:
-                                needMirroring = NesFile.MirroringType.Horizontal;
+                                needMirroring = MirroringType.Horizontal;
                                 break;
                             case 1:
-                                needMirroring = NesFile.MirroringType.Vertical;
+                                needMirroring = MirroringType.Vertical;
                                 break;
                             case 2:
-                                needMirroring = NesFile.MirroringType.FourScreenVram;
+                                needMirroring = MirroringType.FourScreenVram;
                                 break;
                         }
-                        if (needMirroring != NesFile.MirroringType.Unknown && needMirroring != nes.Mirroring)
+                        if (needMirroring != MirroringType.Unknown && needMirroring != nes.Mirroring)
                         {
                             nes.Mirroring = needMirroring;
                             fixType |= NesFixType.Mirroring;
