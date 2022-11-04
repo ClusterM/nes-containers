@@ -33,7 +33,6 @@ jobs:
       - name: Install Doxygen
         run: sudo apt-get install doxygen -y
       - name: Generate docs
-        working-directory: ./nes-containers
         run: doxygen Doxyfile
       - name: Setup Pages
         uses: actions/configure-pages@v2
