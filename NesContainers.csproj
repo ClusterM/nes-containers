@@ -4,7 +4,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>NesContainers</AssemblyName>
     <RootNamespace>com.clusterrr.Famicom.Containers</RootNamespace>
-    <LangVersion>11</LangVersion>
+    <LangVersion>10.0</LangVersion>
     <DebugType>embedded</DebugType>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <DocumentationFile>NesContainers.xml</DocumentationFile>

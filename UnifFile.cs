@@ -29,30 +29,43 @@ namespace com.clusterrr.Famicom.Containers
         /// </summary>
         /// <param name="key">UNIF data block key</param>
         /// <returns></returns>
-        public IEnumerable<byte>? this[string key]
+        public IEnumerable<byte> this[string key]
         {
             get
             {
                 if (key.Length != 4) throw new ArgumentException("UNIF data block key must be 4 characters long");
-                if (!fields.ContainsKey(key)) return null;
+                if (!fields.ContainsKey(key)) throw new IndexOutOfRangeException($"There is not {key} field");
                 return Array.AsReadOnly(fields[key]);
             }
             set
             {
                 if (key.Length != 4) throw new ArgumentException("UNIF data block key must be 4 characters long");
-                if (value == null && fields.ContainsKey(key))
-                    fields.Remove(key);
+                if (value == null)
+                    this.RemoveField(key);
                 else
                     fields[key] = (value ?? new byte[0]).ToArray();
             }
         }
 
         /// <summary>
+        /// Returns true if field exists in the UNIF
+        /// </summary>
+        /// <param name="fieldName">Field code</param>
+        /// <returns>True if field exists in the UNIF</returns>
+        public bool ContainsField(string fieldName) => fields.ContainsKey(fieldName);
+
+        /// <summary>
+        /// Remove field from the UNIF
+        /// </summary>
+        /// <param name="fieldName"></param>
+        public void RemoveField(string fieldName) => fields.Remove(fieldName);
+
+        /// <summary>
         /// Returns enumerator that iterates throught fields
         /// </summary>
         /// <returns>IEnumerable object</returns>
         public IEnumerator<KeyValuePair<string, IEnumerable<byte>>> GetEnumerator()
-            => fields.Select(kv => new KeyValuePair<string,IEnumerable<byte>>(kv.Key, Array.AsReadOnly(kv.Value))).GetEnumerator();
+            => fields.Select(kv => new KeyValuePair<string, IEnumerable<byte>>(kv.Key, Array.AsReadOnly(kv.Value))).GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
 
@@ -151,9 +164,8 @@ namespace com.clusterrr.Famicom.Containers
         /// </summary>
         /// <param name="text">Input text</param>
         /// <returns>Output byte[] array</returns>
-        private static byte[]? StringToUTF8N(string? text)
+        private static byte[] StringToUTF8N(string text)
         {
-            if (text == null) return null;
             var str = Encoding.UTF8.GetBytes(text);
             var result = new byte[str.Length + 1];
             Array.Copy(str, result, str.Length);
@@ -181,8 +193,13 @@ namespace com.clusterrr.Famicom.Containers
         /// </summary>
         public string? Mapper
         {
-            get => UTF8NToString(fields["MAPR"]);
-            set => fields["MAPR"] = value == null ? null : StringToUTF8N(value);
+            get => UTF8NToString(this["MAPR"]?.ToArray());
+            set { 
+                if (value == null) 
+                    RemoveField("MAPR");
+                else 
+                    this["MAPR"] = StringToUTF8N(value);
+            }
         }
 
         /// <summary>
@@ -194,7 +211,7 @@ namespace com.clusterrr.Famicom.Containers
             get => UTF8NToString(fields["DINF"], 100);
             set
             {
-                if (this["DINF"] == null)
+                if (!ContainsField("DINF"))
                     this["DINF"] = new byte[204];
                 var data = this["DINF"].ToArray();
                 for (int i = 0; i < 100; i++)
@@ -216,7 +233,7 @@ namespace com.clusterrr.Famicom.Containers
             get => UTF8NToString(fields["DINF"], 100, 104);
             set
             {
-                if (this["DINF"] == null)
+                if (!ContainsField("DINF"))
                     this["DINF"] = new byte[204];
                 var data = this["DINF"].ToArray();
                 for (int i = 104; i < 104 + 100; i++)
@@ -237,10 +254,8 @@ namespace com.clusterrr.Famicom.Containers
         {
             get
             {
-                var data = this["DINF"]?.ToArray();
-                if (data == null) return null;
-                if (!fields.ContainsKey("DINF"))
-                    return new DateTime();
+                if (!ContainsField("DINF")) return null;
+                var data = this["DINF"].ToArray();
                 return new DateTime(
                         year: data[102] | (data[103] << 8),
                         month: data[101],
@@ -249,7 +264,7 @@ namespace com.clusterrr.Famicom.Containers
             }
             set
             {
-                if (this["DINF"] == null)
+                if (!ContainsField("DINF"))
                     this["DINF"] = new byte[204];
                 if (value != null)
                 {
@@ -269,7 +284,13 @@ namespace com.clusterrr.Famicom.Containers
         public string? GameName
         {
             get => UTF8NToString(this["NAME"]?.ToArray());
-            set => this["NAME"] = StringToUTF8N(value);
+            set
+            {
+                if (value == null)
+                    RemoveField("NAME");
+                else
+                    this["NAME"] = StringToUTF8N(value!);
+            }
         }
 
         /// <summary>
@@ -279,9 +300,8 @@ namespace com.clusterrr.Famicom.Containers
         {
             get
             {
-                var data = this["TVCI"];
-                if (data != null && data.Any())
-                    return (NesFile.Timing)data.First();
+                if (ContainsField("TVCI") && this["TVCI"].Any())
+                    return (NesFile.Timing)this["TVCI"].First();
                 else
                     return NesFile.Timing.Ntsc;
             }
@@ -298,7 +318,7 @@ namespace com.clusterrr.Famicom.Containers
         {
             get
             {
-                if (this["CTRL"]?.Any() == true)
+                if (ContainsField("CTRL") && this["CTRL"].Any())
                     return (Controller)this["CTRL"].First();
                 else
                     return Controller.None;
@@ -316,7 +336,7 @@ namespace com.clusterrr.Famicom.Containers
         {
             get
             {
-                if (this["BATR"]?.Any() == true)
+                if (ContainsField("BATR") && this["BATR"].Any())
                     return this["BATR"].First() != 0;
                 else
                     return false;
@@ -334,8 +354,8 @@ namespace com.clusterrr.Famicom.Containers
         {
             get
             {
-                if (this["MIRR"]?.Any() == true)
-                    return (MirroringType)fields["MIRR"].First();
+                if (ContainsField("MIRR") && this["MIRR"].Any())
+                    return (MirroringType)this["MIRR"].First();
                 else
                     return MirroringType.Unknown;
             }
