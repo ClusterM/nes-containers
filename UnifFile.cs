@@ -22,7 +22,7 @@ namespace com.clusterrr.Famicom.Containers
         /// <summary>
         /// UNIF version
         /// </summary>
-        public uint Version { get; set; } = 7;
+        public uint Version { get; set; } = 5;
 
         /// <summary>
         /// Get/set UNIF field
@@ -93,7 +93,7 @@ namespace com.clusterrr.Famicom.Containers
             {
                 var type = Encoding.UTF8.GetString(data, pos, 4);
                 pos += 4;
-                int length = data[pos] | (data[pos + 1] << 8) | (data[pos + 2] << 16) | (data[pos + 3] << 24);
+                int length = BitConverter.ToInt32(data, pos);
                 pos += 4;
                 var fieldData = new byte[length];
                 Array.Copy(data, pos, fieldData, 0, length);
@@ -130,20 +130,24 @@ namespace com.clusterrr.Famicom.Containers
         /// <returns></returns>
         public byte[] ToBytes()
         {
+            // Some checks
+            if (ContainsField("CTRL") && Version < 7)
+                throw new InvalidDataException("CTRL (controllers) field requires UNIF version 7 or greater");
+            if (ContainsField("TVCI") && Version < 6)
+                throw new InvalidDataException("TVCI (controllers) field requires UNIF version 6 or greater");
+
             var data = new List<byte>();
+            // Header
             data.AddRange(Encoding.UTF8.GetBytes("UNIF"));
             data.AddRange(BitConverter.GetBytes(Version));
             data.AddRange(Enumerable.Repeat<byte>(0, 24).ToArray());
-
+            // Fields
             foreach (var kv in this)
             {
                 data.AddRange(Encoding.UTF8.GetBytes(kv.Key));
                 var v = kv.Value.ToArray();
                 int len = v.Length;
-                data.Add((byte)(len & 0xFF));
-                data.Add((byte)((len >> 8) & 0xFF));
-                data.Add((byte)((len >> 16) & 0xFF));
-                data.Add((byte)((len >> 24) & 0xFF));
+                data.AddRange(BitConverter.GetBytes(len));
                 data.AddRange(v);
             }
             return data.ToArray();
@@ -175,11 +179,10 @@ namespace com.clusterrr.Famicom.Containers
         /// <param name="maxLength">Maximum number of bytes to parse</param>
         /// <param name="offset">Start offset</param>
         /// <returns></returns>
-        private static string? UTF8NToString(byte[] data, int maxLength = int.MaxValue, int offset = 0)
+        private static string UTF8NToString(byte[] data, int maxLength = int.MaxValue, int offset = 0)
         {
-            if (data == null || data.Length == 0) return null;
             int length = 0;
-            while ((data[length + offset] != 0) && (length + offset < data.Length) && (length + offset < maxLength))
+            while ((data[length + offset] != 0) && (length + offset < data.Length) && (length  < maxLength))
                 length++;
             return Encoding.UTF8.GetString(data, offset, length);
         }
@@ -204,7 +207,7 @@ namespace com.clusterrr.Famicom.Containers
         /// 
         public string? DumperName
         {
-            get => UTF8NToString(fields["DINF"], 100);
+            get => ContainsField("DINF") ? UTF8NToString(fields["DINF"], 100) : null;
             set
             {
                 if (!ContainsField("DINF"))
@@ -226,7 +229,7 @@ namespace com.clusterrr.Famicom.Containers
         /// </summary>
         public string? DumpingSoftware
         {
-            get => UTF8NToString(fields["DINF"], 100, 104);
+            get => ContainsField("DINF") ? UTF8NToString(this["DINF"].ToArray(), 100, 104) : null;
             set
             {
                 if (!ContainsField("DINF"))
@@ -237,7 +240,7 @@ namespace com.clusterrr.Famicom.Containers
                 if (value != null)
                 {
                     var name = StringToUTF8N(value);
-                    Array.Copy(name, 0, fields["DINF"], 104, Math.Min(100, name!.Length));
+                    Array.Copy(name, 0, data, 104, Math.Min(100, name!.Length));
                 }
                 this["DINF"] = data;
             }
@@ -260,10 +263,10 @@ namespace com.clusterrr.Famicom.Containers
             }
             set
             {
-                if (!ContainsField("DINF"))
-                    this["DINF"] = new byte[204];
                 if (value != null)
                 {
+                    if (!ContainsField("DINF"))
+                        this["DINF"] = new byte[204];
                     var data = this["DINF"].ToArray();
                     data[100] = (byte)value.Value.Day;
                     data[101] = (byte)value.Value.Month;
@@ -357,7 +360,10 @@ namespace com.clusterrr.Famicom.Containers
             }
             set
             {
-                fields["MIRR"] = new byte[] { (byte)value };
+                if (value != MirroringType.Unknown)
+                    this["MIRR"] = new byte[] { (byte)value };
+                else
+                    this.RemoveField("MIRR");
             }
         }
 
@@ -370,23 +376,13 @@ namespace com.clusterrr.Famicom.Containers
             {
                 var num = kv.Key[3];
                 var crc32 = Crc32Calculator.CalculateCRC32(kv.Value.ToArray());
-                fields[$"PCK{num}"] = new byte[] {
-                    (byte)(crc32 & 0xFF),
-                    (byte)((crc32 >> 8) & 0xFF),
-                    (byte)((crc32 >> 16) & 0xFF),
-                    (byte)((crc32 >> 24) & 0xFF)
-                };
+                this[$"PCK{num}"] = BitConverter.GetBytes(crc32);
             }
             foreach (var kv in this.Where(kv => kv.Key.StartsWith("CHR")))
             {
                 var num = kv.Key[3];
                 var crc32 = Crc32Calculator.CalculateCRC32(kv.Value.ToArray());
-                fields[$"CCK{num}"] = new byte[] {
-                    (byte)(crc32 & 0xFF),
-                    (byte)((crc32 >> 8) & 0xFF),
-                    (byte)((crc32 >> 16) & 0xFF),
-                    (byte)((crc32 >> 24) & 0xFF)
-                };
+                this[$"CCK{num}"] = BitConverter.GetBytes(crc32);
             }
         }
 
