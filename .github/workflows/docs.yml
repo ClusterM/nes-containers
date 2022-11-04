@@ -33,7 +33,7 @@ jobs:
       - name: Install Doxygen
         run: sudo apt-get install doxygen -y
       - name: Generate docs
-        working-directory: nes-containers
+        working-directory: ./nes-containers
         run: doxygen Doxyfile
       - name: Setup Pages
         uses: actions/configure-pages@v2
@@ -41,7 +41,7 @@ jobs:
         uses: actions/upload-pages-artifact@v1
         with:
           # Upload entire repository
-          path: 'nes-containers/docs/html'
+          path: './nes-containers/docs/html'
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v1
