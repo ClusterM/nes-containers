@@ -41,7 +41,7 @@ namespace com.clusterrr.Famicom.Containers
                 if (value == null && fields.ContainsKey(key))
                     fields.Remove(key);
                 else
-                    fields[key] = value.ToArray();
+                    fields[key] = (value ?? new byte[0]).ToArray();
             }
         }
 
