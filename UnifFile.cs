@@ -21,6 +21,9 @@ namespace com.clusterrr.Famicom.Containers
         /// </summary>
         public int Version = 7;
 
+        /// <summary>
+        /// Constructor to create empty UnifFile object
+        /// </summary>
         public UnifFile()
         {
             DumpDate = DateTime.Now;
@@ -59,6 +62,11 @@ namespace com.clusterrr.Famicom.Containers
         {
         }
 
+        /// <summary>
+        /// Create UnifFile object from raw .unf file contents
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
         public static UnifFile FromBytes(byte[] data)
         {
             return new UnifFile(data);
@@ -68,7 +76,6 @@ namespace com.clusterrr.Famicom.Containers
         /// Save UNIF file
         /// </summary>
         /// <param name="fileName">Target filename</param>
-        /// <param name="dumperName"></param>
         public void Save(string fileName)
         {
             var data = new List<byte>();
@@ -112,6 +119,7 @@ namespace com.clusterrr.Famicom.Containers
         /// </summary>
         /// <param name="data">Input array of bytes</param>
         /// <param name="maxLength">Maximum number of bytes to parse</param>
+        /// <param name="offset">Start offset</param>
         /// <returns></returns>
         private static string UTF8NToString(byte[] data, int maxLength = int.MaxValue, int offset = 0)
         {
@@ -339,15 +347,39 @@ namespace com.clusterrr.Famicom.Containers
                                   Fields.Where(k => k.Key.StartsWith("CHR")).OrderBy(k => k.Key).SelectMany(i => i.Value)).ToArray()
             );
 
+        /// <summary>
+        /// Default game controller(s)
+        /// </summary>
         [Flags]
         public enum Controller
         {
+            /// <summary>
+            /// None
+            /// </summary>
             None = 0,
+            /// <summary>
+            /// Standatd Controller
+            /// </summary>
             StandardController = 1,
+            /// <summary>
+            /// Zapper
+            /// </summary>
             Zapper = 2,
+            /// <summary>
+            /// R.O.B.
+            /// </summary>
             ROB = 4,
+            /// <summary>
+            /// Arkanoid Controller
+            /// </summary>
             ArkanoidController = 8,
+            /// <summary>
+            /// Power Pad
+            /// </summary>
             PowerPad = 16,
+            /// <summary>
+            /// Four Score
+            /// </summary>
             FourScore = 32,
         }
     }

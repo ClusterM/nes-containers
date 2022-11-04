@@ -4,6 +4,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>NesContainers</AssemblyName>
     <RootNamespace>com.clusterrr.Famicom.Containers</RootNamespace>
+    <LangVersion>7.3</LangVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -17,12 +18,4 @@
     <DocumentationFile>NesContainers.xml</DocumentationFile>
     <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
-
-  <ItemGroup>
-    <None Update="README.md">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </None>
-  </ItemGroup>
-
 </Project>

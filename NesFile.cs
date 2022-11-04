@@ -186,7 +186,13 @@ namespace com.clusterrr.Famicom.Containers
         /// </summary>
         public enum iNesVersion
         {
+            /// <summary>
+            /// Classic iNES format
+            /// </summary>
             iNES = 1,
+            /// <summary>
+            /// NES 2.0 format
+            /// </summary>
             NES20 = 2
         }
         /// <summary>
@@ -385,7 +391,7 @@ namespace com.clusterrr.Famicom.Containers
         }
 
         /// <summary>
-        /// Type of expansion device connected to console
+        /// Type of expansion device connected to console, source: https://www.nesdev.org/wiki/NES_2.0#Default_Expansion_Device
         /// </summary>
         public enum ExpansionDevice
         {
@@ -580,7 +586,27 @@ namespace com.clusterrr.Famicom.Containers
             /// <summary>
             /// City Patrolman Lightgun
             /// </summary>
-            CityPatrolmanLightgun = 0x2F
+            CityPatrolmanLightgun = 0x2F,
+            /// <summary>
+            /// Sharp C1 Cassette Interface
+            /// </summary>
+            SharpC1CassetteInterface = 0x30,
+            /// <summary>
+            /// Standard Controller with swapped Left-Right/Up-Down/B-A
+            /// </summary>
+            StandardControllerWithSwapped = 0x31,
+            /// <summary>
+            /// Excalibor Sudoku Pad
+            /// </summary>
+            ExcaliborSudokuPad = 0x32,
+            /// <summary>
+            /// ABL Pinball
+            /// </summary>
+            AblPinball = 0x33,
+            /// <summary>
+            /// Golden Nugget Casino extra buttons
+            /// </summary>
+            GoldenNuggetCasinoExtraButtons = 0x34,
         }
 
         /// <summary>
@@ -699,27 +725,27 @@ namespace com.clusterrr.Famicom.Containers
         }
 
         /// <summary>
-        /// Create NesFile object from specified .nes file 
+        /// Create NesFile object from the specified .nes file 
         /// </summary>
-        /// <param name="fileName">Path to .nes file</param>
+        /// <param name="fileName">Path to the .nes file</param>
         public NesFile(string fileName)
             : this(File.ReadAllBytes(fileName))
         {
         }
 
         /// <summary>
-        /// Create NesFile object from specified .nes file 
+        /// Create NesFile object from raw .nes file contents
         /// </summary>
-        /// <param name="fileName">Path to .nes file</param>
+        /// <param name="data">Raw ROM data</param>
         public static NesFile FromBytes(byte[] data)
         {
             return new NesFile(data);
         }
 
         /// <summary>
-        /// Returns iNES data (header + PRG + CHR)
+        /// Return iNES file contents (header + PRG + CHR)
         /// </summary>
-        /// <returns>iNES data</returns>
+        /// <returns>iNES file contents</returns>
         public byte[] ToBytes()
         {
             var data = new List<byte>();

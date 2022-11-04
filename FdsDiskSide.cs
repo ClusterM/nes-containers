@@ -4,6 +4,9 @@ using System.Linq;
 
 namespace com.clusterrr.Famicom.Containers
 {
+    /// <summary>
+    /// Single FDS disk side: disk info block, file amount block and file blocks
+    /// </summary>
     public class FdsDiskSide
     {
         readonly FdsBlockDiskInfo diskInfoBlock;
@@ -11,11 +14,14 @@ namespace com.clusterrr.Famicom.Containers
         /// Disk info block
         /// </summary>
         public FdsBlockDiskInfo DiskInfoBlock { get => diskInfoBlock; }
+        /// <summary>
+        /// Literal ASCII string: *NINTENDO-HVC*
+        /// </summary>
         public string DiskVerification { get => diskInfoBlock.DiskVerification; }
         /// <summary>
         /// Manufacturer code. $00 = Unlicensed, $01 = Nintendo
         /// </summary>
-        public FdsBlockDiskInfo.Manufacturer ManufacturerCode { get => diskInfoBlock.ManufacturerCode; set => diskInfoBlock.ManufacturerCode = value; }
+        public FdsBlockDiskInfo.Company ManufacturerCode { get => diskInfoBlock.LicenseeCode; set => diskInfoBlock.LicenseeCode = value; }
         /// <summary>
         /// 3-letter ASCII code per game (e.g. ZEL for The Legend of Zelda)
         /// </summary>
@@ -89,6 +95,9 @@ namespace com.clusterrr.Famicom.Containers
         /// </summary>
         public IList<FdsDiskFile> Files { get => files; }
 
+        /// <summary>
+        /// Constructor to create empty FdsDiskSide object
+        /// </summary>
         public FdsDiskSide()
         {
             diskInfoBlock = new FdsBlockDiskInfo();
@@ -96,15 +105,23 @@ namespace com.clusterrr.Famicom.Containers
             files = new List<FdsDiskFile>();
         }
 
+        /// <summary>
+        /// Constructor to create FdsDiskSide object from blocks and files
+        /// </summary>
+        /// <param name="diskInfoBlock">Disk info block</param>
+        /// <param name="fileAmountBlock">File amount block</param>
+        /// <param name="files">Files</param>
         public FdsDiskSide(FdsBlockDiskInfo diskInfoBlock, FdsBlockFileAmount fileAmountBlock, IEnumerable<FdsDiskFile> files)
         {
             this.diskInfoBlock = diskInfoBlock;
             this.fileAmountBlock = fileAmountBlock;
             this.files = files.ToList();
-            //if (this.fileAmountBlock.FileAmount > this.files.Count)
-            //    throw new ArgumentOutOfRangeException("visibleFileAmount", "visibleFileAmount must be less or equal number of files");
         }
 
+        /// <summary>
+        /// Constructor to create FdsDiskSide object from blocks
+        /// </summary>
+        /// <param name="blocks"></param>
         public FdsDiskSide(IEnumerable<IFdsBlock> blocks)
         {
             this.diskInfoBlock = (FdsBlockDiskInfo)blocks.First();
@@ -117,6 +134,10 @@ namespace com.clusterrr.Famicom.Containers
             }
         }
 
+        /// <summary>
+        /// Constructor to create FdsDiskSide object from raw data
+        /// </summary>
+        /// <param name="data"></param>
         public FdsDiskSide(byte[] data) : this()
         {
             int pos = 0;
@@ -146,12 +167,19 @@ namespace com.clusterrr.Famicom.Containers
             }
         }
 
+        /// <summary>
+        /// Change file's "file number" fields orderly
+        /// </summary>
         public void FixFileNumbers()
         {
             for (var i = 0; i < files.Count; i++)
                 files[i].FileNumber = (byte)i;
         }
 
+        /// <summary>
+        /// Get FDS blocks
+        /// </summary>
+        /// <returns></returns>
         public IEnumerable<IFdsBlock> GetBlocks()
         {
             var blocks = new List<IFdsBlock>
@@ -163,17 +191,31 @@ namespace com.clusterrr.Famicom.Containers
             return blocks;
         }
 
+        /// <summary>
+        /// Create FdsDiskSide object from raw data
+        /// </summary>
+        /// <param name="data">Data</param>
+        /// <returns>FdsDiskSide object</returns>
+
         public static FdsDiskSide FromBytes(byte[] data)
         {
             return new FdsDiskSide(data);
         }
 
+        /// <summary>
+        /// Return raw data
+        /// </summary>
+        /// <returns></returns>
         public byte[] ToBytes()
         {
             var data = Enumerable.Concat(Enumerable.Concat(diskInfoBlock.ToBytes(), fileAmountBlock.ToBytes()), files.SelectMany(f => f.ToBytes())).ToArray();
             return Enumerable.Concat(data, new byte[65500 - data.Count()]).ToArray();
         }
 
+        /// <summary>
+        /// String representation
+        /// </summary>
+        /// <returns>Game name, disk number, side number as string</returns>
         public override string ToString() => $"{GameName} - disk {DiskNumber + 1}, side {DiskSide}";
     }
 }

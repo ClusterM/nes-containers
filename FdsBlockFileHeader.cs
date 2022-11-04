@@ -1,22 +1,41 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 
 namespace com.clusterrr.Famicom.Containers
 {
+    /// <summary>
+    /// File header FDS block (block type 3)
+    /// </summary>
     [StructLayout(LayoutKind.Sequential, Size = 18, Pack = 1)]
     public class FdsBlockFileHeader : IFdsBlock, IEquatable<FdsBlockFileHeader>
     {
+        /// <summary>
+        /// Kind of the file
+        /// </summary>
         public enum Kind
         {
+            /// <summary>
+            /// PRG data
+            /// </summary>
             Program = 0,
+            /// <summary>
+            /// CHR data
+            /// </summary>
             Character = 1,
+            /// <summary>
+            /// Nametable data
+            /// </summary>
             NameTable = 2
         }
 
         [MarshalAs(UnmanagedType.U1)]
         private readonly byte blockType = 3;
+        /// <summary>
+        /// Valid block type ID
+        /// </summary>
         public byte ValidTypeID { get => 3; }
         /// <summary>
         /// True if block type ID is valid
@@ -25,28 +44,45 @@ namespace com.clusterrr.Famicom.Containers
 
         [MarshalAs(UnmanagedType.U1)]
         private byte fileNumber;
+        /// <summary>
+        /// File number
+        /// </summary>
         public byte FileNumber { get => fileNumber; set => fileNumber = value; }
 
         [MarshalAs(UnmanagedType.U1)]
-        // ID specified at disk-read function call
         private byte fileIndicateCode;
+        /// <summary>
+        /// File indicate code (ID specified at disk-read function call)
+        /// </summary>
         public byte FileIndicateCode { get => fileIndicateCode; set => fileIndicateCode = value; }
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 8)]
         private byte[] fileName;
+        /// <summary>
+        /// Filename
+        /// </summary>
         public string FileName { get => Encoding.ASCII.GetString(fileName).Trim(new char[] { '\0', ' ' }); set => fileName = Encoding.ASCII.GetBytes(value.PadRight(8)).Take(8).ToArray(); }
 
         [MarshalAs(UnmanagedType.U2)]
         // the destination address when loading
         private ushort fileAddress;
+        /// <summary>
+        /// File address - the destination address when loading
+        /// </summary>
         public ushort FileAddress { get => fileAddress; set => fileAddress = value; }
 
         [MarshalAs(UnmanagedType.U2)]
         private ushort fileSize;
+        /// <summary>
+        /// File size
+        /// </summary>
         public ushort FileSize { get => fileSize; set => fileSize = value; }
 
         [MarshalAs(UnmanagedType.U1)]
         private byte fileKind;
+        /// <summary>
+        /// Kind of the file: program, character or nametable
+        /// </summary>
         public Kind FileKind { get => (Kind)fileKind; set => fileKind = (byte)value; }
 
         [MarshalAs(UnmanagedType.U1)]
@@ -63,32 +99,46 @@ namespace com.clusterrr.Famicom.Containers
         /// </summary>
         public bool EndOfHeadMeet { get => endOfHeadMeet; set => endOfHeadMeet = value; }
 
-        public uint Length => 16;
+        /// <summary>
+        /// Length of the block
+        /// </summary>
+        public uint Length { get => 16; }
 
-        public static FdsBlockFileHeader FromBytes(byte[] rawData, int position = 0)
+        /// <summary>
+        /// Create FdsBlockFileHeader object from raw data
+        /// </summary>
+        /// <param name="data">Data</param>
+        /// <param name="offset">Offset</param>
+        /// <returns></returns>
+        /// <exception cref="InvalidDataException"></exception>
+        public static FdsBlockFileHeader FromBytes(byte[] data, int offset = 0)
         {
             int rawsize = Marshal.SizeOf(typeof(FdsBlockFileHeader));
-            if (rawsize > rawData.Length - position)
+            if (rawsize > data.Length - offset)
             {
-                if (rawsize <= rawData.Length - position + 2)
+                if (rawsize <= data.Length - offset + 2)
                 {
                     var newRawData = new byte[rawsize];
-                    Array.Copy(rawData, position, newRawData, 0, rawsize - 2);
-                    rawData = newRawData;
-                    position = 0;
+                    Array.Copy(data, offset, newRawData, 0, rawsize - 2);
+                    data = newRawData;
+                    offset = 0;
                 }
                 else
                 {
-                    throw new ArgumentException("Not enough data to fill FdsFileHeaderBlock class. Array length from position: " + (rawData.Length - position) + ", Struct length: " + rawsize);
+                    throw new InvalidDataException("Not enough data to fill FdsFileHeaderBlock class. Array length from position: " + (data.Length - offset) + ", struct length: " + rawsize);
                 }
             }
             IntPtr buffer = Marshal.AllocHGlobal(rawsize);
-            Marshal.Copy(rawData, position, buffer, rawsize);
+            Marshal.Copy(data, offset, buffer, rawsize);
             FdsBlockFileHeader retobj = (FdsBlockFileHeader)Marshal.PtrToStructure(buffer, typeof(FdsBlockFileHeader));
             Marshal.FreeHGlobal(buffer);
             return retobj;
         }
 
+        /// <summary>
+        /// Return raw data
+        /// </summary>
+        /// <returns>Data</returns>
         public byte[] ToBytes()
         {
             int rawSize = Marshal.SizeOf(this);
@@ -100,8 +150,17 @@ namespace com.clusterrr.Famicom.Containers
             return rawDatas;
         }
 
+        /// <summary>
+        /// String representation
+        /// </summary>
+        /// <returns>File name and file kind as string</returns>
         public override string ToString() => $"{FileName} ({FileKind})";
 
+        /// <summary>
+        /// Equality comparer
+        /// </summary>
+        /// <param name="other">Other FdsBlockFileHeader object</param>
+        /// <returns>True if objects are equal</returns>
         public bool Equals(FdsBlockFileHeader other)
         {
             return Enumerable.SequenceEqual(this.ToBytes(), other.ToBytes());

@@ -1,76 +1,637 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 
 namespace com.clusterrr.Famicom.Containers
 {
+    /// <summary>
+    /// Disk info FDS block (block type 1)
+    /// </summary>
     [StructLayout(LayoutKind.Sequential, Size = 58, Pack = 1)]
     public class FdsBlockDiskInfo : IFdsBlock, IEquatable<FdsBlockDiskInfo>
     {
+        /// <summary>
+        /// Disk side
+        /// </summary>
         public enum DiskSides
         {
+            /// <summary>
+            /// Side A
+            /// </summary>
             A = 0,
+            /// <summary>
+            /// Side B
+            /// </summary>
             B = 1,
         }
+        /// <summary>
+        /// Disk type
+        /// </summary>
         public enum DiskTypes
         {
-            FMS = 0, // Normal
-            FSC = 1, // With shutter
+            /// <summary>
+            /// Normal
+            /// </summary>
+            FMS = 0,
+            /// <summary>
+            /// With shutter
+            /// </summary>
+            FSC = 1,
         }
+        /// <summary>
+        /// Country
+        /// </summary>
         public enum Country
         {
+            /// <summary>
+            /// Japan
+            /// </summary>
             Japan = 0x49,
         }
 
-        public enum Manufacturer
+        /// <summary>
+        /// Company name, source: https://www.nesdev.org/wiki/Licensee_codes
+        /// </summary>
+        public enum Company
         {
-            Unlicensed = 0x00,
+            /// <summary>
+            /// Nintendo
+            /// </summary>
             Nintendo = 0x01,
+            /// <summary>
+            /// Nomura Securities? (unverified)
+            /// </summary>
+            NomuraSecurities = 0x07,
+            /// <summary>
+            /// Capcom
+            /// </summary>
             Capcom = 0x08,
+            /// <summary>
+            /// Hot-B
+            /// </summary>
+            HotB = 0x09,
+            /// <summary>
+            /// Jaleco
+            /// </summary>
             Jaleco = 0x0A,
-            Hudson_Soft = 0x18,
+            /// <summary>
+            /// Coconuts Japan Entertainment
+            /// </summary>
+            CoconutsJapanEntertainment = 0x0B,
+            /// <summary>
+            /// Electronic Arts (Japan)
+            /// </summary>
+            ElectronicArtsJap = 0x13,
+            /// <summary>
+            /// Hudson Soft
+            /// </summary>
+            HudsonSoft = 0x18,
+            /// <summary>
+            /// Tokai Engineering
+            /// </summary>
+            TokaiEngineering = 0x21,
+            /// <summary>
+            /// Kemco (Japan)
+            /// </summary>
+            KemcoJap = 0x28,
+            /// <summary>
+            /// SETA (Japan)
+            /// </summary>
+            SetaJap = 0x29,
+            /// <summary>
+            /// Tamtex
+            /// </summary>
+            Tamtex = 0x2B,
+            /// <summary>
+            /// Hector Playing Interface (Hect)
+            /// </summary>
+            HectorPlayingInterface = 0x35,
+            /// <summary>
+            /// Loriciel
+            /// </summary>
+            Loriciel = 0x3D,
+            /// <summary>
+            /// Gremlin
+            /// </summary>
+            Gremlin = 0x3E,
+            /// <summary>
+            /// Seika Corporation
+            /// </summary>
+            SeikaCorporation = 0x40,
+            /// <summary>
+            /// Ubisoft
+            /// </summary>
+            Ubisoft = 0x41,
+            /// <summary>
+            /// System 3
+            /// </summary>
+            System3 = 0x46,
+            /// <summary>
+            /// Irem
+            /// </summary>
             Irem = 0x49,
+            /// <summary>
+            /// Gakken
+            /// </summary>
             Gakken = 0x4A,
-            BulletProof_Software = 0x8B,
-            PackInVideo = 0x99,
+            /// <summary>
+            /// Absolute
+            /// </summary>
+            Absolute = 0x50,
+            /// <summary>
+            /// Acclaim (NA)
+            /// </summary>
+            AcclaimNA = 0x51,
+            /// <summary>
+            /// Activision
+            /// </summary>
+            Activision = 0x52,
+            /// <summary>
+            /// American Sammy
+            /// </summary>
+            AmericanSammy = 0x53,
+            /// <summary>
+            /// GameTek
+            /// </summary>
+            Gametek = 0x54,
+            /// <summary>
+            /// Hi Tech Expressions
+            /// </summary>
+            HITechExpressions = 0x55,
+            /// <summary>
+            /// LJN
+            /// </summary>
+            Ljn = 0x56,
+            /// <summary>
+            /// Matchbox Toys
+            /// </summary>
+            MatchboxToys = 0x57,
+            /// <summary>
+            /// Mattel
+            /// </summary>
+            Mattel = 0x58,
+            /// <summary>
+            /// Milton Bradley
+            /// </summary>
+            MiltonBradley = 0x59,
+            /// <summary>
+            /// Mindscape / Software Toolworks
+            /// </summary>
+            MindscapeSoftwareToolworks = 0x5A,
+            /// <summary>
+            /// SETA (NA)
+            /// </summary>
+            SetaNA = 0x5B,
+            /// <summary>
+            /// Taxan
+            /// </summary>
+            Taxan = 0x5C,
+            /// <summary>
+            /// Tradewest
+            /// </summary>
+            Tradewest = 0x5D,
+            /// <summary>
+            /// INTV Corporation
+            /// </summary>
+            IntvCorporation = 0x5E,
+            /// <summary>
+            /// Titus
+            /// </summary>
+            Titus = 0x60,
+            /// <summary>
+            /// Virgin Games
+            /// </summary>
+            VirginGames = 0x61,
+            /// <summary>
+            /// Ocean
+            /// </summary>
+            Ocean = 0x67,
+            /// <summary>
+            /// Electronic Arts (NA)
+            /// </summary>
+            ElectronicArtsNA = 0x69,
+            /// <summary>
+            /// Beam Software
+            /// </summary>
+            BeamSoftware = 0x6B,
+            /// <summary>
+            /// Elite Systems
+            /// </summary>
+            EliteSystems = 0x6E,
+            /// <summary>
+            /// Electro Brain
+            /// </summary>
+            ElectroBrain = 0x6F,
+            /// <summary>
+            /// Infogrames
+            /// </summary>
+            Infogrames = 0x70,
+            /// <summary>
+            /// JVC
+            /// </summary>
+            Jvc = 0x72,
+            /// <summary>
+            /// Parker Brothers
+            /// </summary>
+            ParkerBrothers = 0x73,
+            /// <summary>
+            /// The Sales Curve / SCi
+            /// </summary>
+            TheSalesCurveSci = 0x75,
+            /// <summary>
+            /// THQ
+            /// </summary>
+            Thq = 0x78,
+            /// <summary>
+            /// Accolade
+            /// </summary>
+            Accolade = 0x79,
+            /// <summary>
+            /// Triffix
+            /// </summary>
+            Triffix = 0x7A,
+            /// <summary>
+            /// Microprose Software
+            /// </summary>
+            MicroproseSoftware = 0x7C,
+            /// <summary>
+            /// Kemco (NA)
+            /// </summary>
+            KemcoNA = 0x7F,
+            /// <summary>
+            /// Misawa Entertainment
+            /// </summary>
+            MisawaEntertainment = 0x80,
+            /// <summary>
+            /// G. Amusements Co.
+            /// </summary>
+            GAmusementsCO = 0x83,
+            /// <summary>
+            /// G.O 1
+            /// </summary>
+            GO1 = 0x85,
+            /// <summary>
+            /// Tokuma Shoten Intermedia
+            /// </summary>
+            TokumaShotenIntermedia = 0x86,
+            /// <summary>
+            /// Nihon Maicom Kaihatsu (NMK)
+            /// </summary>
+            NihonMaicomKaihatsu = 0x89,
+            /// <summary>
+            /// BulletProof Software (BPS)
+            /// </summary>
+            BulletproofSoftware = 0x8B,
+            /// <summary>
+            /// VIC Tokai
+            /// </summary>
+            VicTokai = 0x8C,
+            /// <summary>
+            /// Sanritsu
+            /// </summary>
+            Sanritsu = 0x8D,
+            /// <summary>
+            /// Character Soft
+            /// </summary>
+            CharacterSoft = 0x8E,
+            /// <summary>
+            /// I'Max
+            /// </summary>
+            IMax = 0x8F,
+            /// <summary>
+            /// Toaplan
+            /// </summary>
+            Toaplan = 0x94,
+            /// <summary>
+            /// Varie
+            /// </summary>
+            Varie = 0x95,
+            /// <summary>
+            /// Yonezawa Party Room 21 / S'Pal
+            /// </summary>
+            YonezawaPartyRoom21SPal = 0x96,
+            /// <summary>
+            /// Pack-In-Video
+            /// </summary>
+            PackINVideo = 0x99,
+            /// <summary>
+            /// Nihon Bussan
+            /// </summary>
+            NihonBussan = 0x9A,
+            /// <summary>
+            /// Tecmo
+            /// </summary>
             Tecmo = 0x9B,
+            /// <summary>
+            /// Imagineer
+            /// </summary>
             Imagineer = 0x9C,
-            Scorpion_Soft = 0xA2,
+            /// <summary>
+            /// Face
+            /// </summary>
+            Face = 0x9E,
+            /// <summary>
+            /// Scorpion Soft
+            /// </summary>
+            ScorpionSoft = 0xA2,
+            /// <summary>
+            /// Broderbund
+            /// </summary>
+            Broderbund = 0xA3,
+            /// <summary>
+            /// Konami
+            /// </summary>
             Konami = 0xA4,
-            Kawada_Co = 0xA6,
+            /// <summary>
+            /// K. Amusement Leasing Co. (KAC)
+            /// </summary>
+            KAmusementLeasingCO = 0xA5,
+            /// <summary>
+            /// Kawada Co., Ltd.
+            /// </summary>
+            KawadaCOLtd = 0xA6,
+            /// <summary>
+            /// Takara
+            /// </summary>
             Takara = 0xA7,
-            Royal_Industries = 0xA8,
-            Toei_Animation = 0xAC,
+            /// <summary>
+            /// Royal Industries
+            /// </summary>
+            RoyalIndustries = 0xA8,
+            /// <summary>
+            /// Tecnos
+            /// </summary>
+            Tecnos = 0xA9,
+            /// <summary>
+            /// Victor Musical Industries
+            /// </summary>
+            VictorMusicalIndustries = 0xAA,
+            /// <summary>
+            /// Hi-Score Media Work
+            /// </summary>
+            HIScoreMediaWork = 0xAB,
+            /// <summary>
+            /// Toei Animation
+            /// </summary>
+            ToeiAnimation = 0xAC,
+            /// <summary>
+            /// Toho (Japan)
+            /// </summary>
+            TohoJap = 0xAD,
+            /// <summary>
+            /// TSS
+            /// </summary>
+            Tss = 0xAE,
+            /// <summary>
+            /// Namco
+            /// </summary>
             Namco = 0xAF,
-            ASCII_Corporation = 0xB1,
+            /// <summary>
+            /// Acclaim (Japan)
+            /// </summary>
+            AcclaimJap = 0xB0,
+            /// <summary>
+            /// ASCII Corporation / Nexoft
+            /// </summary>
+            AsciiCorporationNexoft = 0xB1,
+            /// <summary>
+            /// Bandai
+            /// </summary>
             Bandai = 0xB2,
-            Soft_Pro_Inc = 0xB3,
-            HAL_Laboratory = 0xB6,
-            Sunsoft_and_Ask_Co = 0xBB,
-            Toshiba_EMI = 0xBC,
+            /// <summary>
+            /// Soft Pro Inc.
+            /// </summary>
+            SoftProInc = 0xB3,
+            /// <summary>
+            /// Enix
+            /// </summary>
+            Enix = 0xB4,
+            /// <summary>
+            /// dB-SOFT
+            /// </summary>
+            DBSoft = 0xB5,
+            /// <summary>
+            /// HAL Laboratory
+            /// </summary>
+            HalLaboratory = 0xB6,
+            /// <summary>
+            /// SNK
+            /// </summary>
+            Snk = 0xB7,
+            /// <summary>
+            /// Pony Canyon
+            /// </summary>
+            PonyCanyon = 0xB9,
+            /// <summary>
+            /// Culture Brain
+            /// </summary>
+            CultureBrain = 0xBA,
+            /// <summary>
+            /// Sunsoft
+            /// </summary>
+            Sunsoft = 0xBB,
+            /// <summary>
+            /// Toshiba EMI
+            /// </summary>
+            ToshibaEmi = 0xBC,
+            /// <summary>
+            /// CBS/Sony Group
+            /// </summary>
+            CbsSonyGroup = 0xBD,
+            /// <summary>
+            /// Sammy Corporation
+            /// </summary>
+            SammyCorporation = 0xBF,
+            /// <summary>
+            /// Taito
+            /// </summary>
             Taito = 0xC0,
-            Sunsoft = 0xC1,
+            /// <summary>
+            /// Sunsoft / Ask Co., Ltd.
+            /// </summary>
+            SunsoftAskCOLtd = 0xC1,
+            /// <summary>
+            /// Kemco
+            /// </summary>
             Kemco = 0xC2,
-            Square = 0xC3,
-            Tokuma_Shoten = 0xC4,
-            Data_East = 0xC5,
-            Tonkin_House_and_Tokyo_Shoseki = 0xC6,
-            East_Cube = 0xC7,
-            Konami_and_Ultra_and_Palcom = 0xCA,
-            NTVIC_and_VAP = 0xCB,
-            Use_Co = 0xCC,
-            Pony_Canyon_and_FCI = 0xCE,
+            /// <summary>
+            /// Square / Disk Original Group (DOG)
+            /// </summary>
+            SquareDiskOriginalGroup = 0xC3,
+            /// <summary>
+            /// Tokuma Shoten
+            /// </summary>
+            TokumaShoten = 0xC4,
+            /// <summary>
+            /// Data East
+            /// </summary>
+            DataEast = 0xC5,
+            /// <summary>
+            /// Tonkin House / Tokyo Shoseki
+            /// </summary>
+            TonkinHouseTokyoShoseki = 0xC6,
+            /// <summary>
+            /// East Cube / Toho (NA)
+            /// </summary>
+            EastCubeTohoNA = 0xC7,
+            /// <summary>
+            /// Koei
+            /// </summary>
+            Koei = 0xC8,
+            /// <summary>
+            /// UPL
+            /// </summary>
+            Upl = 0xC9,
+            /// <summary>
+            /// Konami / Ultra / Palcom
+            /// </summary>
+            KonamiUltraPalcom = 0xCA,
+            /// <summary>
+            /// NTVIC / VAP
+            /// </summary>
+            NtvicVap = 0xCB,
+            /// <summary>
+            /// Use Co., Ltd.
+            /// </summary>
+            UseCOLtd = 0xCC,
+            /// <summary>
+            /// Meldac
+            /// </summary>
+            Meldac = 0xCD,
+            /// <summary>
+            /// Pony Canyon / FCI
+            /// </summary>
+            PonyCanyonFci = 0xCE,
+            /// <summary>
+            /// Angel
+            /// </summary>
+            Angel = 0xCF,
+            /// <summary>
+            /// Disco
+            /// </summary>
+            Disco = 0xD0,
+            /// <summary>
+            /// Sofel
+            /// </summary>
             Sofel = 0xD1,
-            Bothtec_Inc = 0xD2,
-            Hiro_Co = 0xDB,
+            /// <summary>
+            /// Bothtec, Inc. / Quest
+            /// </summary>
+            BothtecIncQuest = 0xD2,
+            /// <summary>
+            /// Sigma Enterprises
+            /// </summary>
+            SigmaEnterprises = 0xD3,
+            /// <summary>
+            /// Ask Corp.
+            /// </summary>
+            AskCorp = 0xD4,
+            /// <summary>
+            /// Kyugo Trading Co.
+            /// </summary>
+            KyugoTradingCO = 0xD5,
+            /// <summary>
+            /// Naxat Soft / Kaga Tech
+            /// </summary>
+            NaxatSoftKagaTech = 0xD6,
+            /// <summary>
+            /// Status
+            /// </summary>
+            Status = 0xD8,
+            /// <summary>
+            /// Banpresto
+            /// </summary>
+            Banpresto = 0xD9,
+            /// <summary>
+            /// Tomy
+            /// </summary>
+            Tomy = 0xDA,
+            /// <summary>
+            /// Hiro Co., Ltd.
+            /// </summary>
+            HiroCOLtd = 0xDB,
+            /// <summary>
+            /// Nippon Computer Systems (NCS) / Masaya Games
+            /// </summary>
+            NipponComputerSystemsMasayaGames = 0xDD,
+            /// <summary>
+            /// Human Creative
+            /// </summary>
+            HumanCreative = 0xDE,
+            /// <summary>
+            /// Altron
+            /// </summary>
+            Altron = 0xDF,
+            /// <summary>
+            /// K.K. DCE
+            /// </summary>
+            KKDce = 0xE0,
+            /// <summary>
+            /// Towa Chiki
+            /// </summary>
+            TowaChiki = 0xE1,
+            /// <summary>
+            /// Yutaka
+            /// </summary>
+            Yutaka = 0xE2,
+            /// <summary>
+            /// Kaken Corporation
+            /// </summary>
+            KakenCorporation = 0xE3,
+            /// <summary>
+            /// Epoch
+            /// </summary>
+            Epoch = 0xE5,
+            /// <summary>
+            /// Athena
+            /// </summary>
             Athena = 0xE7,
+            /// <summary>
+            /// Asmik
+            /// </summary>
+            Asmik = 0xE8,
+            /// <summary>
+            /// Natsume
+            /// </summary>
+            Natsume = 0xE9,
+            /// <summary>
+            /// King Records
+            /// </summary>
+            KingRecords = 0xEA,
+            /// <summary>
+            /// Atlus
+            /// </summary>
             Atlus = 0xEB,
+            /// <summary>
+            /// Sony Music Entertainment
+            /// </summary>
+            SonyMusicEntertainment = 0xEC,
+            /// <summary>
+            /// Pixel Corporation
+            /// </summary>
+            PixelCorporation = 0xED,
+            /// <summary>
+            /// Information Global Service (IGS)
+            /// </summary>
+            InformationGlobalService = 0xEE,
+            /// <summary>
+            /// Fujimic
+            /// </summary>
+            Fujimic = 0xEF,
+            /// <summary>
+            /// A-Wave
+            /// </summary>
+            AWave = 0xF0,
         }
 
         [MarshalAs(UnmanagedType.U1)]
         // Raw byte: 0x01
         private readonly byte blockType = 1;
+        /// <summary>
+        /// Valid block type ID
+        /// </summary>
         public byte ValidTypeID { get => 1; }
         /// <summary>
         /// True if block type ID is valid
@@ -89,7 +650,7 @@ namespace com.clusterrr.Famicom.Containers
         /// <summary>
         /// Manufacturer code. = = 0x00, Unlicensed, = = 0x01, Nintendo
         /// </summary>
-        public Manufacturer ManufacturerCode { get => (Manufacturer)manufacturerCode; set => manufacturerCode = (byte)value; }
+        public Company LicenseeCode { get => (Company)manufacturerCode; set => manufacturerCode = (byte)value; }
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3)]
         byte[] gameName;
@@ -309,32 +870,46 @@ namespace com.clusterrr.Famicom.Containers
         /// </summary>
         public bool EndOfHeadMeet { get => endOfHeadMeet; set => endOfHeadMeet = value; }
 
-        public uint Length => 56;
+        /// <summary>
+        /// Length of the block
+        /// </summary>
+        public uint Length { get => 56; }
 
-        public static FdsBlockDiskInfo FromBytes(byte[] rawData, int position = 0)
+        /// <summary>
+        /// Create FdsBlockDiskInfo object from raw data
+        /// </summary>
+        /// <param name="data">Data</param>
+        /// <param name="offset">Data offset</param>
+        /// <returns>FdsBlockDiskInfo object</returns>
+        /// <exception cref="InvalidDataException"></exception>
+        public static FdsBlockDiskInfo FromBytes(byte[] data, int offset = 0)
         {
             int rawsize = Marshal.SizeOf(typeof(FdsBlockDiskInfo));
-            if (rawsize > rawData.Length - position)
+            if (rawsize > data.Length - offset)
             {
-                if (rawsize <= rawData.Length - position + 2)
+                if (rawsize <= data.Length - offset + 2)
                 {
                     var newRawData = new byte[rawsize];
-                    Array.Copy(rawData, position, newRawData, 0, rawsize - 2);
-                    rawData = newRawData;
-                    position = 0;
+                    Array.Copy(data, offset, newRawData, 0, rawsize - 2);
+                    data = newRawData;
+                    offset = 0;
                 }
                 else
                 {
-                    throw new ArgumentException("Not enough data to fill FdsDiskInfoBlock class. Array length from position: " + (rawData.Length - position) + ", Struct length: " + rawsize);
+                    throw new InvalidDataException("Not enough data to fill FdsDiskInfoBlock class. Array length from position: " + (data.Length - offset) + ", struct length: " + rawsize);
                 }
             }
             IntPtr buffer = Marshal.AllocHGlobal(rawsize);
-            Marshal.Copy(rawData, position, buffer, rawsize);
+            Marshal.Copy(data, offset, buffer, rawsize);
             FdsBlockDiskInfo retobj = (FdsBlockDiskInfo)Marshal.PtrToStructure(buffer, typeof(FdsBlockDiskInfo));
             Marshal.FreeHGlobal(buffer);
             return retobj;
         }
 
+        /// <summary>
+        /// Return raw data
+        /// </summary>
+        /// <returns>Data</returns>
         public byte[] ToBytes()
         {
             int rawSize = Marshal.SizeOf(this);
@@ -346,8 +921,17 @@ namespace com.clusterrr.Famicom.Containers
             return rawDatas;
         }
 
+        /// <summary>
+        /// String representation
+        /// </summary>
+        /// <returns>Game name</returns>
         public override string ToString() => GameName;
 
+        /// <summary>
+        /// Equality comparer
+        /// </summary>
+        /// <param name="other">Other FdsBlockDiskInfo object</param>
+        /// <returns>True if objects are equal</returns>
         public bool Equals(FdsBlockDiskInfo other)
         {
             return Enumerable.SequenceEqual(this.ToBytes(), other.ToBytes());

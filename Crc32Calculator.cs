@@ -1,6 +1,9 @@
 ﻿namespace com.clusterrr.Famicom.Containers
 {
-    public static class Crc32Calculator
+    /// <summary>
+    /// CRC32 calculator
+    /// </summary>
+    internal static class Crc32Calculator
     {
         static readonly uint[] table = new uint[256];
 

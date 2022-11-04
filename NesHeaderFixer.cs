@@ -3,15 +3,36 @@ using System.Linq;
 
 namespace com.clusterrr.Famicom.Containers.HeaderFixer
 {
+	/// <summary>
+	/// Static class that allows to fix known ROMs with bad header
+	/// </summary>
     public static class NesHeaderFixer
     {
+		/// <summary>
+		/// What was fixed in the ROM header
+		/// </summary>
         [Flags]
         public enum NesFixType
         {
+			/// <summary>
+			/// Nothing
+			/// </summary>
             NoFix = 0,
+			/// <summary>
+			/// Mapper
+			/// </summary>
             Mapper = 1,
+			/// <summary>
+			/// Mirroring
+			/// </summary>
             Mirroring = 2,
+			/// <summary>
+			/// Battery flag
+			/// </summary>
             Battery = 4,
+			/// <summary>
+			/// No CHR
+			/// </summary>
             NoChr = 8
         };
 
@@ -76,7 +97,7 @@ namespace com.clusterrr.Famicom.Containers.HeaderFixer
             ulong partialmd5 = 0;
             for (int x = 0; x < 8; x++)
                 partialmd5 |= (ulong)md5[15 - x] << (x * 8);
-            // maybe this games uses battery saves?
+            // maybe this game uses battery saves?
             foreach (var sav in savie)
             {
                 if (!nes.Battery && sav == partialmd5)
