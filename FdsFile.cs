@@ -13,7 +13,7 @@ namespace com.clusterrr.Famicom.Containers
         /// <summary>
         /// Disk Side Images
         /// </summary>
-        public IList<FdsDiskSide> Sides { get => sides; set => sides = value; }
+        public IList<FdsDiskSide> Sides { get => sides; set => sides = value ?? new List<FdsDiskSide>(); }
 
         /// <summary>
         /// Constructor to create empty FdsFile object
