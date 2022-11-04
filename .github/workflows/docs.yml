@@ -21,7 +21,7 @@ concurrency:
 
 jobs:
   # Single deploy job since we're just deploying
-  deploy:
+  deployment:
     runs-on: ubuntu-latest
     env:
       name: github-pages
