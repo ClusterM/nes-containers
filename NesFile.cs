@@ -9,7 +9,7 @@ namespace com.clusterrr.Famicom.Containers
     /// <summary>
     /// iNES file container for NES/Famicom games
     /// </summary>
-    public class NesFile
+    public partial class NesFile
     {
         /// <summary>
         /// PRG data
@@ -145,41 +145,6 @@ namespace com.clusterrr.Famicom.Containers
         /// Miscellaneous ROMs сount (NES 2.0 only)
         /// </summary>
         public byte MiscellaneousROMsCount { get; set; } = 0;
-
-        /// <summary>
-        /// What CIRAM A10 is connected to
-        /// </summary>
-        public enum MirroringType
-        {
-            /// <summary>
-            /// PPU A11 (horizontal mirroring)
-            /// </summary>
-            Horizontal = 0,
-            /// <summary>
-            /// PPU A10 (vertical mirroring)
-            /// </summary>
-            Vertical = 1,
-            /// <summary>
-            /// Ground (one-screen A)
-            /// </summary>
-            OneScreenA = 2,
-            /// <summary>
-            /// Vcc (one-screen B)
-            /// </summary>
-            OneScreenB = 3,
-            /// <summary>
-            /// Extra memory has been added (four-screen)
-            /// </summary>
-            FourScreenVram = 4,
-            /// <summary>
-            /// Mapper controlled
-            /// </summary>
-            MapperControlled = 5, // for UNIF
-            /// <summary>
-            /// Unknown value
-            /// </summary>
-            Unknown = 0xff
-        };
 
         /// <summary>
         /// Version of iNES format
@@ -624,10 +589,6 @@ namespace com.clusterrr.Famicom.Containers
         {
             var header = new byte[16];
             Array.Copy(data, header, header.Length);
-            if (header[0] == 'U' &&
-                header[1] != 'N' &&
-                header[2] != 'I' &&
-                header[3] != 'F') throw new InvalidDataException("It's UNIF file, not iNES file");
             if (header[0] != 'N' ||
                 header[1] != 'E' ||
                 header[2] != 'S' ||
