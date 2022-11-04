@@ -653,7 +653,7 @@ namespace com.clusterrr.Famicom.Containers
         public Company LicenseeCode { get => (Company)manufacturerCode; set => manufacturerCode = (byte)value; }
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3)]
-        byte[] gameName;
+        byte[] gameName = Encoding.ASCII.GetBytes("---");
         /// <summary>
         /// 3-letter ASCII code per game (e.g. ZEL for The Legend of Zelda)
         /// </summary>
@@ -718,7 +718,7 @@ namespace com.clusterrr.Famicom.Containers
         readonly byte unknown06 = 0xFF;
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3)]
-        byte[] manufacturingDate;
+        byte[] manufacturingDate = { 0, 0, 0 };
         /// <summary>
         /// Manufacturing date
         /// </summary>
@@ -769,10 +769,10 @@ namespace com.clusterrr.Famicom.Containers
         readonly ushort unknown09 = 0x0200;
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 5)]
         // Speculative: some kind of game information representation?
-        readonly byte[] unknown10;
+        readonly byte[] unknown10 = { 0, 0, 0, 0, 0 };
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3)]
-        byte[] rewrittenDate;
+        byte[] rewrittenDate = { 0, 0, 0 };
         /// <summary>
         /// "Rewritten disk" date. It's speculated this refers to the date the disk was formatted and rewritten by something like a Disk Writer kiosk.
         /// In the case of an original (non-copied) disk, this should be the same as Manufacturing date
@@ -881,7 +881,7 @@ namespace com.clusterrr.Famicom.Containers
         }
 
         /// <summary>
-        /// Return raw data
+        /// Returns raw data
         /// </summary>
         /// <returns>Data</returns>
         public byte[] ToBytes()

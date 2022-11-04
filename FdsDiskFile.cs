@@ -62,8 +62,8 @@ namespace com.clusterrr.Famicom.Containers
         /// <param name="dataBlock">File data block</param>
         public FdsDiskFile(FdsBlockFileHeader headerBlock, FdsBlockFileData dataBlock)
         {
-            this.HeaderBlock = headerBlock;
-            this.DataBlock = dataBlock;
+            this.headerBlock = headerBlock;
+            this.dataBlock = dataBlock;
             headerBlock.FileSize = (ushort)dataBlock.Data.Count();
         }
 
@@ -72,8 +72,8 @@ namespace com.clusterrr.Famicom.Containers
         /// </summary>
         public FdsDiskFile()
         {
-            this.HeaderBlock = new FdsBlockFileHeader();
-            this.DataBlock = new FdsBlockFileData();
+            this.headerBlock = new FdsBlockFileHeader();
+            this.dataBlock = new FdsBlockFileData();
             HeaderBlock.FileSize = (ushort)DataBlock.Data.Count();
         }
 

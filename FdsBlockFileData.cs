@@ -30,16 +30,6 @@ namespace com.clusterrr.Famicom.Containers
         }
 
         /// <summary>
-        /// Set by dumper. True when checksum is ok
-        /// </summary>
-        public bool CrcOk { get; set; } = true;
-
-        /// <summary>
-        /// Set by dumper. True when "end of head" flag was meet during dumping
-        /// </summary>
-        public bool EndOfHeadMeet { get; set; } = false;
-
-        /// <summary>
         /// Length of the block
         /// </summary>
         public uint Length => (uint)(data.Length + 1);
@@ -63,18 +53,10 @@ namespace com.clusterrr.Famicom.Containers
         }
 
         /// <summary>
-        /// Return raw data
+        /// Returns raw data
         /// </summary>
         /// <returns>Data</returns>
-        public byte[] ToBytes()
-        {
-            var result = new List<byte>
-            {
-                blockType
-            };
-            result.AddRange(Data);
-            return result.ToArray();
-        }
+        public byte[] ToBytes() => Enumerable.Concat<byte>(new[] { blockType }, data).ToArray();
 
         /// <summary>
         /// String representation

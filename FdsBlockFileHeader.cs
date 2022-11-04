@@ -57,7 +57,7 @@ namespace com.clusterrr.Famicom.Containers
         public byte FileIndicateCode { get => fileIndicateCode; set => fileIndicateCode = value; }
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 8)]
-        private byte[] fileName;
+        private byte[] fileName = Encoding.ASCII.GetBytes("FILENAME");
         /// <summary>
         /// Filename
         /// </summary>
@@ -122,7 +122,7 @@ namespace com.clusterrr.Famicom.Containers
         }
 
         /// <summary>
-        /// Return raw data
+        /// Returns raw data
         /// </summary>
         /// <returns>Data</returns>
         public byte[] ToBytes()

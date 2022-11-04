@@ -5,6 +5,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Xml.Linq;
 
 namespace com.clusterrr.Famicom.Containers
 {
@@ -16,7 +17,7 @@ namespace com.clusterrr.Famicom.Containers
         /// <summary>
         /// UNIF fields
         /// </summary>
-        private Dictionary<string, byte[]> fields = new Dictionary<string, byte[]>();
+        private Dictionary<string, byte[]?> fields = new Dictionary<string, byte[]?>();
 
         /// <summary>
         /// UNIF version
@@ -28,11 +29,12 @@ namespace com.clusterrr.Famicom.Containers
         /// </summary>
         /// <param name="key">UNIF data block key</param>
         /// <returns></returns>
-        public IEnumerable<byte> this[string key]
+        public IEnumerable<byte>? this[string key]
         {
             get
             {
                 if (key.Length != 4) throw new ArgumentException("UNIF data block key must be 4 characters long");
+                if (!fields.ContainsKey(key)) return null;
                 return Array.AsReadOnly(fields[key]);
             }
             set
@@ -82,7 +84,7 @@ namespace com.clusterrr.Famicom.Containers
                 pos += 4;
                 var fieldData = new byte[length];
                 Array.Copy(data, pos, fieldData, 0, length);
-                fields[type] = fieldData;
+                this[type] = fieldData;
                 pos += length;
             }
         }
@@ -124,15 +126,16 @@ namespace com.clusterrr.Famicom.Containers
             header[7] = (byte)((Version >> 24) & 0xFF);
             data.AddRange(header);
 
-            foreach (var name in fields.Keys)
+            foreach (var kv in this)
             {
-                data.AddRange(Encoding.UTF8.GetBytes(name));
-                int len = fields[name].Length;
+                data.AddRange(Encoding.UTF8.GetBytes(kv.Key));
+                var v = kv.Value.ToArray();
+                int len = v.Length;
                 data.Add((byte)(len & 0xFF));
                 data.Add((byte)((len >> 8) & 0xFF));
                 data.Add((byte)((len >> 16) & 0xFF));
                 data.Add((byte)((len >> 24) & 0xFF));
-                data.AddRange(fields[name]);
+                data.AddRange(v);
             }
             return data.ToArray();
         }
@@ -148,8 +151,9 @@ namespace com.clusterrr.Famicom.Containers
         /// </summary>
         /// <param name="text">Input text</param>
         /// <returns>Output byte[] array</returns>
-        private static byte[] StringToUTF8N(string text)
+        private static byte[]? StringToUTF8N(string? text)
         {
+            if (text == null) return null;
             var str = Encoding.UTF8.GetBytes(text);
             var result = new byte[str.Length + 1];
             Array.Copy(str, result, str.Length);
@@ -163,8 +167,9 @@ namespace com.clusterrr.Famicom.Containers
         /// <param name="maxLength">Maximum number of bytes to parse</param>
         /// <param name="offset">Start offset</param>
         /// <returns></returns>
-        private static string UTF8NToString(byte[] data, int maxLength = int.MaxValue, int offset = 0)
+        private static string? UTF8NToString(byte[]? data, int maxLength = int.MaxValue, int offset = 0)
         {
+            if (data == null || data.Length == 0) return null;
             int length = 0;
             while ((data[length + offset] != 0) && (length + offset < data.Length) && (length + offset < maxLength))
                 length++;
@@ -174,108 +179,97 @@ namespace com.clusterrr.Famicom.Containers
         /// <summary>
         /// Mapper name
         /// </summary>
-        public string Mapper
+        public string? Mapper
         {
-            get
-            {
-                if (fields.ContainsKey("MAPR"))
-                    return UTF8NToString(fields["MAPR"]);
-                else
-                    return null;
-            }
-            set
-            {
-                fields["MAPR"] = StringToUTF8N(value);
-            }
+            get => UTF8NToString(fields["MAPR"]);
+            set => fields["MAPR"] = value == null ? null : StringToUTF8N(value);
         }
 
         /// <summary>
         /// The dumper name
         /// </summary>
         /// 
-        public string DumperName
+        public string? DumperName
         {
-            get
-            {
-                if (!fields.ContainsKey("DINF"))
-                    return null;
-                return UTF8NToString(fields["DINF"], 100);
-            }
+            get => UTF8NToString(fields["DINF"], 100);
             set
             {
-                if (!fields.ContainsKey("DINF"))
-                    fields["DINF"] = new byte[204];
+                if (this["DINF"] == null)
+                    this["DINF"] = new byte[204];
+                var data = this["DINF"].ToArray();
                 for (int i = 0; i < 100; i++)
-                    fields["DINF"][i] = 0;
-                var name = StringToUTF8N(value);
-                Array.Copy(name, 0, fields["DINF"], 0, Math.Min(100, name.Length));
+                    data[i] = 0;
+                if (value != null)
+                {
+                    var name = StringToUTF8N(value);
+                    Array.Copy(name, 0, data, 0, Math.Min(100, name!.Length));
+                }
+                this["DINF"] = data;
             }
         }
 
         /// <summary>
         /// The name of the dumping software or mechanism
         /// </summary>
-        public string DumpingSoftware
+        public string? DumpingSoftware
         {
-            get
-            {
-                if (!fields.ContainsKey("DINF"))
-                    return null;
-                return UTF8NToString(fields["DINF"], 100, 104);
-            }
+            get => UTF8NToString(fields["DINF"], 100, 104);
             set
             {
-                if (!fields.ContainsKey("DINF"))
-                    fields["DINF"] = new byte[204];
+                if (this["DINF"] == null)
+                    this["DINF"] = new byte[204];
+                var data = this["DINF"].ToArray();
                 for (int i = 104; i < 104 + 100; i++)
-                    fields["DINF"][i] = 0;
-                var name = StringToUTF8N(value);
-                Array.Copy(name, 0, fields["DINF"], 104, Math.Min(100, name.Length));
+                    data[i] = 0;
+                if (value != null)
+                {
+                    var name = StringToUTF8N(value);
+                    Array.Copy(name, 0, fields["DINF"], 104, Math.Min(100, name!.Length));
+                }
+                this["DINF"] = data;
             }
         }
 
         /// <summary>
         /// Date of the dump
         /// </summary>
-        public DateTime DumpDate
+        public DateTime? DumpDate
         {
             get
             {
+                var data = this["DINF"]?.ToArray();
+                if (data == null) return null;
                 if (!fields.ContainsKey("DINF"))
                     return new DateTime();
                 return new DateTime(
-                        year: fields["DINF"][102] | (fields["DINF"][103] << 8),
-                        month: fields["DINF"][101],
-                        day: fields["DINF"][100]
+                        year: data[102] | (data[103] << 8),
+                        month: data[101],
+                        day: data[100]
                     );
             }
             set
             {
-                if (!fields.ContainsKey("DINF"))
-                    fields["DINF"] = new byte[204];
-                fields["DINF"][100] = (byte)value.Day;
-                fields["DINF"][101] = (byte)value.Month;
-                fields["DINF"][102] = (byte)(value.Year & 0xFF);
-                fields["DINF"][103] = (byte)(value.Year >> 8);
+                if (this["DINF"] == null)
+                    this["DINF"] = new byte[204];
+                if (value != null)
+                {
+                    var data = this["DINF"].ToArray();
+                    data[100] = (byte)value.Value.Day;
+                    data[101] = (byte)value.Value.Month;
+                    data[102] = (byte)(value.Value.Year & 0xFF);
+                    data[103] = (byte)(value.Value.Year >> 8);
+                    this["DINF"] = data;
+                }
             }
         }
 
         /// <summary>
         /// Name of the game
         /// </summary>
-        public string GameName
+        public string? GameName
         {
-            get
-            {
-                if (fields.ContainsKey("NAME"))
-                    return UTF8NToString(fields["NAME"]);
-                else
-                    return null;
-            }
-            set
-            {
-                fields["NAME"] = StringToUTF8N(value);
-            }
+            get => UTF8NToString(this["NAME"]?.ToArray());
+            set => this["NAME"] = StringToUTF8N(value);
         }
 
         /// <summary>
@@ -285,14 +279,15 @@ namespace com.clusterrr.Famicom.Containers
         {
             get
             {
-                if (fields.ContainsKey("TVCI") && fields["TVCI"].Length > 0)
-                    return (NesFile.Timing)fields["TVCI"][0];
+                var data = this["TVCI"];
+                if (data != null && data.Any())
+                    return (NesFile.Timing)data.First();
                 else
                     return NesFile.Timing.Ntsc;
             }
             set
             {
-                fields["TVCI"] = new byte[] { (byte)value };
+                this["TVCI"] = new byte[] { (byte)value };
             }
         }
 
@@ -303,8 +298,8 @@ namespace com.clusterrr.Famicom.Containers
         {
             get
             {
-                if (fields.ContainsKey("CTRL") && fields["CTRL"].Length > 0)
-                    return (Controller)fields["CTRL"][0];
+                if (this["CTRL"]?.Any() == true)
+                    return (Controller)this["CTRL"].First();
                 else
                     return Controller.None;
             }
@@ -321,8 +316,8 @@ namespace com.clusterrr.Famicom.Containers
         {
             get
             {
-                if (fields.ContainsKey("BATR") && fields["BATR"].Length > 0)
-                    return fields["BATR"][0] != 0;
+                if (this["BATR"]?.Any() == true)
+                    return this["BATR"].First() != 0;
                 else
                     return false;
             }
@@ -339,8 +334,8 @@ namespace com.clusterrr.Famicom.Containers
         {
             get
             {
-                if (fields.ContainsKey("MIRR") && fields["MIRR"].Length > 0)
-                    return (MirroringType)fields["MIRR"][0];
+                if (this["MIRR"]?.Any() == true)
+                    return (MirroringType)fields["MIRR"].First();
                 else
                     return MirroringType.Unknown;
             }
@@ -355,10 +350,10 @@ namespace com.clusterrr.Famicom.Containers
         /// </summary>
         public void CalculateAndStoreCRCs()
         {
-            foreach (var key in fields.Keys.Where(k => k.StartsWith("PRG")))
+            foreach (var kv in this.Where(kv => kv.Key.StartsWith("PRG")))
             {
-                var num = key[3];
-                var crc32 = Crc32Calculator.CalculateCRC32(fields[key]);
+                var num = kv.Key[3];
+                var crc32 = Crc32Calculator.CalculateCRC32(kv.Value.ToArray());
                 fields[$"PCK{num}"] = new byte[] {
                     (byte)(crc32 & 0xFF),
                     (byte)((crc32 >> 8) & 0xFF),
@@ -366,10 +361,10 @@ namespace com.clusterrr.Famicom.Containers
                     (byte)((crc32 >> 24) & 0xFF)
                 };
             }
-            foreach (var key in fields.Keys.Where(k => k.StartsWith("CHR")))
+            foreach (var kv in this.Where(kv => kv.Key.StartsWith("CHR")))
             {
-                var num = key[3];
-                var crc32 = Crc32Calculator.CalculateCRC32(fields[key]);
+                var num = kv.Key[3];
+                var crc32 = Crc32Calculator.CalculateCRC32(kv.Value.ToArray());
                 fields[$"CCK{num}"] = new byte[] {
                     (byte)(crc32 & 0xFF),
                     (byte)((crc32 >> 8) & 0xFF),

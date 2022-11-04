@@ -4,12 +4,13 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>NesContainers</AssemblyName>
     <RootNamespace>com.clusterrr.Famicom.Containers</RootNamespace>
-    <LangVersion>7.3</LangVersion>
+    <LangVersion>11</LangVersion>
     <DebugType>embedded</DebugType>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <DocumentationFile>NesContainers.xml</DocumentationFile>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

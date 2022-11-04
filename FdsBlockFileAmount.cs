@@ -48,7 +48,7 @@ namespace com.clusterrr.Famicom.Containers
         }
 
         /// <summary>
-        /// Return raw data
+        /// Returns raw data
         /// </summary>
         /// <returns>Data</returns>
         public byte[] ToBytes() => new byte[] { blockType, fileAmount };

@@ -22,17 +22,17 @@ namespace com.clusterrr.Famicom.Containers
         /// <summary>
         /// CHR data (can be null if none)
         /// </summary>
-        public IEnumerable<byte> CHR
+        public IEnumerable<byte>? CHR
         {
-            get => Array.AsReadOnly(chr);
+            get => chr.Length == 0 ? null : Array.AsReadOnly(chr);
             set => chr = (value ?? new byte[0]).ToArray();
         }
         /// <summary>
         /// Trainer (can be null if none)
         /// </summary>
-        public IEnumerable<byte> Trainer
+        public IEnumerable<byte>? Trainer
         {
-            get => Array.AsReadOnly(trainer);
+            get => trainer.Length == 0 ? null : Array.AsReadOnly(trainer);
             set
             {
                 if (value != null && value.Count() != 0 && value.Count() != 512)
@@ -43,9 +43,9 @@ namespace com.clusterrr.Famicom.Containers
         /// <summary>
         /// Miscellaneous ROM (NES 2.0 only, can be null if none)
         /// </summary>
-        public IEnumerable<byte> MiscellaneousROM
+        public IEnumerable<byte>? MiscellaneousROM
         {
-            get => Array.AsReadOnly(miscellaneousROM);
+            get => miscellaneousROM.Length == 0 ? null : Array.AsReadOnly(miscellaneousROM);
             set => miscellaneousROM = (value ?? new byte[0]).ToArray();
         }
         /// <summary>
