@@ -34,7 +34,7 @@ namespace com.clusterrr.Famicom.Containers
             get
             {
                 if (key.Length != 4) throw new ArgumentException("UNIF data block key must be 4 characters long");
-                if (!fields.ContainsKey(key)) throw new IndexOutOfRangeException($"There is not {key} field");
+                if (!ContainsField(key)) throw new IndexOutOfRangeException($"There is no {key} field");
                 return Array.AsReadOnly(fields[key]);
             }
             set
