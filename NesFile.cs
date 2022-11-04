@@ -742,10 +742,11 @@ namespace com.clusterrr.Famicom.Containers
                 chrSizePadded = header[5] * 0x2000UL;
                 switch (Mirroring)
                 {
-                    case MirroringType.Unknown:
+                    case MirroringType.Unknown:          // mirroring field ignored
                     case MirroringType.Horizontal:
                     case MirroringType.Vertical:
                     case MirroringType.FourScreenVram:
+                    case MirroringType.MapperControlled: // mirroring field ignored
                         break;
                     default:
                         throw new InvalidDataException($"{Mirroring} mirroring is not supported by iNES");

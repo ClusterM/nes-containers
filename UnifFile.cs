@@ -21,7 +21,7 @@ namespace com.clusterrr.Famicom.Containers
         /// <summary>
         /// UNIF version
         /// </summary>
-        public int Version = 7;
+        public int Version { get; set; } = 7;
 
         /// <summary>
         /// Get/set UNIF field

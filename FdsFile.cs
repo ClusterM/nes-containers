@@ -5,7 +5,7 @@ using System.Linq;
 namespace com.clusterrr.Famicom.Containers
 {
     /// <summary>
-    /// Full .fds file, disk sides collection
+    /// File container for FDS games, disk sides collection
     /// </summary>
     public class FdsFile
     {
