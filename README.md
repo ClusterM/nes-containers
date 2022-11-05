@@ -86,3 +86,8 @@ Save ROM as .fds file: `fdsfile.Save(filename);`
 Check [documentation](https://clusterm.github.io/nes-containers/classcom_1_1clusterrr_1_1_famicom_1_1_containers_1_1_fds_file.html) for all available classes and properties.
 
 Full format specifications: https://www.nesdev.org/wiki/FDS_file_format
+
+## Donate
+https://www.donationalerts.com/r/clustermeerkat
+
+https://boosty.to/cluster
