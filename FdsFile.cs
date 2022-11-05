@@ -39,6 +39,7 @@ namespace com.clusterrr.Famicom.Containers
         {
             if (data[0] == (byte)'F' && data[1] == (byte)'D' && data[2] == (byte)'S' && data[3] == 0x1A)
                 data = data.Skip(16).ToArray(); // skip header
+            if (data.Length % 65500 != 0) throw new InvalidDataException("Invalid FDS image: the size must be divisible by 65500");
             for (int i = 0; i < data.Length; i += 65500)
             {
                 var sideData = data.Skip(i).Take(66500).ToArray();

@@ -89,7 +89,6 @@ namespace com.clusterrr.Famicom.Containers
         public byte FileAmount { get => fileAmountBlock.FileAmount; set => fileAmountBlock.FileAmount = value; }
 
         readonly IList<FdsDiskFile> files;
-
         /// <summary>
         /// Files on disk
         /// </summary>

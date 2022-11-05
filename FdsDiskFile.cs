@@ -4,7 +4,7 @@ using System.Linq;
 namespace com.clusterrr.Famicom.Containers
 {
     /// <summary>
-    /// FDS file - header and data
+    /// File on FDS disk - header and data
     /// </summary>
     public class FdsDiskFile
     {
@@ -55,6 +55,7 @@ namespace com.clusterrr.Famicom.Containers
                 HeaderBlock.FileSize = (ushort)DataBlock.Data.Count();
             }
         }
+
         /// <summary>
         /// Construcor
         /// </summary>
