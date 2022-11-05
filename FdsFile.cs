@@ -72,6 +72,7 @@ namespace com.clusterrr.Famicom.Containers
         /// <summary>
         /// Returns .fds file contents
         /// </summary>
+        /// <param name="useHeader">Option to add .fds file header (ignored by most emulators)</param>
         /// <returns>FDS file contents</returns>
         public byte[] ToBytes(bool useHeader = false)
         {
