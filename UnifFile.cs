@@ -182,7 +182,7 @@ namespace com.clusterrr.Famicom.Containers
         private static string UTF8NToString(byte[] data, int maxLength = int.MaxValue, int offset = 0)
         {
             int length = 0;
-            while ((data[length + offset] != 0) && (length + offset < data.Length) && (length  < maxLength))
+            while ((data[length + offset] != 0) && (length + offset < data.Length) && (length < maxLength))
                 length++;
             return Encoding.UTF8.GetString(data, offset, length);
         }
@@ -193,10 +193,11 @@ namespace com.clusterrr.Famicom.Containers
         public string? Mapper
         {
             get => ContainsField("MAPR") ? UTF8NToString(this["MAPR"].ToArray()) : null;
-            set { 
-                if (value == null) 
+            set
+            {
+                if (value == null)
                     RemoveField("MAPR");
-                else 
+                else
                     this["MAPR"] = StringToUTF8N(value);
             }
         }
@@ -207,20 +208,33 @@ namespace com.clusterrr.Famicom.Containers
         /// 
         public string? DumperName
         {
-            get => ContainsField("DINF") ? UTF8NToString(fields["DINF"], 100) : null;
-            set
+            get
             {
                 if (!ContainsField("DINF"))
-                    this["DINF"] = new byte[204];
+                    return null;
                 var data = this["DINF"].ToArray();
-                for (int i = 0; i < 100; i++)
-                    data[i] = 0;
-                if (value != null)
+                if (data.Length >= 204 && data[0] != 0)
+                    return UTF8NToString(data, 100);
+                else
+                    return null;
+            }
+            set
+            {
+                if (value != null || DumpingSoftware != null || DumpDate != null)
                 {
-                    var name = StringToUTF8N(value);
-                    Array.Copy(name, 0, data, 0, Math.Min(100, name!.Length));
+                    if (!ContainsField("DINF"))
+                        this["DINF"] = new byte[204];
+                    var data = this["DINF"].ToArray();
+                    for (int i = 0; i < 100; i++)
+                        data[i] = 0;
+                    if (value != null)
+                    {
+                        var name = StringToUTF8N(value);
+                        Array.Copy(name, 0, data, 0, Math.Min(100, name!.Length));
+                    }
+                    this["DINF"] = data;
                 }
-                this["DINF"] = data;
+                else RemoveField("DINF");
             }
         }
 
@@ -229,20 +243,33 @@ namespace com.clusterrr.Famicom.Containers
         /// </summary>
         public string? DumpingSoftware
         {
-            get => ContainsField("DINF") ? UTF8NToString(this["DINF"].ToArray(), 100, 104) : null;
-            set
+            get
             {
                 if (!ContainsField("DINF"))
-                    this["DINF"] = new byte[204];
+                    return null;
                 var data = this["DINF"].ToArray();
-                for (int i = 104; i < 104 + 100; i++)
-                    data[i] = 0;
-                if (value != null)
+                if (data.Length >= 204 && data[0] != 0)
+                    return UTF8NToString(data, 100, 104);
+                else
+                    return null;
+            }
+            set
+            {
+                if (value != null || DumperName != null || DumpDate != null)
                 {
-                    var name = StringToUTF8N(value);
-                    Array.Copy(name, 0, data, 104, Math.Min(100, name!.Length));
+                    if (!ContainsField("DINF"))
+                        this["DINF"] = new byte[204];
+                    var data = this["DINF"].ToArray();
+                    for (int i = 104; i < 104 + 100; i++)
+                        data[i] = 0;
+                    if (value != null)
+                    {
+                        var name = StringToUTF8N(value);
+                        Array.Copy(name, 0, data, 104, Math.Min(100, name!.Length));
+                    }
+                    this["DINF"] = data;
                 }
-                this["DINF"] = data;
+                else RemoveField("DINF");
             }
         }
 
@@ -255,6 +282,8 @@ namespace com.clusterrr.Famicom.Containers
             {
                 if (!ContainsField("DINF")) return null;
                 var data = this["DINF"].ToArray();
+                if (data[0] == 0 && data[1] == 0 && data[2] == 0 && data[3] == 0)
+                    return null;
                 return new DateTime(
                         year: data[102] | (data[103] << 8),
                         month: data[101],
@@ -263,17 +292,29 @@ namespace com.clusterrr.Famicom.Containers
             }
             set
             {
-                if (value != null)
+                if (value != null || DumperName != null || DumpingSoftware != null)
                 {
                     if (!ContainsField("DINF"))
                         this["DINF"] = new byte[204];
                     var data = this["DINF"].ToArray();
-                    data[100] = (byte)value.Value.Day;
-                    data[101] = (byte)value.Value.Month;
-                    data[102] = (byte)(value.Value.Year & 0xFF);
-                    data[103] = (byte)(value.Value.Year >> 8);
+                    if (value != null)
+                    {
+                        data[100] = (byte)value.Value.Day;
+                        data[101] = (byte)value.Value.Month;
+                        data[102] = (byte)(value.Value.Year & 0xFF);
+                        data[103] = (byte)(value.Value.Year >> 8);
+                    }
+                    else
+                    {
+                        // Is it valid?
+                        data[100] = 0;
+                        data[101] = 0;
+                        data[102] = 0;
+                        data[103] = 0;
+                    }
                     this["DINF"] = data;
                 }
+                else RemoveField("DINF");
             }
         }
 
@@ -295,25 +336,28 @@ namespace com.clusterrr.Famicom.Containers
         /// <summary>
         /// For non-homebrew NES/Famicom games, this field's value is always a function of the region in which a game was released
         /// </summary>
-        public NesFile.Timing Region
+        public Timing? Region
         {
             get
             {
                 if (ContainsField("TVCI") && this["TVCI"].Any())
-                    return (NesFile.Timing)this["TVCI"].First();
+                    return (Timing)this["TVCI"].First();
                 else
-                    return NesFile.Timing.Ntsc;
+                    return null;
             }
             set
             {
-                this["TVCI"] = new byte[] { (byte)value };
+                if (value != null)
+                    this["TVCI"] = new byte[] { (byte)value };
+                else
+                    RemoveField("TVCI");
             }
         }
 
         /// <summary>
         /// Controllers usable by this game (bitmask)
         /// </summary>
-        public Controller Controllers
+        public Controller? Controllers
         {
             get
             {
@@ -324,14 +368,17 @@ namespace com.clusterrr.Famicom.Containers
             }
             set
             {
-                fields["CTRL"] = new byte[] { (byte)value };
+                if (value != null)
+                    fields["CTRL"] = new byte[] { (byte)value };
+                else
+                    RemoveField("CTRL");
             }
         }
 
         /// <summary>
         /// Battery-backed (or other non-volatile memory) memory is present
         /// </summary>
-        public bool Battery
+        public bool? Battery
         {
             get
             {
@@ -342,25 +389,28 @@ namespace com.clusterrr.Famicom.Containers
             }
             set
             {
-                fields["BATR"] = new byte[] { (byte)(value ? 1 : 0) };
+                if (value != null)
+                    fields["BATR"] = new byte[] { (byte)((bool)value ? 1 : 0) };
+                else
+                    RemoveField("BATR");
             }
         }
 
         /// <summary>
         /// Mirroring type
         /// </summary>
-        public MirroringType Mirroring
+        public MirroringType? Mirroring
         {
             get
             {
                 if (ContainsField("MIRR") && this["MIRR"].Any())
                     return (MirroringType)this["MIRR"].First();
                 else
-                    return MirroringType.Unknown;
+                    return null;
             }
             set
             {
-                if (value != MirroringType.Unknown)
+                if (value != null && value != MirroringType.Unknown)
                     this["MIRR"] = new byte[] { (byte)value };
                 else
                     this.RemoveField("MIRR");
