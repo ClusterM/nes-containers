@@ -87,6 +87,9 @@ Check [documentation](https://clusterm.github.io/nes-containers/classcom_1_1clus
 
 Full format specifications: https://www.nesdev.org/wiki/FDS_file_format
 
+## Get it on NuGet
+https://www.nuget.org/packages/NesContainers/
+
 ## Donate
 https://www.donationalerts.com/r/clustermeerkat
 
