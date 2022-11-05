@@ -7,7 +7,7 @@ using System.Security.Cryptography;
 namespace com.clusterrr.Famicom.Containers
 {
     /// <summary>
-    /// iNES file container for NES/Famicom games
+    /// iNES / NES 2.0 file container for NES/Famicom games
     /// </summary>
     public partial class NesFile
     {

@@ -418,6 +418,174 @@ namespace com.clusterrr.Famicom.Containers
         }
 
         /// <summary>
+        /// PRG0 field
+        /// </summary>
+        public IEnumerable<byte>? PRG0
+        {
+            get
+            {
+                if (ContainsField("PRG0"))
+                    return this["PRG0"];
+                else
+                    return null;
+            }
+            set
+            {
+                if (value != null)
+                    this["PRG0"] = value;
+                else
+                    RemoveField("PRG0");
+            }
+        }
+
+        /// <summary>
+        /// PRG1 field
+        /// </summary>
+        public IEnumerable<byte>? PRG1
+        {
+            get
+            {
+                if (ContainsField("PRG1"))
+                    return this["PRG1"];
+                else
+                    return null;
+            }
+            set
+            {
+                if (value != null)
+                    this["PRG1"] = value;
+                else
+                    RemoveField("PRG1");
+            }
+        }
+
+        /// <summary>
+        /// PRG2 field
+        /// </summary>
+        public IEnumerable<byte>? PRG2
+        {
+            get
+            {
+                if (ContainsField("PRG2"))
+                    return this["PRG2"];
+                else
+                    return null;
+            }
+            set
+            {
+                if (value != null)
+                    this["PRG2"] = value;
+                else
+                    RemoveField("PRG2");
+            }
+        }
+
+        /// <summary>
+        /// PRG3 field
+        /// </summary>
+        public IEnumerable<byte>? PRG3
+        {
+            get
+            {
+                if (ContainsField("PRG3"))
+                    return this["PRG3"];
+                else
+                    return null;
+            }
+            set
+            {
+                if (value != null)
+                    this["PRG3"] = value;
+                else
+                    RemoveField("PRG3");
+            }
+        }
+
+        /// <summary>
+        /// CHR0 field
+        /// </summary>
+        public IEnumerable<byte>? CHR0
+        {
+            get
+            {
+                if (ContainsField("CHR0"))
+                    return this["CHR0"];
+                else
+                    return null;
+            }
+            set
+            {
+                if (value != null)
+                    this["CHR0"] = value;
+                else
+                    RemoveField("CHR0");
+            }
+        }
+
+        /// <summary>
+        /// CHR1 field
+        /// </summary>
+        public IEnumerable<byte>? CHR1
+        {
+            get
+            {
+                if (ContainsField("CHR1"))
+                    return this["CHR1"];
+                else
+                    return null;
+            }
+            set
+            {
+                if (value != null)
+                    this["CHR1"] = value;
+                else
+                    RemoveField("CHR1");
+            }
+        }
+
+        /// <summary>
+        /// CHR2 field
+        /// </summary>
+        public IEnumerable<byte>? CHR2
+        {
+            get
+            {
+                if (ContainsField("CHR2"))
+                    return this["CHR2"];
+                else
+                    return null;
+            }
+            set
+            {
+                if (value != null)
+                    this["CHR2"] = value;
+                else
+                    RemoveField("CHR2");
+            }
+        }
+
+        /// <summary>
+        /// CHR3 field
+        /// </summary>
+        public IEnumerable<byte>? CHR3
+        {
+            get
+            {
+                if (ContainsField("CHR3"))
+                    return this["CHR3"];
+                else
+                    return null;
+            }
+            set
+            {
+                if (value != null)
+                    this["CHR3"] = value;
+                else
+                    RemoveField("CHR3");
+            }
+        }
+
+        /// <summary>
         /// Calculate CRC32 for PRG and CHR fields and store it into PCKx and CCKx fields
         /// </summary>
         public void CalculateAndStoreCRCs()
