@@ -1,5 +1,5 @@
 # NesContainers
-A simple .NET library for working with NES/Famicom ROM containers: .nes (iNES, NES 2.0), .unf (UNIF) and .fds (Famicom Disk System images).
+A simple .NET Standard 2.0 library for reading and modifying NES/Famicom ROM containers: .nes (iNES, NES 2.0), .unf (UNIF), and .fds (Famicom Disk System images).
 
 Full documentation: https://clusterm.github.io/nes-containers/
 
@@ -86,3 +86,8 @@ Save ROM as .fds file: `fdsfile.Save(filename);`
 Check [documentation](https://clusterm.github.io/nes-containers/classcom_1_1clusterrr_1_1_famicom_1_1_containers_1_1_fds_file.html) for all available classes and properties.
 
 Full format specifications: https://www.nesdev.org/wiki/FDS_file_format
+
+## Donate
+https://www.donationalerts.com/r/clustermeerkat
+
+https://boosty.to/cluster
