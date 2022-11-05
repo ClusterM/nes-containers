@@ -14,39 +14,39 @@ namespace com.clusterrr.Famicom.Containers
         /// <summary>
         /// PRG data
         /// </summary>
-        public IEnumerable<byte> PRG
+        public byte[] PRG
         {
-            get => Array.AsReadOnly(prg);
+            get => prg;
             set => prg = (value ?? new byte[0]).ToArray();
         }
         /// <summary>
-        /// CHR data (can be null if none)
+        /// CHR data
         /// </summary>
-        public IEnumerable<byte>? CHR
+        public byte[] CHR
         {
-            get => chr.Length == 0 ? null : Array.AsReadOnly(chr);
+            get => chr;
             set => chr = (value ?? new byte[0]).ToArray();
         }
         /// <summary>
-        /// Trainer (can be null if none)
+        /// Trainer
         /// </summary>
-        public IEnumerable<byte>? Trainer
+        public byte[] Trainer
         {
-            get => trainer.Length == 0 ? null : Array.AsReadOnly(trainer);
+            get => trainer;
             set
             {
-                if (value != null && value.Count() != 0 && value.Count() != 512)
-                    throw new ArgumentOutOfRangeException("Trainer size must be 512 bytes");
-                chr = (value ?? new byte[0]).ToArray();
+                if (value != null && value.Count() != 0 && value.Count() > 512)
+                    throw new ArgumentOutOfRangeException("Trainer size must be 512 bytes or less");
+                chr = value ?? new byte[0];
             }
         }
         /// <summary>
-        /// Miscellaneous ROM (NES 2.0 only, can be null if none)
+        /// Miscellaneous ROM (NES 2.0 only)
         /// </summary>
-        public IEnumerable<byte>? MiscellaneousROM
+        public byte[] MiscellaneousROM
         {
-            get => miscellaneousROM.Length == 0 ? null : Array.AsReadOnly(miscellaneousROM);
-            set => miscellaneousROM = (value ?? new byte[0]).ToArray();
+            get => miscellaneousROM;
+            set => miscellaneousROM = value ?? new byte[0];
         }
         /// <summary>
         /// Mapper number
@@ -635,7 +635,7 @@ namespace com.clusterrr.Famicom.Containers
             }
 
             uint offset = (uint)header.Length;
-            if (trainer != null && trainer.Length > 0)
+            if (trainer.Length > 0)
             {
                 if (offset < data.Length)
                     Array.Copy(data, offset, trainer, 0, Math.Max(0, Math.Min(trainer.Length, data.Length - offset)));
@@ -698,9 +698,6 @@ namespace com.clusterrr.Famicom.Containers
             header[1] = (byte)'E';
             header[2] = (byte)'S';
             header[3] = 0x1A;
-            if (prg == null) prg = new byte[0];
-            if (chr == null) chr = new byte[0];
-            if (trainer == null) trainer = new byte[0];
             ulong prgSizePadded, chrSizePadded;
             if (Version == iNesVersion.iNES)
             {
@@ -750,7 +747,10 @@ namespace com.clusterrr.Famicom.Containers
 
                 data.AddRange(header);
                 if (trainer.Length > 0)
+                {
                     data.AddRange(trainer);
+                    if (trainer.Length < 512) data.AddRange(Enumerable.Repeat<byte>(0xFF, (int)512 - trainer.Length));
+                }
                 data.AddRange(prg);
                 data.AddRange(chr);
             }
@@ -843,19 +843,22 @@ namespace com.clusterrr.Famicom.Containers
                 header[15] |= (byte)((byte)DefaultExpansionDevice & 0x3F);
 
                 data.AddRange(header);
-                if (Trainer != null)
-                    data.AddRange(Trainer);
+                if (trainer.Length > 0)
+                {
+                    data.AddRange(trainer);
+                    if (trainer.Length < 512) data.AddRange(Enumerable.Repeat<byte>(0xFF, (int)512 - trainer.Length));
+                }
                 data.AddRange(prg);
                 data.AddRange(Enumerable.Repeat<byte>(0xFF, (int)prgSizePadded - prg.Length));
                 data.AddRange(chr);
                 data.AddRange(Enumerable.Repeat<byte>(0xFF, (int)chrSizePadded - chr.Length));
-                if (MiscellaneousROMsCount > 0 || (MiscellaneousROM != null && MiscellaneousROM.Count() > 0))
+                if (MiscellaneousROMsCount > 0 || miscellaneousROM.Length > 0)
                 {
                     if (MiscellaneousROMsCount == 0)
                         throw new InvalidDataException("MiscellaneousROMsCount is zero while MiscellaneousROM is not empty");
-                    if (MiscellaneousROM == null)
+                    if (MiscellaneousROM.Length == 0)
                         throw new InvalidDataException("MiscellaneousROM is empty while MiscellaneousROMsCount is not zero");
-                    data.AddRange(MiscellaneousROM);
+                    data.AddRange(miscellaneousROM);
                 }
             }
             return data.ToArray();
@@ -923,28 +926,18 @@ namespace com.clusterrr.Famicom.Containers
         /// <summary>
         /// Calculate MD5 checksum of ROM (CHR+PRG without header)
         /// </summary>
+        /// <returns>MD5 checksum for all PRG and CHR data</returns>
         public byte[] CalculateMD5()
         {
             var md5 = MD5.Create();
-            if (prg == null) prg = new byte[0];
-            if (chr == null) chr = new byte[0];
-            var alldata = new byte[prg.Length + chr.Length];
-            Array.Copy(prg, 0, alldata, 0, prg.Length);
-            Array.Copy(chr, 0, alldata, prg.Length, chr.Count());
+            var alldata = Enumerable.Concat(prg ?? new byte[0], chr ?? new byte[0]).ToArray();
             return md5.ComputeHash(alldata);
         }
 
         /// <summary>
         /// Calculate CRC32 checksum of ROM (CHR+PRG without header)
         /// </summary>
-        public uint CalculateCRC32()
-        {
-            if (prg == null) prg = new byte[0];
-            if (chr == null) chr = new byte[0];
-            var alldata = new byte[prg.Length + chr.Length];
-            Array.Copy(prg, 0, alldata, 0, prg.Length);
-            Array.Copy(chr, 0, alldata, prg.Length, chr.Length);
-            return Crc32Calculator.CalculateCRC32(alldata);
-        }
+        /// <returns>CRC32 checksum for all PRG and CHR data</returns>
+        public uint CalculateCRC32() => Crc32Calculator.CalculateCRC32(Enumerable.Concat(prg ?? new byte[0], chr ?? new byte[0]).ToArray());
     }
 }

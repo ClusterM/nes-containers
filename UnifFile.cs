@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Runtime.ConstrainedExecution;
+using System.Security.Cryptography;
 using System.Text;
 using System.Xml.Linq;
 
@@ -12,7 +14,7 @@ namespace com.clusterrr.Famicom.Containers
     /// <summary>
     /// UNIF file container for NES/Famicom games
     /// </summary>
-    public class UnifFile : IEnumerable<KeyValuePair<string, IEnumerable<byte>>>
+    public class UnifFile : IEnumerable<KeyValuePair<string, byte[]>>
     {
         /// <summary>
         /// UNIF fields
@@ -29,13 +31,13 @@ namespace com.clusterrr.Famicom.Containers
         /// </summary>
         /// <param name="key">UNIF data block key</param>
         /// <returns></returns>
-        public IEnumerable<byte> this[string key]
+        public byte[] this[string key]
         {
             get
             {
                 if (key.Length != 4) throw new ArgumentException("UNIF data block key must be 4 characters long");
                 if (!ContainsField(key)) throw new IndexOutOfRangeException($"There is no {key} field");
-                return Array.AsReadOnly(fields[key]);
+                return fields[key];
             }
             set
             {
@@ -43,7 +45,7 @@ namespace com.clusterrr.Famicom.Containers
                 if (value == null)
                     this.RemoveField(key);
                 else
-                    fields[key] = (value ?? new byte[0]).ToArray();
+                    fields[key] = value;
             }
         }
 
@@ -64,8 +66,8 @@ namespace com.clusterrr.Famicom.Containers
         /// Returns enumerator that iterates throught fields
         /// </summary>
         /// <returns>IEnumerable object</returns>
-        public IEnumerator<KeyValuePair<string, IEnumerable<byte>>> GetEnumerator()
-            => fields.Select(kv => new KeyValuePair<string, IEnumerable<byte>>(kv.Key, Array.AsReadOnly(kv.Value))).GetEnumerator();
+        public IEnumerator<KeyValuePair<string, byte[]>> GetEnumerator()
+            => fields.Select(kv => new KeyValuePair<string, byte[]>(kv.Key, kv.Value)).GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
 
@@ -145,10 +147,10 @@ namespace com.clusterrr.Famicom.Containers
             foreach (var kv in this)
             {
                 data.AddRange(Encoding.UTF8.GetBytes(kv.Key));
-                var v = kv.Value.ToArray();
-                int len = v.Length;
+                var value = kv.Value;
+                int len = value.Length;
                 data.AddRange(BitConverter.GetBytes(len));
-                data.AddRange(v);
+                data.AddRange(value);
             }
             return data.ToArray();
         }
@@ -188,11 +190,11 @@ namespace com.clusterrr.Famicom.Containers
         }
 
         /// <summary>
-        /// Mapper name
+        /// Mapper name (null if none)
         /// </summary>
         public string? Mapper
         {
-            get => ContainsField("MAPR") ? UTF8NToString(this["MAPR"].ToArray()) : null;
+            get => ContainsField("MAPR") ? UTF8NToString(this["MAPR"]) : null;
             set
             {
                 if (value == null)
@@ -203,7 +205,7 @@ namespace com.clusterrr.Famicom.Containers
         }
 
         /// <summary>
-        /// The dumper name
+        /// The dumper name (null if none)
         /// </summary>
         /// 
         public string? DumperName
@@ -212,7 +214,7 @@ namespace com.clusterrr.Famicom.Containers
             {
                 if (!ContainsField("DINF"))
                     return null;
-                var data = this["DINF"].ToArray();
+                var data = this["DINF"];
                 if (data.Length >= 204 && data[0] != 0)
                     return UTF8NToString(data, 100);
                 else
@@ -224,7 +226,7 @@ namespace com.clusterrr.Famicom.Containers
                 {
                     if (!ContainsField("DINF"))
                         this["DINF"] = new byte[204];
-                    var data = this["DINF"].ToArray();
+                    var data = this["DINF"];
                     for (int i = 0; i < 100; i++)
                         data[i] = 0;
                     if (value != null)
@@ -239,7 +241,7 @@ namespace com.clusterrr.Famicom.Containers
         }
 
         /// <summary>
-        /// The name of the dumping software or mechanism
+        /// The name of the dumping software or mechanism (null if none)
         /// </summary>
         public string? DumpingSoftware
         {
@@ -247,7 +249,7 @@ namespace com.clusterrr.Famicom.Containers
             {
                 if (!ContainsField("DINF"))
                     return null;
-                var data = this["DINF"].ToArray();
+                var data = this["DINF"];
                 if (data.Length >= 204 && data[0] != 0)
                     return UTF8NToString(data, 100, 104);
                 else
@@ -259,7 +261,7 @@ namespace com.clusterrr.Famicom.Containers
                 {
                     if (!ContainsField("DINF"))
                         this["DINF"] = new byte[204];
-                    var data = this["DINF"].ToArray();
+                    var data = this["DINF"];
                     for (int i = 104; i < 104 + 100; i++)
                         data[i] = 0;
                     if (value != null)
@@ -274,14 +276,14 @@ namespace com.clusterrr.Famicom.Containers
         }
 
         /// <summary>
-        /// Date of the dump
+        /// Date of the dump (null if none)
         /// </summary>
         public DateTime? DumpDate
         {
             get
             {
                 if (!ContainsField("DINF")) return null;
-                var data = this["DINF"].ToArray();
+                var data = this["DINF"];
                 if (data[0] == 0 && data[1] == 0 && data[2] == 0 && data[3] == 0)
                     return null;
                 return new DateTime(
@@ -296,7 +298,7 @@ namespace com.clusterrr.Famicom.Containers
                 {
                     if (!ContainsField("DINF"))
                         this["DINF"] = new byte[204];
-                    var data = this["DINF"].ToArray();
+                    var data = this["DINF"];
                     if (value != null)
                     {
                         data[100] = (byte)value.Value.Day;
@@ -307,10 +309,7 @@ namespace com.clusterrr.Famicom.Containers
                     else
                     {
                         // Is it valid?
-                        data[100] = 0;
-                        data[101] = 0;
-                        data[102] = 0;
-                        data[103] = 0;
+                        data[100] = data[101] = data[102] = data[103] = 0;
                     }
                     this["DINF"] = data;
                 }
@@ -319,11 +318,11 @@ namespace com.clusterrr.Famicom.Containers
         }
 
         /// <summary>
-        /// Name of the game
+        /// Name of the game (null if none)
         /// </summary>
         public string? GameName
         {
-            get => ContainsField("NAME") ? UTF8NToString(this["NAME"].ToArray()) : null;
+            get => ContainsField("NAME") ? UTF8NToString(this["NAME"]) : null;
             set
             {
                 if (value == null)
@@ -334,7 +333,7 @@ namespace com.clusterrr.Famicom.Containers
         }
 
         /// <summary>
-        /// For non-homebrew NES/Famicom games, this field's value is always a function of the region in which a game was released
+        /// For non-homebrew NES/Famicom games, this field's value is always a function of the region in which a game was released (null if none)
         /// </summary>
         public Timing? Region
         {
@@ -355,7 +354,7 @@ namespace com.clusterrr.Famicom.Containers
         }
 
         /// <summary>
-        /// Controllers usable by this game (bitmask)
+        /// Controllers usable by this game, bitmask (null if none)
         /// </summary>
         public Controller? Controllers
         {
@@ -376,7 +375,7 @@ namespace com.clusterrr.Famicom.Containers
         }
 
         /// <summary>
-        /// Battery-backed (or other non-volatile memory) memory is present
+        /// Battery-backed (or other non-volatile memory) memory is present (null if none)
         /// </summary>
         public bool? Battery
         {
@@ -397,7 +396,7 @@ namespace com.clusterrr.Famicom.Containers
         }
 
         /// <summary>
-        /// Mirroring type
+        /// Mirroring type (null if none)
         /// </summary>
         public MirroringType? Mirroring
         {
@@ -418,9 +417,9 @@ namespace com.clusterrr.Famicom.Containers
         }
 
         /// <summary>
-        /// PRG0 field
+        /// PRG0 field (null if none)
         /// </summary>
-        public IEnumerable<byte>? PRG0
+        public byte[]? PRG0
         {
             get
             {
@@ -439,9 +438,9 @@ namespace com.clusterrr.Famicom.Containers
         }
 
         /// <summary>
-        /// PRG1 field
+        /// PRG1 field (null if none)
         /// </summary>
-        public IEnumerable<byte>? PRG1
+        public byte[]? PRG1
         {
             get
             {
@@ -460,9 +459,9 @@ namespace com.clusterrr.Famicom.Containers
         }
 
         /// <summary>
-        /// PRG2 field
+        /// PRG2 field (null if none)
         /// </summary>
-        public IEnumerable<byte>? PRG2
+        public byte[]? PRG2
         {
             get
             {
@@ -481,9 +480,9 @@ namespace com.clusterrr.Famicom.Containers
         }
 
         /// <summary>
-        /// PRG3 field
+        /// PRG3 field (null if none)
         /// </summary>
-        public IEnumerable<byte>? PRG3
+        public byte[]? PRG3
         {
             get
             {
@@ -502,9 +501,9 @@ namespace com.clusterrr.Famicom.Containers
         }
 
         /// <summary>
-        /// CHR0 field
+        /// CHR0 field (null if none)
         /// </summary>
-        public IEnumerable<byte>? CHR0
+        public byte[]? CHR0
         {
             get
             {
@@ -523,9 +522,9 @@ namespace com.clusterrr.Famicom.Containers
         }
 
         /// <summary>
-        /// CHR1 field
+        /// CHR1 field (null if none)
         /// </summary>
-        public IEnumerable<byte>? CHR1
+        public byte[]? CHR1
         {
             get
             {
@@ -544,9 +543,9 @@ namespace com.clusterrr.Famicom.Containers
         }
 
         /// <summary>
-        /// CHR2 field
+        /// CHR2 field (null if none)
         /// </summary>
-        public IEnumerable<byte>? CHR2
+        public byte[]? CHR2
         {
             get
             {
@@ -565,9 +564,9 @@ namespace com.clusterrr.Famicom.Containers
         }
 
         /// <summary>
-        /// CHR3 field
+        /// CHR3 field (null if none)
         /// </summary>
-        public IEnumerable<byte>? CHR3
+        public byte[]? CHR3
         {
             get
             {
@@ -593,21 +592,33 @@ namespace com.clusterrr.Famicom.Containers
             foreach (var kv in this.Where(kv => kv.Key.StartsWith("PRG")))
             {
                 var num = kv.Key[3];
-                var crc32 = Crc32Calculator.CalculateCRC32(kv.Value.ToArray());
+                var crc32 = Crc32Calculator.CalculateCRC32(kv.Value);
                 this[$"PCK{num}"] = BitConverter.GetBytes(crc32);
             }
             foreach (var kv in this.Where(kv => kv.Key.StartsWith("CHR")))
             {
                 var num = kv.Key[3];
-                var crc32 = Crc32Calculator.CalculateCRC32(kv.Value.ToArray());
+                var crc32 = Crc32Calculator.CalculateCRC32(kv.Value);
                 this[$"CCK{num}"] = BitConverter.GetBytes(crc32);
             }
         }
 
         /// <summary>
-        /// Calculate overall CRC32
+        /// Calculate MD5 checksum of ROM (all PRG fields + all CHR fields)
         /// </summary>
-        /// <returns></returns>
+        /// <returns>MD5 checksum for all PRG and CHR data</returns>
+        public byte[] CalculateMD5()
+        {
+            var md5 = MD5.Create();
+            var alldata = Enumerable.Concat(fields.Where(k => k.Key.StartsWith("PRG")).OrderBy(k => k.Key).SelectMany(i => i.Value),
+                                  fields.Where(k => k.Key.StartsWith("CHR")).OrderBy(k => k.Key).SelectMany(i => i.Value)).ToArray();
+            return md5.ComputeHash(alldata);
+        }
+
+        /// <summary>
+        /// Calculate CRC32 checksum of ROM (all PRG fields + all CHR fields)
+        /// </summary>
+        /// <returns>CRC32 checksum for all PRG and CHR data</returns>
         public uint CalculateCRC32()
             => Crc32Calculator.CalculateCRC32(
                 Enumerable.Concat(fields.Where(k => k.Key.StartsWith("PRG")).OrderBy(k => k.Key).SelectMany(i => i.Value),
