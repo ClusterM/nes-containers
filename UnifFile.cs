@@ -16,6 +16,24 @@ namespace com.clusterrr.Famicom.Containers
     /// </summary>
     public class UnifFile : IEnumerable<KeyValuePair<string, byte[]>>
     {
+        private const string FIELD_CTRL = "CTRL";
+        private const string FIELD_TVCI = "TVCI";
+        private const string FIELD_DINF = "DINF";
+        private const string FIELD_NAME = "NAME";
+        private const string FIELD_BATR = "BATR";
+        private const string FIELD_MAPR = "MAPR";
+        private const string FIELD_MIRR = "MIRR";
+        private const string FIELD_PRG0 = "PRG0";
+        private const string FIELD_PRG1 = "PRG1";
+        private const string FIELD_PRG2 = "PRG2";
+        private const string FIELD_PRG3 = "PRG3";
+        private const string FIELD_CHR0 = "CHR0";
+        private const string FIELD_CHR1 = "CHR1";
+        private const string FIELD_CHR2 = "CHR2";
+        private const string FIELD_CHR3 = "CHR3";
+        private const string PREFIX_PRG = "PRG";
+        private const string PREFIX_CHR = "CHR";
+
         /// <summary>
         /// UNIF fields
         /// </summary>
@@ -133,9 +151,9 @@ namespace com.clusterrr.Famicom.Containers
         public byte[] ToBytes()
         {
             // Some checks
-            if (ContainsField("CTRL") && Version < 7)
+            if (ContainsField(FIELD_CTRL) && Version < 7)
                 throw new InvalidDataException("CTRL (controllers) field requires UNIF version 7 or greater");
-            if (ContainsField("TVCI") && Version < 6)
+            if (ContainsField(FIELD_TVCI) && Version < 6)
                 throw new InvalidDataException("TVCI (controllers) field requires UNIF version 6 or greater");
 
             var data = new List<byte>();
@@ -194,13 +212,13 @@ namespace com.clusterrr.Famicom.Containers
         /// </summary>
         public string? Mapper
         {
-            get => ContainsField("MAPR") ? UTF8NToString(this["MAPR"]) : null;
+            get => ContainsField(FIELD_MAPR) ? UTF8NToString(this[FIELD_MAPR]) : null;
             set
             {
                 if (value == null)
-                    RemoveField("MAPR");
+                    RemoveField(FIELD_MAPR);
                 else
-                    this["MAPR"] = StringToUTF8N(value);
+                    this[FIELD_MAPR] = StringToUTF8N(value);
             }
         }
 
@@ -212,9 +230,9 @@ namespace com.clusterrr.Famicom.Containers
         {
             get
             {
-                if (!ContainsField("DINF"))
+                if (!ContainsField(FIELD_DINF))
                     return null;
-                var data = this["DINF"];
+                var data = this[FIELD_DINF];
                 if (data.Length >= 204 && data[0] != 0)
                     return UTF8NToString(data, 100);
                 else
@@ -224,9 +242,9 @@ namespace com.clusterrr.Famicom.Containers
             {
                 if (value != null || DumpingSoftware != null || DumpDate != null)
                 {
-                    if (!ContainsField("DINF"))
-                        this["DINF"] = new byte[204];
-                    var data = this["DINF"];
+                    if (!ContainsField(FIELD_DINF))
+                        this[FIELD_DINF] = new byte[204];
+                    var data = this[FIELD_DINF];
                     for (int i = 0; i < 100; i++)
                         data[i] = 0;
                     if (value != null)
@@ -234,9 +252,9 @@ namespace com.clusterrr.Famicom.Containers
                         var name = StringToUTF8N(value);
                         Array.Copy(name, 0, data, 0, Math.Min(100, name!.Length));
                     }
-                    this["DINF"] = data;
+                    this[FIELD_DINF] = data;
                 }
-                else RemoveField("DINF");
+                else RemoveField(FIELD_DINF);
             }
         }
 
@@ -247,9 +265,9 @@ namespace com.clusterrr.Famicom.Containers
         {
             get
             {
-                if (!ContainsField("DINF"))
+                if (!ContainsField(FIELD_DINF))
                     return null;
-                var data = this["DINF"];
+                var data = this[FIELD_DINF];
                 if (data.Length >= 204 && data[0] != 0)
                     return UTF8NToString(data, 100, 104);
                 else
@@ -259,9 +277,9 @@ namespace com.clusterrr.Famicom.Containers
             {
                 if (value != null || DumperName != null || DumpDate != null)
                 {
-                    if (!ContainsField("DINF"))
-                        this["DINF"] = new byte[204];
-                    var data = this["DINF"];
+                    if (!ContainsField(FIELD_DINF))
+                        this[FIELD_DINF] = new byte[204];
+                    var data = this[FIELD_DINF];
                     for (int i = 104; i < 104 + 100; i++)
                         data[i] = 0;
                     if (value != null)
@@ -269,9 +287,9 @@ namespace com.clusterrr.Famicom.Containers
                         var name = StringToUTF8N(value);
                         Array.Copy(name, 0, data, 104, Math.Min(100, name!.Length));
                     }
-                    this["DINF"] = data;
+                    this[FIELD_DINF] = data;
                 }
-                else RemoveField("DINF");
+                else RemoveField(FIELD_DINF);
             }
         }
 
@@ -282,8 +300,8 @@ namespace com.clusterrr.Famicom.Containers
         {
             get
             {
-                if (!ContainsField("DINF")) return null;
-                var data = this["DINF"];
+                if (!ContainsField(FIELD_DINF)) return null;
+                var data = this[FIELD_DINF];
                 if (data[0] == 0 && data[1] == 0 && data[2] == 0 && data[3] == 0)
                     return null;
                 return new DateTime(
@@ -296,9 +314,9 @@ namespace com.clusterrr.Famicom.Containers
             {
                 if (value != null || DumperName != null || DumpingSoftware != null)
                 {
-                    if (!ContainsField("DINF"))
-                        this["DINF"] = new byte[204];
-                    var data = this["DINF"];
+                    if (!ContainsField(FIELD_DINF))
+                        this[FIELD_DINF] = new byte[204];
+                    var data = this[FIELD_DINF];
                     if (value != null)
                     {
                         data[100] = (byte)value.Value.Day;
@@ -311,9 +329,9 @@ namespace com.clusterrr.Famicom.Containers
                         // Is it valid?
                         data[100] = data[101] = data[102] = data[103] = 0;
                     }
-                    this["DINF"] = data;
+                    this[FIELD_DINF] = data;
                 }
-                else RemoveField("DINF");
+                else RemoveField(FIELD_DINF);
             }
         }
 
@@ -322,13 +340,13 @@ namespace com.clusterrr.Famicom.Containers
         /// </summary>
         public string? GameName
         {
-            get => ContainsField("NAME") ? UTF8NToString(this["NAME"]) : null;
+            get => ContainsField(FIELD_NAME) ? UTF8NToString(this[FIELD_NAME]) : null;
             set
             {
                 if (value == null)
-                    RemoveField("NAME");
+                    RemoveField(FIELD_NAME);
                 else
-                    this["NAME"] = StringToUTF8N(value!);
+                    this[FIELD_NAME] = StringToUTF8N(value!);
             }
         }
 
@@ -339,17 +357,17 @@ namespace com.clusterrr.Famicom.Containers
         {
             get
             {
-                if (ContainsField("TVCI") && this["TVCI"].Any())
-                    return (Timing)this["TVCI"].First();
+                if (ContainsField(FIELD_TVCI) && this[FIELD_TVCI].Any())
+                    return (Timing)this[FIELD_TVCI].First();
                 else
                     return null;
             }
             set
             {
                 if (value != null)
-                    this["TVCI"] = new byte[] { (byte)value };
+                    this[FIELD_TVCI] = new byte[] { (byte)value };
                 else
-                    RemoveField("TVCI");
+                    RemoveField(FIELD_TVCI);
             }
         }
 
@@ -360,17 +378,17 @@ namespace com.clusterrr.Famicom.Containers
         {
             get
             {
-                if (ContainsField("CTRL") && this["CTRL"].Any())
-                    return (Controller)this["CTRL"].First();
+                if (ContainsField(FIELD_CTRL) && this[FIELD_CTRL].Any())
+                    return (Controller)this[FIELD_CTRL].First();
                 else
                     return Controller.None;
             }
             set
             {
                 if (value != null)
-                    fields["CTRL"] = new byte[] { (byte)value };
+                    fields[FIELD_CTRL] = new byte[] { (byte)value };
                 else
-                    RemoveField("CTRL");
+                    RemoveField(FIELD_CTRL);
             }
         }
 
@@ -381,17 +399,17 @@ namespace com.clusterrr.Famicom.Containers
         {
             get
             {
-                if (ContainsField("BATR") && this["BATR"].Any())
-                    return this["BATR"].First() != 0;
+                if (ContainsField(FIELD_BATR) && this[FIELD_BATR].Any())
+                    return this[FIELD_BATR].First() != 0;
                 else
                     return false;
             }
             set
             {
                 if (value != null)
-                    fields["BATR"] = new byte[] { (byte)((bool)value ? 1 : 0) };
+                    fields[FIELD_BATR] = new byte[] { (byte)((bool)value ? 1 : 0) };
                 else
-                    RemoveField("BATR");
+                    RemoveField(FIELD_BATR);
             }
         }
 
@@ -402,17 +420,17 @@ namespace com.clusterrr.Famicom.Containers
         {
             get
             {
-                if (ContainsField("MIRR") && this["MIRR"].Any())
-                    return (MirroringType)this["MIRR"].First();
+                if (ContainsField(FIELD_MIRR) && this[FIELD_MIRR].Any())
+                    return (MirroringType)this[FIELD_MIRR].First();
                 else
                     return null;
             }
             set
             {
                 if (value != null && value != MirroringType.Unknown)
-                    this["MIRR"] = new byte[] { (byte)value };
+                    this[FIELD_MIRR] = new byte[] { (byte)value };
                 else
-                    this.RemoveField("MIRR");
+                    this.RemoveField(FIELD_MIRR);
             }
         }
 
@@ -423,17 +441,17 @@ namespace com.clusterrr.Famicom.Containers
         {
             get
             {
-                if (ContainsField("PRG0"))
-                    return this["PRG0"];
+                if (ContainsField(FIELD_PRG0))
+                    return this[FIELD_PRG0];
                 else
                     return null;
             }
             set
             {
                 if (value != null)
-                    this["PRG0"] = value;
+                    this[FIELD_PRG0] = value;
                 else
-                    RemoveField("PRG0");
+                    RemoveField(FIELD_PRG0);
             }
         }
 
@@ -444,17 +462,17 @@ namespace com.clusterrr.Famicom.Containers
         {
             get
             {
-                if (ContainsField("PRG1"))
-                    return this["PRG1"];
+                if (ContainsField(FIELD_PRG1))
+                    return this[FIELD_PRG1];
                 else
                     return null;
             }
             set
             {
                 if (value != null)
-                    this["PRG1"] = value;
+                    this[FIELD_PRG1] = value;
                 else
-                    RemoveField("PRG1");
+                    RemoveField(FIELD_PRG1);
             }
         }
 
@@ -465,17 +483,17 @@ namespace com.clusterrr.Famicom.Containers
         {
             get
             {
-                if (ContainsField("PRG2"))
-                    return this["PRG2"];
+                if (ContainsField(FIELD_PRG2))
+                    return this[FIELD_PRG2];
                 else
                     return null;
             }
             set
             {
                 if (value != null)
-                    this["PRG2"] = value;
+                    this[FIELD_PRG2] = value;
                 else
-                    RemoveField("PRG2");
+                    RemoveField(FIELD_PRG2);
             }
         }
 
@@ -486,17 +504,17 @@ namespace com.clusterrr.Famicom.Containers
         {
             get
             {
-                if (ContainsField("PRG3"))
-                    return this["PRG3"];
+                if (ContainsField(FIELD_PRG3))
+                    return this[FIELD_PRG3];
                 else
                     return null;
             }
             set
             {
                 if (value != null)
-                    this["PRG3"] = value;
+                    this[FIELD_PRG3] = value;
                 else
-                    RemoveField("PRG3");
+                    RemoveField(FIELD_PRG3);
             }
         }
 
@@ -507,17 +525,17 @@ namespace com.clusterrr.Famicom.Containers
         {
             get
             {
-                if (ContainsField("CHR0"))
-                    return this["CHR0"];
+                if (ContainsField(FIELD_CHR0))
+                    return this[FIELD_CHR0];
                 else
                     return null;
             }
             set
             {
                 if (value != null)
-                    this["CHR0"] = value;
+                    this[FIELD_CHR0] = value;
                 else
-                    RemoveField("CHR0");
+                    RemoveField(FIELD_CHR0);
             }
         }
 
@@ -528,17 +546,17 @@ namespace com.clusterrr.Famicom.Containers
         {
             get
             {
-                if (ContainsField("CHR1"))
-                    return this["CHR1"];
+                if (ContainsField(FIELD_CHR1))
+                    return this[FIELD_CHR1];
                 else
                     return null;
             }
             set
             {
                 if (value != null)
-                    this["CHR1"] = value;
+                    this[FIELD_CHR1] = value;
                 else
-                    RemoveField("CHR1");
+                    RemoveField(FIELD_CHR1);
             }
         }
 
@@ -549,17 +567,17 @@ namespace com.clusterrr.Famicom.Containers
         {
             get
             {
-                if (ContainsField("CHR2"))
-                    return this["CHR2"];
+                if (ContainsField(FIELD_CHR2))
+                    return this[FIELD_CHR2];
                 else
                     return null;
             }
             set
             {
                 if (value != null)
-                    this["CHR2"] = value;
+                    this[FIELD_CHR2] = value;
                 else
-                    RemoveField("CHR2");
+                    RemoveField(FIELD_CHR2);
             }
         }
 
@@ -570,17 +588,17 @@ namespace com.clusterrr.Famicom.Containers
         {
             get
             {
-                if (ContainsField("CHR3"))
-                    return this["CHR3"];
+                if (ContainsField(FIELD_CHR3))
+                    return this[FIELD_CHR3];
                 else
                     return null;
             }
             set
             {
                 if (value != null)
-                    this["CHR3"] = value;
+                    this[FIELD_CHR3] = value;
                 else
-                    RemoveField("CHR3");
+                    RemoveField(FIELD_CHR3);
             }
         }
 
@@ -589,13 +607,13 @@ namespace com.clusterrr.Famicom.Containers
         /// </summary>
         public void CalculateAndStoreCRCs()
         {
-            foreach (var kv in this.Where(kv => kv.Key.StartsWith("PRG")))
+            foreach (var kv in this.Where(kv => kv.Key.StartsWith(PREFIX_PRG)))
             {
                 var num = kv.Key[3];
                 var crc32 = Crc32Calculator.CalculateCRC32(kv.Value);
                 this[$"PCK{num}"] = BitConverter.GetBytes(crc32);
             }
-            foreach (var kv in this.Where(kv => kv.Key.StartsWith("CHR")))
+            foreach (var kv in this.Where(kv => kv.Key.StartsWith(PREFIX_CHR)))
             {
                 var num = kv.Key[3];
                 var crc32 = Crc32Calculator.CalculateCRC32(kv.Value);
@@ -610,8 +628,8 @@ namespace com.clusterrr.Famicom.Containers
         public byte[] CalculateMD5()
         {
             var md5 = MD5.Create();
-            var alldata = Enumerable.Concat(fields.Where(k => k.Key.StartsWith("PRG")).OrderBy(k => k.Key).SelectMany(i => i.Value),
-                                  fields.Where(k => k.Key.StartsWith("CHR")).OrderBy(k => k.Key).SelectMany(i => i.Value)).ToArray();
+            var alldata = Enumerable.Concat(fields.Where(k => k.Key.StartsWith(PREFIX_PRG)).OrderBy(k => k.Key).SelectMany(i => i.Value),
+                                  fields.Where(k => k.Key.StartsWith(PREFIX_CHR)).OrderBy(k => k.Key).SelectMany(i => i.Value)).ToArray();
             return md5.ComputeHash(alldata);
         }
 
@@ -621,8 +639,8 @@ namespace com.clusterrr.Famicom.Containers
         /// <returns>CRC32 checksum for all PRG and CHR data</returns>
         public uint CalculateCRC32()
             => Crc32Calculator.CalculateCRC32(
-                Enumerable.Concat(fields.Where(k => k.Key.StartsWith("PRG")).OrderBy(k => k.Key).SelectMany(i => i.Value),
-                                  fields.Where(k => k.Key.StartsWith("CHR")).OrderBy(k => k.Key).SelectMany(i => i.Value)).ToArray()
+                Enumerable.Concat(fields.Where(k => k.Key.StartsWith(PREFIX_PRG)).OrderBy(k => k.Key).SelectMany(i => i.Value),
+                                  fields.Where(k => k.Key.StartsWith(PREFIX_CHR)).OrderBy(k => k.Key).SelectMany(i => i.Value)).ToArray()
             );
 
         /// <summary>
