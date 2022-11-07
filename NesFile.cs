@@ -17,7 +17,7 @@ namespace com.clusterrr.Famicom.Containers
         public byte[] PRG
         {
             get => prg;
-            set => prg = (value ?? new byte[0]).ToArray();
+            set => prg = (value ?? Array.Empty<byte>()).ToArray();
         }
         /// <summary>
         /// CHR data
@@ -25,7 +25,7 @@ namespace com.clusterrr.Famicom.Containers
         public byte[] CHR
         {
             get => chr;
-            set => chr = (value ?? new byte[0]).ToArray();
+            set => chr = (value ?? Array.Empty<byte>()).ToArray();
         }
         /// <summary>
         /// Trainer
@@ -37,7 +37,7 @@ namespace com.clusterrr.Famicom.Containers
             {
                 if (value != null && value.Count() != 0 && value.Count() > 512)
                     throw new ArgumentOutOfRangeException("Trainer size must be 512 bytes or less");
-                chr = value ?? new byte[0];
+                chr = value ?? Array.Empty<byte>();
             }
         }
         /// <summary>
@@ -46,7 +46,7 @@ namespace com.clusterrr.Famicom.Containers
         public byte[] MiscellaneousROM
         {
             get => miscellaneousROM;
-            set => miscellaneousROM = value ?? new byte[0];
+            set => miscellaneousROM = value ?? Array.Empty<byte>();
         }
         /// <summary>
         /// Mapper number
@@ -96,10 +96,10 @@ namespace com.clusterrr.Famicom.Containers
         /// </summary>
         public uint ChrRamSize { get; set; } = 0;
         private uint chrNvRamSize = 0;
-        private byte[] prg = new byte[0];
-        private byte[] chr = new byte[0];
-        private byte[] trainer = new byte[0];
-        private byte[] miscellaneousROM = new byte[0];
+        private byte[] prg = Array.Empty<byte>();
+        private byte[] chr = Array.Empty<byte>();
+        private byte[] trainer = Array.Empty<byte>();
+        private byte[] miscellaneousROM = Array.Empty<byte>();
 
         /// <summary>
         /// CHR NVRAM Size (NES 2.0 only)
@@ -587,7 +587,7 @@ namespace com.clusterrr.Famicom.Containers
             if ((header[6] & (1 << 2)) != 0)
                 trainer = new byte[512];
             else
-                trainer = new byte[0];
+                trainer = Array.Empty<byte>();
             if ((header[6] & (1 << 3)) != 0)
                 Mirroring = MirroringType.FourScreenVram;
             if (Version == iNesVersion.iNES)
@@ -659,7 +659,7 @@ namespace com.clusterrr.Famicom.Containers
             }
             else
             {
-                MiscellaneousROM = new byte[0];
+                MiscellaneousROM = Array.Empty<byte>();
             }
         }
 
@@ -930,7 +930,7 @@ namespace com.clusterrr.Famicom.Containers
         public byte[] CalculateMD5()
         {
             var md5 = MD5.Create();
-            var alldata = Enumerable.Concat(prg ?? new byte[0], chr ?? new byte[0]).ToArray();
+            var alldata = Enumerable.Concat(prg ?? Array.Empty<byte>(), chr ?? Array.Empty<byte>()).ToArray();
             return md5.ComputeHash(alldata);
         }
 
@@ -938,6 +938,6 @@ namespace com.clusterrr.Famicom.Containers
         /// Calculate CRC32 checksum of ROM (CHR+PRG without header)
         /// </summary>
         /// <returns>CRC32 checksum for all PRG and CHR data</returns>
-        public uint CalculateCRC32() => Crc32Calculator.CalculateCRC32(Enumerable.Concat(prg ?? new byte[0], chr ?? new byte[0]).ToArray());
+        public uint CalculateCRC32() => Crc32Calculator.CalculateCRC32(Enumerable.Concat(prg ?? Array.Empty<byte>(), chr ?? Array.Empty<byte>()).ToArray());
     }
 }

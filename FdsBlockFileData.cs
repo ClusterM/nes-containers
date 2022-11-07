@@ -19,7 +19,7 @@ namespace com.clusterrr.Famicom.Containers
         /// </summary>
         public bool IsValid { get => blockType == ValidTypeID; }
 
-        private byte[] data = new byte[0];
+        private byte[] data = Array.Empty<byte>();
         /// <summary>
         /// File data
         /// </summary>
