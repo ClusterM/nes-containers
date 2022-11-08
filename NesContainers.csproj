@@ -16,12 +16,12 @@
     <PackageProjectUrl>https://github.com/ClusterM/nes-containers</PackageProjectUrl>
     <Copyright>Alexey 'Cluster' Avdyukhin, 2022</Copyright>
     <Description>A simple .NET Standard 2.0 library for reading and modifying NES/Famicom ROM containers: .nes (iNES, NES 2.0), .unf (UNIF), and .fds (Famicom Disk System images).</Description>
-    <Version>1.0.1</Version>
+    <Version>1.1.0</Version>
     <RepositoryUrl>https://github.com/ClusterM/nes-containers</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>nes,famicom,famicom disk system</PackageTags>
-    <AssemblyVersion>1.0.1</AssemblyVersion>
-    <FileVersion>1.0.1</FileVersion>
+    <AssemblyVersion>1.1.0</AssemblyVersion>
+    <FileVersion>1.1.0</FileVersion>
     <Authors>Alexey 'Cluster' Avdyukhin</Authors>
   </PropertyGroup>
 
