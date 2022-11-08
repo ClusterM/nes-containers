@@ -610,14 +610,16 @@ namespace com.clusterrr.Famicom.Containers
             foreach (var kv in this.Where(kv => kv.Key.StartsWith(PREFIX_PRG)))
             {
                 var num = kv.Key[3];
-                var crc32 = Crc32Calculator.CalculateCRC32(kv.Value);
-                this[$"PCK{num}"] = BitConverter.GetBytes(crc32);
+                using var crc32 = new Crc32();
+                var crc32sum = crc32.ComputeHash(kv.Value);
+                this[$"PCK{num}"] = crc32sum;
             }
             foreach (var kv in this.Where(kv => kv.Key.StartsWith(PREFIX_CHR)))
             {
                 var num = kv.Key[3];
-                var crc32 = Crc32Calculator.CalculateCRC32(kv.Value);
-                this[$"CCK{num}"] = BitConverter.GetBytes(crc32);
+                using var crc32 = new Crc32();
+                var crc32sum = crc32.ComputeHash(kv.Value);
+                this[$"CCK{num}"] = crc32sum;
             }
         }
 
@@ -627,10 +629,22 @@ namespace com.clusterrr.Famicom.Containers
         /// <returns>MD5 checksum for all PRG and CHR data</returns>
         public byte[] CalculateMD5()
         {
-            var md5 = MD5.Create();
-            var alldata = Enumerable.Concat(fields.Where(k => k.Key.StartsWith(PREFIX_PRG)).OrderBy(k => k.Key).SelectMany(i => i.Value),
-                                  fields.Where(k => k.Key.StartsWith(PREFIX_CHR)).OrderBy(k => k.Key).SelectMany(i => i.Value)).ToArray();
-            return md5.ComputeHash(alldata);
+            using var md5 = MD5.Create();
+            foreach(var kv in fields.Where(k => k.Key.StartsWith(PREFIX_PRG)).OrderBy(k => k.Key)
+                .Concat(fields.Where(k => k.Key.StartsWith(PREFIX_CHR)).OrderBy(k => k.Key)))
+            {
+                var v = kv.Value;
+                int sizeUpPow2 = 0;
+                if (v.Length > 0)
+                {
+                    sizeUpPow2 = 1;
+                    while (sizeUpPow2 < v.Length) sizeUpPow2 *= 2;
+                }
+                md5.TransformBlock(v, 0, v.Length, null, 0);
+                md5.TransformBlock(Enumerable.Repeat<byte>(byte.MaxValue, sizeUpPow2 - v.Length).ToArray(), 0, sizeUpPow2 - v.Length, null, 0);
+            }
+            md5.TransformFinalBlock(new byte[0], 0, 0);
+            return md5.Hash;
         }
 
         /// <summary>
@@ -638,10 +652,24 @@ namespace com.clusterrr.Famicom.Containers
         /// </summary>
         /// <returns>CRC32 checksum for all PRG and CHR data</returns>
         public uint CalculateCRC32()
-            => Crc32Calculator.CalculateCRC32(
-                Enumerable.Concat(fields.Where(k => k.Key.StartsWith(PREFIX_PRG)).OrderBy(k => k.Key).SelectMany(i => i.Value),
-                                  fields.Where(k => k.Key.StartsWith(PREFIX_CHR)).OrderBy(k => k.Key).SelectMany(i => i.Value)).ToArray()
-            );
+        {
+            using var crc32 = new Crc32();
+            foreach (var kv in fields.Where(k => k.Key.StartsWith(PREFIX_PRG)).OrderBy(k => k.Key)
+                .Concat(fields.Where(k => k.Key.StartsWith(PREFIX_CHR)).OrderBy(k => k.Key)))
+            {
+                var v = kv.Value;
+                int sizeUpPow2 = 0;
+                if (v.Length > 0)
+                {
+                    sizeUpPow2 = 1;
+                    while (sizeUpPow2 < v.Length) sizeUpPow2 *= 2;
+                }
+                crc32.TransformBlock(v, 0, v.Length, null, 0);
+                crc32.TransformBlock(Enumerable.Repeat<byte>(byte.MaxValue, sizeUpPow2 - v.Length).ToArray(), 0, sizeUpPow2 - v.Length, null, 0);
+            }
+            crc32.TransformFinalBlock(new byte[0], 0, 0);
+            return BitConverter.ToUInt32(crc32.Hash, 0);
+        }
 
         /// <summary>
         /// Default game controller(s)

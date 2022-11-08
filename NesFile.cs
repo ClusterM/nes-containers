@@ -752,7 +752,9 @@ namespace com.clusterrr.Famicom.Containers
                     if (trainer.Length < 512) data.AddRange(Enumerable.Repeat<byte>(0xFF, (int)512 - trainer.Length));
                 }
                 data.AddRange(prg);
+                data.AddRange(Enumerable.Repeat<byte>(byte.MaxValue, (int)prgSizePadded - prg.Length));
                 data.AddRange(chr);
+                data.AddRange(Enumerable.Repeat<byte>(byte.MaxValue, (int)chrSizePadded - chr.Length));
             }
             else if (Version == iNesVersion.NES20)
             {
@@ -846,12 +848,12 @@ namespace com.clusterrr.Famicom.Containers
                 if (trainer.Length > 0)
                 {
                     data.AddRange(trainer);
-                    if (trainer.Length < 512) data.AddRange(Enumerable.Repeat<byte>(0xFF, (int)512 - trainer.Length));
+                    if (trainer.Length < 512) data.AddRange(Enumerable.Repeat(byte.MaxValue, (int)512 - trainer.Length));
                 }
                 data.AddRange(prg);
-                data.AddRange(Enumerable.Repeat<byte>(0xFF, (int)prgSizePadded - prg.Length));
+                data.AddRange(Enumerable.Repeat(byte.MaxValue, (int)prgSizePadded - prg.Length));
                 data.AddRange(chr);
-                data.AddRange(Enumerable.Repeat<byte>(0xFF, (int)chrSizePadded - chr.Length));
+                data.AddRange(Enumerable.Repeat(byte.MaxValue, (int)chrSizePadded - chr.Length));
                 if (MiscellaneousROMsCount > 0 || miscellaneousROM.Length > 0)
                 {
                     if (MiscellaneousROMsCount == 0)
@@ -929,15 +931,46 @@ namespace com.clusterrr.Famicom.Containers
         /// <returns>MD5 checksum for all PRG and CHR data</returns>
         public byte[] CalculateMD5()
         {
-            var md5 = MD5.Create();
-            var alldata = Enumerable.Concat(prg ?? Array.Empty<byte>(), chr ?? Array.Empty<byte>()).ToArray();
-            return md5.ComputeHash(alldata);
+            int prgSizeUpPow2 = 1;
+            int chrSizeUpPow2 = 1;
+            while (prgSizeUpPow2 < PRG.Length) prgSizeUpPow2 *= 2;
+            if (CHR.Length == 0)
+                chrSizeUpPow2 = 0;
+            else
+                while (chrSizeUpPow2 < CHR.Length) chrSizeUpPow2 *= 2;
+            using (var md5 = MD5.Create())
+            {
+                md5.TransformBlock(prg, 0, prg.Length, null, 0);
+                md5.TransformBlock(Enumerable.Repeat<byte>(byte.MaxValue, prgSizeUpPow2 - prg.Length).ToArray(), 0, prgSizeUpPow2 - prg.Length, null, 0);
+                md5.TransformBlock(chr, 0, chr.Length, null, 0);
+                md5.TransformBlock(Enumerable.Repeat<byte>(byte.MaxValue, chrSizeUpPow2 - chr.Length).ToArray(), 0, chrSizeUpPow2 - chr.Length, null, 0);
+                md5.TransformFinalBlock(new byte[0], 0, 0);
+                return md5.Hash;
+            }
         }
 
         /// <summary>
         /// Calculate CRC32 checksum of ROM (CHR+PRG without header)
         /// </summary>
         /// <returns>CRC32 checksum for all PRG and CHR data</returns>
-        public uint CalculateCRC32() => Crc32Calculator.CalculateCRC32(Enumerable.Concat(prg ?? Array.Empty<byte>(), chr ?? Array.Empty<byte>()).ToArray());
+        public uint CalculateCRC32()
+        {
+            int prgSizeUpPow2 = 1;
+            int chrSizeUpPow2 = 1;
+            while (prgSizeUpPow2 < PRG.Length) prgSizeUpPow2 *= 2;
+            if (CHR.Length == 0)
+                chrSizeUpPow2 = 0;
+            else
+                while (chrSizeUpPow2 < CHR.Length) chrSizeUpPow2 *= 2;
+            using (var crc32 = new Crc32())
+            {
+                crc32.TransformBlock(prg, 0, prg.Length, null, 0);
+                crc32.TransformBlock(Enumerable.Repeat<byte>(byte.MaxValue, prgSizeUpPow2 - prg.Length).ToArray(), 0, prgSizeUpPow2 - prg.Length, null, 0);
+                crc32.TransformBlock(chr, 0, chr.Length, null, 0);
+                crc32.TransformBlock(Enumerable.Repeat<byte>(byte.MaxValue, chrSizeUpPow2 - chr.Length).ToArray(), 0, chrSizeUpPow2 - chr.Length, null, 0);
+                crc32.TransformFinalBlock(new byte[0], 0, 0);
+                return BitConverter.ToUInt32(crc32.Hash, 0);
+            }
+        }
     }
 }
