@@ -933,11 +933,14 @@ namespace com.clusterrr.Famicom.Containers
         {
             int prgSizeUpPow2 = 1;
             int chrSizeUpPow2 = 1;
-            while (prgSizeUpPow2 < PRG.Length) prgSizeUpPow2 *= 2;
+            if (PRG.Length == 0)
+                prgSizeUpPow2 = 0; // Is it possible?
+            else
+                while (prgSizeUpPow2 < PRG.Length) prgSizeUpPow2 <<= 1;
             if (CHR.Length == 0)
                 chrSizeUpPow2 = 0;
             else
-                while (chrSizeUpPow2 < CHR.Length) chrSizeUpPow2 *= 2;
+                while (chrSizeUpPow2 < CHR.Length) chrSizeUpPow2 <<= 1;
             using (var md5 = MD5.Create())
             {
                 md5.TransformBlock(prg, 0, prg.Length, null, 0);
@@ -957,11 +960,14 @@ namespace com.clusterrr.Famicom.Containers
         {
             int prgSizeUpPow2 = 1;
             int chrSizeUpPow2 = 1;
-            while (prgSizeUpPow2 < PRG.Length) prgSizeUpPow2 *= 2;
+            if (PRG.Length == 0)
+                prgSizeUpPow2 = 0; // Is it possible?
+            else
+                while (prgSizeUpPow2 < PRG.Length) prgSizeUpPow2 <<= 1;
             if (CHR.Length == 0)
                 chrSizeUpPow2 = 0;
             else
-                while (chrSizeUpPow2 < CHR.Length) chrSizeUpPow2 *= 2;
+                while (chrSizeUpPow2 < CHR.Length) chrSizeUpPow2 <<= 1;
             using (var crc32 = new Crc32())
             {
                 crc32.TransformBlock(prg, 0, prg.Length, null, 0);

@@ -638,7 +638,7 @@ namespace com.clusterrr.Famicom.Containers
                 if (v.Length > 0)
                 {
                     sizeUpPow2 = 1;
-                    while (sizeUpPow2 < v.Length) sizeUpPow2 *= 2;
+                    while (sizeUpPow2 < v.Length) sizeUpPow2 <<= 1;
                 }
                 md5.TransformBlock(v, 0, v.Length, null, 0);
                 md5.TransformBlock(Enumerable.Repeat<byte>(byte.MaxValue, sizeUpPow2 - v.Length).ToArray(), 0, sizeUpPow2 - v.Length, null, 0);
@@ -662,10 +662,10 @@ namespace com.clusterrr.Famicom.Containers
                 if (v.Length > 0)
                 {
                     sizeUpPow2 = 1;
-                    while (sizeUpPow2 < v.Length) sizeUpPow2 *= 2;
+                    while (sizeUpPow2 < v.Length) sizeUpPow2 <<= 1;
                 }
                 crc32.TransformBlock(v, 0, v.Length, null, 0);
-                crc32.TransformBlock(Enumerable.Repeat<byte>(byte.MaxValue, sizeUpPow2 - v.Length).ToArray(), 0, sizeUpPow2 - v.Length, null, 0);
+                crc32.TransformBlock(Enumerable.Repeat(byte.MaxValue, sizeUpPow2 - v.Length).ToArray(), 0, sizeUpPow2 - v.Length, null, 0);
             }
             crc32.TransformFinalBlock(new byte[0], 0, 0);
             return BitConverter.ToUInt32(crc32.Hash.Reverse().ToArray(), 0);
