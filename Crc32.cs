@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Security.Cryptography;
 
 namespace com.clusterrr.Famicom.Containers
@@ -52,13 +53,9 @@ namespace com.clusterrr.Famicom.Containers
             }
         }
 
-        protected override byte[] HashFinal()
-        {
-            return BitConverter.GetBytes(~crc);
-        }
-
+        protected override byte[] HashFinal() => BitConverter.GetBytes(~crc).Reverse().ToArray();
         public override bool CanTransformMultipleBlocks => true;
-        public override byte[] Hash => BitConverter.GetBytes(~crc);
+        public override byte[] Hash => BitConverter.GetBytes(~crc).Reverse().ToArray();
         public override int HashSize => 32;
 
     }

@@ -969,7 +969,7 @@ namespace com.clusterrr.Famicom.Containers
                 crc32.TransformBlock(chr, 0, chr.Length, null, 0);
                 crc32.TransformBlock(Enumerable.Repeat<byte>(byte.MaxValue, chrSizeUpPow2 - chr.Length).ToArray(), 0, chrSizeUpPow2 - chr.Length, null, 0);
                 crc32.TransformFinalBlock(new byte[0], 0, 0);
-                return BitConverter.ToUInt32(crc32.Hash, 0);
+                return BitConverter.ToUInt32(crc32.Hash.Reverse().ToArray(), 0);
             }
         }
     }
