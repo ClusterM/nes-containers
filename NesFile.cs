@@ -728,6 +728,14 @@ namespace com.clusterrr.Famicom.Containers
                     throw new InvalidDataException("Mapper number > 255 is supported by NES 2.0 only");
                 if (Submapper != 0)
                     throw new InvalidDataException("Submapper number is supported by NES 2.0 only");
+                if (prgRamSize > 0)
+                    throw new InvalidDataException("PRG RAM size is supported by NES 2.0 only");
+                if (prgNvRamSize > 0)
+                    throw new InvalidDataException("PRG NVRAM size is supported by NES 2.0 only");
+                if (chrRamSize > 0)
+                    throw new InvalidDataException("CHR RAM size is supported by NES 2.0 only");
+                if (chrNvRamSize > 0)
+                    throw new InvalidDataException("CHR NVRAM size is supported by NES 2.0 only");
                 var length16k = prg.Length / 0x4000;
                 if (length16k > 0xFF) throw new ArgumentOutOfRangeException("PRG size is too big for iNES, use NES 2.0 instead");
                 header[4] = (byte)Math.Ceiling((double)prg.Length / 0x4000);
@@ -833,7 +841,7 @@ namespace com.clusterrr.Famicom.Containers
                 header[8] |= (byte)(Submapper << 4);
                 // Check battery value
                 if ((prgNvRamSize > 0 || chrNvRamSize > 0) && !Battery)
-                    throw new InvalidDataException("Battery flag must be set when PrgNvRamSize or ChrNvRamSize is non-zero");
+                    throw new InvalidDataException("Battery flag must be set when PRG NVRAM size or CHR NVRAM size is non-zero");
                 // PRG RAM (volatile) shift count
                 header[10] |= (byte)(prgRamSize & 0x0F);
                 // PRG-NVRAM/EEPROM (non-volatile) shift count
