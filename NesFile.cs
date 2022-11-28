@@ -11,6 +11,10 @@ namespace com.clusterrr.Famicom.Containers
     /// </summary>
     public partial class NesFile
     {
+        private byte[] prg = Array.Empty<byte>();
+        private byte[] chr = Array.Empty<byte>();
+        private byte[] trainer = Array.Empty<byte>();
+        private byte[] miscellaneousROM = Array.Empty<byte>();
         /// <summary>
         /// PRG data
         /// </summary>
@@ -74,43 +78,64 @@ namespace com.clusterrr.Famicom.Containers
                 version = value;
             }
         }
+        private byte prgRamSize = 0;
         /// <summary>
         /// PRG RAM Size (NES 2.0 only)
         /// </summary>
-        public uint PrgRamSize { get; set; } = 0;
-        private uint prgNvRamSize = 0;
+        public uint PrgRamSize
+        {
+            get => prgRamSize > 0 ? (uint)(64 << prgRamSize) : 0;
+            set
+            {
+                byte newValue = (byte)(value > 0 ? Math.Max(1, (int)Math.Ceiling(Math.Log(value, 2)) - 6) : 0);
+                if (value != (newValue > 0 ? (uint)(64 << newValue) : 0))
+                    throw new InvalidDataException("Invalid PRG RAM size value, must be power of 2");
+                prgRamSize = newValue;
+            }
+        }
+        private byte prgNvRamSize = 0;
         /// <summary>
         /// PRG NVRAM Size (NES 2.0 only)
         /// </summary>
         public uint PrgNvRamSize
         {
-            get => prgNvRamSize; set
+            get => prgNvRamSize > 0 ? (uint)(64 << prgNvRamSize) : 0;
+            set
             {
-                prgNvRamSize = value;
-                if (prgNvRamSize > 0 || chrNvRamSize > 0)
-                    Battery = true;
+                byte newValue = (byte)(value > 0 ? Math.Max(1, (int)Math.Ceiling(Math.Log(value, 2)) - 6) : 0);
+                if (value != (newValue > 0 ? (uint)(64 << newValue) : 0))
+                    throw new InvalidDataException("Invalid PRG NVRAM size value, must be power of 2");
+                prgNvRamSize = newValue;
             }
         }
+        private byte chrRamSize = 0;
         /// <summary>
         /// CHR RAM Size (NES 2.0 only)
         /// </summary>
-        public uint ChrRamSize { get; set; } = 0;
-        private uint chrNvRamSize = 0;
-        private byte[] prg = Array.Empty<byte>();
-        private byte[] chr = Array.Empty<byte>();
-        private byte[] trainer = Array.Empty<byte>();
-        private byte[] miscellaneousROM = Array.Empty<byte>();
-
+        public uint ChrRamSize
+        {
+            get => chrRamSize > 0 ? (uint)(64 << chrRamSize) : 0;
+            set
+            {
+                byte newValue = (byte)(value > 0 ? Math.Max(1, (int)Math.Ceiling(Math.Log(value, 2)) - 6) : 0);
+                if (value != (newValue > 0 ? (uint)(64 << newValue) : 0))
+                    throw new InvalidDataException("Invalid CHR RAM size value, must be power of 2");
+                chrRamSize = newValue;
+            }
+        }
+        private byte chrNvRamSize = 0;
         /// <summary>
         /// CHR NVRAM Size (NES 2.0 only)
         /// </summary>
         public uint ChrNvRamSize
         {
-            get => chrNvRamSize; set
+            get => chrNvRamSize > 0 ? (uint)(64 << chrNvRamSize) : 0;
+            set
             {
-                chrNvRamSize = value;
-                if (prgNvRamSize > 0 || chrNvRamSize > 0)
-                    Battery = true;
+                byte newValue = (byte)(value > 0 ? Math.Max(1, (int)Math.Ceiling(Math.Log(value, 2)) - 6) : 0);
+                if (value != (newValue > 0 ? (uint)(64 << newValue) : 0))
+                    throw new InvalidDataException("Invalid CHR NVRAM size value, must be power of 2");
+                chrNvRamSize = newValue;
             }
         }
         /// <summary>
@@ -611,14 +636,10 @@ namespace com.clusterrr.Famicom.Containers
                 Mapper = (ushort)((header[6] >> 4) | (header[7] & 0xF0) | ((header[8] & 0x0F) << 8));
                 Submapper = (byte)(header[8] >> 4);
                 Console = (ConsoleType)(header[7] & 3);
-                if ((header[10] & 0x0F) > 0)
-                    PrgRamSize = (uint)(64 << (header[10] & 0x0F));
-                if ((header[10] & 0xF0) > 0)
-                    PrgNvRamSize = (uint)(64 << ((header[10] & 0xF0) >> 4));
-                if ((header[11] & 0x0F) > 0)
-                    ChrRamSize = (uint)(64 << (header[11] & 0x0F));
-                if ((header[11] & 0xF0) > 0)
-                    ChrNvRamSize = (uint)(64 << ((header[11] & 0xF0) >> 4));
+                prgRamSize = (byte)(header[10] & 0x0F);
+                prgNvRamSize = (byte)((header[10] & 0xF0) >> 4);
+                chrRamSize = (byte)(header[11] & 0x0F);
+                chrNvRamSize = (byte)((header[11] & 0xF0) >> 4);
                 Region = (Timing)header[12];
                 switch (Console)
                 {
@@ -810,18 +831,17 @@ namespace com.clusterrr.Famicom.Containers
                 header[8] |= (byte)((Mapper >> 8) & 0x0F);
                 // Submapper
                 header[8] |= (byte)(Submapper << 4);
+                // Check battery value
+                if ((prgNvRamSize > 0 || chrNvRamSize > 0) && !Battery)
+                    throw new InvalidDataException("Battery flag must be set when PrgNvRamSize or ChrNvRamSize is non-zero");
                 // PRG RAM (volatile) shift count
-                var prgRamBitSize = PrgRamSize > 0 ? Math.Max(1, (int)Math.Ceiling(Math.Log(PrgRamSize, 2)) - 6) : 0;
-                header[10] |= (byte)(prgRamBitSize & 0x0F);
+                header[10] |= (byte)(prgRamSize & 0x0F);
                 // PRG-NVRAM/EEPROM (non-volatile) shift count
-                var prgNvRamBitSize = PrgNvRamSize > 0 ? Math.Max(1, (int)Math.Ceiling(Math.Log(PrgNvRamSize, 2)) - 6) : 0;
-                header[10] |= (byte)((prgNvRamBitSize << 4) & 0xF0);
+                header[10] |= (byte)((prgNvRamSize << 4) & 0xF0);
                 // CHR-RAM size (volatile) shift count
-                var chrRamBitSize = ChrRamSize > 0 ? Math.Max(1, (int)Math.Ceiling(Math.Log(ChrRamSize, 2)) - 6) : 0;
-                header[11] |= (byte)(chrRamBitSize & 0x0F);
+                header[11] |= (byte)(chrRamSize & 0x0F);
                 // CHR-NVRAM size (non-volatile) shift count
-                var chrNvRamBitSize = ChrNvRamSize > 0 ? Math.Max(1, (int)Math.Ceiling(Math.Log(ChrNvRamSize, 2)) - 6) : 0;
-                header[11] |= (byte)((chrNvRamBitSize << 4) & 0xF0);
+                header[11] |= (byte)((chrNvRamSize << 4) & 0xF0);
                 // CPU/PPU timing mode
                 header[12] |= (byte)((byte)Region & 3);
                 switch (Console)
