@@ -621,7 +621,7 @@ namespace com.clusterrr.Famicom.Containers
                 chrSize = (uint)(header[5] * 0x2000);
                 Mapper = (byte)((header[6] >> 4) | (header[7] & 0xF0));
                 Console = (ConsoleType)(header[7] & 3);
-                PrgRamSize = (uint)(header[8] == 0 ? 0x2000 : header[8] * 0x2000);
+                //PrgRamSize = (uint)(header[8] == 0 ? 0x2000 : header[8] * 0x2000);
             }
             else if (Version == iNesVersion.NES20) // NES 2.0
             {
