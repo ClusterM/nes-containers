@@ -648,7 +648,7 @@ namespace com.clusterrr.Famicom.Containers
         [MarshalAs(UnmanagedType.U1)]
         private byte manufacturerCode;
         /// <summary>
-        /// Manufacturer code. = = 0x00, Unlicensed, = = 0x01, Nintendo
+        /// Manufacturer code. 0x00 = Unlicensed, 0x01 = Nintendo
         /// </summary>
         public Company LicenseeCode { get => (Company)manufacturerCode; set => manufacturerCode = (byte)value; }
 
@@ -662,9 +662,9 @@ namespace com.clusterrr.Famicom.Containers
         [MarshalAs(UnmanagedType.U1)]
         byte gameType;
         /// <summary>
-        /// = = 0x20, " " — Normal disk
-        /// = = 0x45, "E" — Event(e.g.Japanese national DiskFax tournaments)
-        /// = = 0x52, "R" — Reduction in price via advertising
+        /// 0x20 = " " — Normal disk
+        /// 0x45 = "E" — Event(e.g.Japanese national DiskFax tournaments)
+        /// 0x52 = "R" — Reduction in price via advertising
         /// </summary>
         public char GameType { get => (char)gameType; set => gameType = (byte)value; }
 
@@ -692,13 +692,13 @@ namespace com.clusterrr.Famicom.Containers
         [MarshalAs(UnmanagedType.U1)]
         byte diskType;
         /// <summary>
-        /// Disk type. = = 0x00, FMC ("normal card"), = = 0x01, FSC ("card with shutter"). May correlate with FMC and FSC product codes
+        /// Disk type. 0x00 = FMC ("normal card"), 0x01 = FSC ("card with shutter"). May correlate with FMC and FSC product codes
         /// </summary>
         public DiskTypes DiskType { get => (DiskTypes)diskType; set => diskType = (byte)value; }
 
         [MarshalAs(UnmanagedType.U1)]
         // Speculative: (Err.10) Possibly indicates disk #; usually $00
-        // Speculative: = = 0x00, yellow disk, = = 0x01, blue or gold disk, = = 0xFE, white disk, = = 0xFF, blue disk
+        // Speculative: 0x00 = yellow disk, 0x01 = blue or gold disk, 0xFE = white disk, 0xFF = blue disk
         readonly byte unknown01 = 0x00;
         [MarshalAs(UnmanagedType.U1)]
         byte bootFile;
@@ -751,10 +751,10 @@ namespace com.clusterrr.Famicom.Containers
         }
 
         [MarshalAs(UnmanagedType.U1)]
-        // = = 0x49, Japan
+        // 0x49 = Japan
         byte countryCode = (byte)Country.Japan;
         /// <summary>
-        /// Country code. = = 0x49, Japan
+        /// Country code. 0x49 = Japan
         /// </summary>
         public Country CountryCode { get => (Country)countryCode; set => countryCode = (byte)value; }
 
@@ -825,7 +825,7 @@ namespace com.clusterrr.Famicom.Containers
         [MarshalAs(UnmanagedType.U1)]
         byte diskRewriteCount = 0x00;
         /// <summary>
-        /// Disk rewrite count. = = 0x00, Original (no copies)
+        /// Disk rewrite count. 0x00 = Original (no copies)
         /// </summary>
         public byte DiskRewriteCount
         {

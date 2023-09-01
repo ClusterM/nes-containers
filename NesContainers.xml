@@ -786,7 +786,7 @@
         </member>
         <member name="P:com.clusterrr.Famicom.Containers.FdsBlockDiskInfo.LicenseeCode">
             <summary>
-            Manufacturer code. = = 0x00, Unlicensed, = = 0x01, Nintendo
+            Manufacturer code. 0x00 = Unlicensed, 0x01 = Nintendo
             </summary>
         </member>
         <member name="P:com.clusterrr.Famicom.Containers.FdsBlockDiskInfo.GameName">
@@ -796,9 +796,9 @@
         </member>
         <member name="P:com.clusterrr.Famicom.Containers.FdsBlockDiskInfo.GameType">
             <summary>
-            = = 0x20, " " — Normal disk
-            = = 0x45, "E" — Event(e.g.Japanese national DiskFax tournaments)
-            = = 0x52, "R" — Reduction in price via advertising
+            0x20 = " " — Normal disk
+            0x45 = "E" — Event(e.g.Japanese national DiskFax tournaments)
+            0x52 = "R" — Reduction in price via advertising
             </summary>
         </member>
         <member name="P:com.clusterrr.Famicom.Containers.FdsBlockDiskInfo.GameVersion">
@@ -818,7 +818,7 @@
         </member>
         <member name="P:com.clusterrr.Famicom.Containers.FdsBlockDiskInfo.DiskType">
             <summary>
-            Disk type. = = 0x00, FMC ("normal card"), = = 0x01, FSC ("card with shutter"). May correlate with FMC and FSC product codes
+            Disk type. 0x00 = FMC ("normal card"), 0x01 = FSC ("card with shutter"). May correlate with FMC and FSC product codes
             </summary>
         </member>
         <member name="P:com.clusterrr.Famicom.Containers.FdsBlockDiskInfo.BootFile">
@@ -833,7 +833,7 @@
         </member>
         <member name="P:com.clusterrr.Famicom.Containers.FdsBlockDiskInfo.CountryCode">
             <summary>
-            Country code. = = 0x49, Japan
+            Country code. 0x49 = Japan
             </summary>
         </member>
         <member name="P:com.clusterrr.Famicom.Containers.FdsBlockDiskInfo.RewrittenDate">
@@ -849,7 +849,7 @@
         </member>
         <member name="P:com.clusterrr.Famicom.Containers.FdsBlockDiskInfo.DiskRewriteCount">
             <summary>
-            Disk rewrite count. = = 0x00, Original (no copies)
+            Disk rewrite count. 0x00 = Original (no copies)
             </summary>
         </member>
         <member name="P:com.clusterrr.Famicom.Containers.FdsBlockDiskInfo.ActualDiskSide">
