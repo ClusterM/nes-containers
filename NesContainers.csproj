@@ -12,17 +12,17 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <Nullable>enable</Nullable>
     <Title>NesContainers</Title>
-    <Company>Cluster</Company>
+    <Company>Alexey Cluster</Company>
     <PackageProjectUrl>https://github.com/ClusterM/nes-containers</PackageProjectUrl>
-    <Copyright>Alexey 'Cluster' Avdyukhin, 2023</Copyright>
+    <Copyright>Alexey Cluster, 2023</Copyright>
     <Description>A simple .NET Standard 2.0 library for reading and modifying NES/Famicom ROM containers: .nes (iNES, NES 2.0), .unf (UNIF), and .fds (Famicom Disk System images).</Description>
-    <Version>1.1.4</Version>
+    <Version>1.1.5</Version>
     <RepositoryUrl>https://github.com/ClusterM/nes-containers</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>nes;famicom;famicom disk system</PackageTags>
-    <AssemblyVersion>1.1.4</AssemblyVersion>
-    <FileVersion>1.1.4</FileVersion>
-    <Authors>Alexey 'Cluster' Avdyukhin</Authors>
+    <AssemblyVersion>1.1.5</AssemblyVersion>
+    <FileVersion>1.1.5</FileVersion>
+    <Authors>Alexey Cluster</Authors>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

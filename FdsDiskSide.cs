@@ -25,7 +25,7 @@ namespace com.clusterrr.Famicom.Containers
         /// <summary>
         /// 3-letter ASCII code per game (e.g. ZEL for The Legend of Zelda)
         /// </summary>
-        public string GameName { get => diskInfoBlock.GameName; set => diskInfoBlock.GameName = value; }
+        public string? GameName { get => diskInfoBlock.GameName; set => diskInfoBlock.GameName = value; }
         /// <summary>
         /// $20 = " " — Normal disk
         /// $45 = "E" — Event(e.g.Japanese national DiskFax tournaments)
@@ -55,7 +55,7 @@ namespace com.clusterrr.Famicom.Containers
         /// <summary>
         /// Manufacturing date
         /// </summary>
-        public DateTime ManufacturingDate { get => diskInfoBlock.ManufacturingDate; set => diskInfoBlock.ManufacturingDate = value; }
+        public DateTime? ManufacturingDate { get => diskInfoBlock.ManufacturingDate; set => diskInfoBlock.ManufacturingDate = value; }
         /// <summary>
         /// Country code. $49 = Japan
         /// </summary>
@@ -64,7 +64,7 @@ namespace com.clusterrr.Famicom.Containers
         /// "Rewritten disk" date. It's speculated this refers to the date the disk was formatted and rewritten by something like a Disk Writer kiosk.
         /// In the case of an original (non-copied) disk, this should be the same as Manufacturing date
         /// </summary>
-        public DateTime RewrittenDate { get => diskInfoBlock.RewrittenDate; set => diskInfoBlock.RewrittenDate = value; }
+        public DateTime? RewrittenDate { get => diskInfoBlock.RewrittenDate; set => diskInfoBlock.RewrittenDate = value; }
         /// <summary>
         /// Disk Writer serial number
         /// </summary>

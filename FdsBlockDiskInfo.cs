@@ -653,11 +653,25 @@ namespace com.clusterrr.Famicom.Containers
         public Company LicenseeCode { get => (Company)manufacturerCode; set => manufacturerCode = (byte)value; }
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3)]
-        byte[] gameName = Encoding.ASCII.GetBytes("---");
+        byte[] gameName = new byte[3];
         /// <summary>
         /// 3-letter ASCII code per game (e.g. ZEL for The Legend of Zelda)
         /// </summary>
-        public string GameName { get => Encoding.ASCII.GetString(gameName).Trim(new char[] { '\0', ' ' }); set => gameName = Encoding.ASCII.GetBytes(value.PadRight(3)).Take(3).ToArray(); }
+        public string? GameName {
+            get
+            {
+                if (!gameName.Select(b => b != 0).Any())
+                    return Encoding.ASCII.GetString(gameName).Trim(new char[] { '\0', ' ' });
+                else
+                    return null;                
+            }
+            set {
+                if (value != null)
+                    gameName = Encoding.ASCII.GetBytes(value.PadRight(3)).Take(3).ToArray();
+                else
+                    gameName = new byte[3];
+            }
+        }
 
         [MarshalAs(UnmanagedType.U1)]
         byte gameType;
@@ -722,31 +736,40 @@ namespace com.clusterrr.Famicom.Containers
         /// <summary>
         /// Manufacturing date
         /// </summary>
-        public DateTime ManufacturingDate
+        public DateTime? ManufacturingDate
         {
             get
             {
                 try
                 {
-                    return new DateTime(
-                        ((manufacturingDate[0] & 0x0F) + ((manufacturingDate[0] >> 4) & 0x0F) * 10) + 1925,
-                        ((manufacturingDate[1] & 0x0F) + ((manufacturingDate[1] >> 4) & 0x0F) * 10),
-                        ((manufacturingDate[2] & 0x0F) + ((manufacturingDate[2] >> 4) & 0x0F) * 10)
-                        );
+                    if (!rewrittenDate.Select(b => b != 0).Any())
+                        return new DateTime(
+                            ((manufacturingDate[0] & 0x0F) + ((manufacturingDate[0] >> 4) & 0x0F) * 10) + 1925,
+                            ((manufacturingDate[1] & 0x0F) + ((manufacturingDate[1] >> 4) & 0x0F) * 10),
+                            ((manufacturingDate[2] & 0x0F) + ((manufacturingDate[2] >> 4) & 0x0F) * 10)
+                            );
+                    else
+                        return null;
                 }
                 catch
                 {
-                    return new DateTime();
+                    return null;
                 }
             }
             set
             {
-                manufacturingDate = new byte[]
+                if (value != null)
                 {
-                    (byte)(((value.Year - 1925) % 10) | (((value.Year - 1925) / 10) << 4)),
-                    (byte)(((value.Month) % 10) | (((value.Month) / 10) << 4)),
-                    (byte)(((value.Day) % 10) | (((value.Day) / 10) << 4))
-                };
+                    manufacturingDate = new byte[]
+                    {
+                    (byte)(((value.Value.Year - 1925) % 10) | (((value.Value.Year - 1925) / 10) << 4)),
+                    (byte)(((value.Value.Month) % 10) | (((value.Value.Month) / 10) << 4)),
+                    (byte)(((value.Value.Day) % 10) | (((value.Value.Day) / 10) << 4))
+                    };
+                } else
+                {
+                    manufacturingDate = new byte[3];
+                }
             }
         }
 
@@ -777,31 +800,41 @@ namespace com.clusterrr.Famicom.Containers
         /// "Rewritten disk" date. It's speculated this refers to the date the disk was formatted and rewritten by something like a Disk Writer kiosk.
         /// In the case of an original (non-copied) disk, this should be the same as Manufacturing date
         /// </summary>
-        public DateTime RewrittenDate
+        public DateTime? RewrittenDate
         {
             get
             {
                 try
                 {
-                    return new DateTime(
-                        ((rewrittenDate[0] & 0x0F) + ((rewrittenDate[0] >> 4) & 0x0F) * 10) + 1925,
-                        ((rewrittenDate[1] & 0x0F) + ((rewrittenDate[1] >> 4) & 0x0F) * 10),
-                        ((rewrittenDate[2] & 0x0F) + ((rewrittenDate[2] >> 4) & 0x0F) * 10)
-                        );
+                    if (!rewrittenDate.Select(b => b != 0).Any())
+                        return new DateTime(
+                            ((rewrittenDate[0] & 0x0F) + ((rewrittenDate[0] >> 4) & 0x0F) * 10) + 1925,
+                            ((rewrittenDate[1] & 0x0F) + ((rewrittenDate[1] >> 4) & 0x0F) * 10),
+                            ((rewrittenDate[2] & 0x0F) + ((rewrittenDate[2] >> 4) & 0x0F) * 10)
+                            );
+                    else
+                        return null;
                 }
                 catch
                 {
-                    return new DateTime();
+                    return null;
                 }
             }
             set
             {
-                rewrittenDate = new byte[]
+                if (value != null)
                 {
-                    (byte)(((value.Year - 1925) % 10) | (((value.Year - 1925) / 10) << 4)),
-                    (byte)(((value.Month) % 10) | (((value.Month) / 10) << 4)),
-                    (byte)(((value.Day) % 10) | (((value.Day) / 10) << 4))
-                };
+                    manufacturingDate = new byte[]
+                    {
+                        (byte)(((value.Value.Year - 1925) % 10) | (((value.Value.Year - 1925) / 10) << 4)),
+                        (byte)(((value.Value.Month) % 10) | (((value.Value.Month) / 10) << 4)),
+                        (byte)(((value.Value.Day) % 10) | (((value.Value.Day) / 10) << 4))
+                    };
+                }
+                else
+                {
+                    manufacturingDate = new byte[3];
+                }
             }
         }
 
@@ -899,7 +932,7 @@ namespace com.clusterrr.Famicom.Containers
         /// String representation
         /// </summary>
         /// <returns>Game name</returns>
-        public override string ToString() => GameName;
+        public override string ToString() => GameName ?? "---";
 
         /// <summary>
         /// Equality comparer
