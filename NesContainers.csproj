@@ -19,7 +19,7 @@
     <Version>1.1.6</Version>
     <RepositoryUrl>https://github.com/ClusterM/nes-containers</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <PackageTags>nes;famicom;famicom disk system</PackageTags>
+    <PackageTags>NES;Famicom;FamicomDiskSystem</PackageTags>
     <AssemblyVersion>1.1.6</AssemblyVersion>
     <FileVersion>1.1.6</FileVersion>
     <Authors>Alexey Cluster</Authors>
