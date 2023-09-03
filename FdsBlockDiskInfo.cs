@@ -26,20 +26,22 @@ namespace com.clusterrr.Famicom.Containers
             /// </summary>
             B = 1,
         }
+
         /// <summary>
-        /// Disk type
+        /// Disk type (FMC)
         /// </summary>
         public enum DiskTypes
         {
             /// <summary>
-            /// Normal
+            /// Normal/other
             /// </summary>
             FMS = 0,
             /// <summary>
-            /// With shutter
+            /// FMC blue-disk releases
             /// </summary>
             FSC = 1,
         }
+
         /// <summary>
         /// Country
         /// </summary>
@@ -626,13 +628,34 @@ namespace com.clusterrr.Famicom.Containers
             AWave = 0xF0,
         }
 
+        /// <summary>
+        /// Disk type (other)
+        /// </summary>
+        public enum DiskTypesOther
+        {
+            /// <summary>
+            /// Yellow disk
+            /// </summary>
+            YellowDisk = 0x00,
+            /// <summary>
+            /// Prototype, sample, or internal-use (white or pink) disk
+            /// </summary>
+            PrototypeSample = 0xFE,
+            /// <summary>
+            /// Blue disk
+            /// </summary>
+            BlueDisk = 0xFF
+        }
+
         [MarshalAs(UnmanagedType.U1)]
         // Raw byte: 0x01
         private readonly byte blockType = 1;
+
         /// <summary>
         /// Valid block type ID
         /// </summary>
         public byte ValidTypeID { get => 1; }
+
         /// <summary>
         /// True if block type ID is valid
         /// </summary>
@@ -660,7 +683,7 @@ namespace com.clusterrr.Famicom.Containers
         public string? GameName {
             get
             {
-                if (!gameName.Select(b => b != 0).Any())
+                if (gameName.Where(b => b != 0).Any())
                     return Encoding.ASCII.GetString(gameName).Trim(new char[] { '\0', ' ' });
                 else
                     return null;                
@@ -685,7 +708,7 @@ namespace com.clusterrr.Famicom.Containers
         [MarshalAs(UnmanagedType.U1)]
         byte gameVersion;
         /// <summary>
-        /// Game version/revision number. Starts at $00, increments per revision
+        /// Game version/revision number. Starts at 0x00, increments per revision
         /// </summary>
         public byte GameVersion { get => gameVersion; set => gameVersion = value; }
 
@@ -699,7 +722,7 @@ namespace com.clusterrr.Famicom.Containers
         [MarshalAs(UnmanagedType.U1)]
         byte diskNumber;
         /// <summary>
-        /// Disk number. First disk is $00, second is $01, etc.
+        /// Disk number. First disk is 0x00, second is 0x01, etc.
         /// </summary>
         public byte DiskNumber { get => diskNumber; set => diskNumber = value; }
 
@@ -711,25 +734,59 @@ namespace com.clusterrr.Famicom.Containers
         public DiskTypes DiskType { get => (DiskTypes)diskType; set => diskType = (byte)value; }
 
         [MarshalAs(UnmanagedType.U1)]
-        // Speculative: (Err.10) Possibly indicates disk #; usually $00
-        // Speculative: 0x00 = yellow disk, 0x01 = blue or gold disk, 0xFE = white disk, 0xFF = blue disk
-        readonly byte unknown01 = 0x00;
+        byte unknown01 = 0x00;
+        /// <summary>
+        /// Unknown, offset 0x18.
+        /// Always 0x00
+        /// </summary>
+        public byte Unknown01 { get => unknown01; set => unknown01 = value; }
+
         [MarshalAs(UnmanagedType.U1)]
         byte bootFile;
         /// <summary>
         /// Boot read file code. Refers to the file code/file number to load upon boot/start-up
         /// </summary>
         public byte BootFile { get => bootFile; set => bootFile = value; }
+
         [MarshalAs(UnmanagedType.U1)]
-        readonly byte unknown02 = 0xFF;
+        byte unknown02 = 0xFF;
+        /// <summary>
+        /// Unknown, offset 0x1A.
+        /// Always 0xFF
+        /// </summary>
+        public byte Unknown02 { get => unknown02; set => unknown02 = value; }
+
         [MarshalAs(UnmanagedType.U1)]
-        readonly byte unknown03 = 0xFF;
+        byte unknown03 = 0xFF;
+        /// <summary>
+        /// Unknown, offset 0x1B.
+        /// Always 0xFF
+        /// </summary>
+        public byte Unknown03 { get => unknown03; set => unknown03 = value; }
+
         [MarshalAs(UnmanagedType.U1)]
-        readonly byte unknown04 = 0xFF;
+        byte unknown04 = 0xFF;
+        /// <summary>
+        /// Unknown, offset 0x1C.
+        /// Always 0xFF
+        /// </summary>
+        public byte Unknown04 { get => unknown04; set => unknown04 = value; }
+
         [MarshalAs(UnmanagedType.U1)]
-        readonly byte unknown05 = 0xFF;
+        byte unknown05 = 0xFF;
+        /// <summary>
+        /// Unknown, offset 0x1D.
+        /// Always 0xFF
+        /// </summary>
+        public byte Unknown05 { get => unknown05; set => unknown05 = value; }
+
         [MarshalAs(UnmanagedType.U1)]
-        readonly byte unknown06 = 0xFF;
+        byte unknown06 = 0xFF;
+        /// <summary>
+        /// Unknown, offset 0x1E.
+        /// Always 0xFF
+        /// </summary>
+        public byte Unknown06 { get => unknown06; set => unknown06 = value; }
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3)]
         byte[] manufacturingDate = { 0, 0, 0 };
@@ -742,7 +799,7 @@ namespace com.clusterrr.Famicom.Containers
             {
                 try
                 {
-                    if (!rewrittenDate.Select(b => b != 0).Any())
+                    if (rewrittenDate.Where(b => b != 0).Any())
                         return new DateTime(
                             ((manufacturingDate[0] & 0x0F) + ((manufacturingDate[0] >> 4) & 0x0F) * 10) + 1925,
                             ((manufacturingDate[1] & 0x0F) + ((manufacturingDate[1] >> 4) & 0x0F) * 10),
@@ -774,7 +831,6 @@ namespace com.clusterrr.Famicom.Containers
         }
 
         [MarshalAs(UnmanagedType.U1)]
-        // 0x49 = Japan
         byte countryCode = (byte)Country.Japan;
         /// <summary>
         /// Country code. 0x49 = Japan
@@ -782,17 +838,74 @@ namespace com.clusterrr.Famicom.Containers
         public Country CountryCode { get => (Country)countryCode; set => countryCode = (byte)value; }
 
         [MarshalAs(UnmanagedType.U1)]
-        // Raw byte: $61. Speculative: Region code?
-        readonly byte unknown07 = 0x61;
+        byte unknown07 = 0x61;
+        /// <summary>
+        /// Unknown, offset 0x23.
+        /// Always 0x61.
+        /// Speculative: Region code?
+        /// </summary>
+        public byte Unknown07 { get => unknown07; set => unknown07 = value; }
+
         [MarshalAs(UnmanagedType.U1)]
-        // Raw byte: $00. Speculative: Location/site?
-        readonly byte unknown08 = 0x00;
-        [MarshalAs(UnmanagedType.U2)]
-        // Raw bytes: $00 $02
-        readonly ushort unknown09 = 0x0200;
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 5)]
+        byte unknown08 = 0x00;
+        /// <summary>
+        /// Unknown, offset 0x24.
+        /// Always 0x00.
+        /// Speculative: Location/site?
+        /// </summary>
+        public byte Unknown08 { get => unknown08; set => unknown08 = value; }
+
+        [MarshalAs(UnmanagedType.U1)]
+        byte unknown09 = 0x00;
+        /// <summary>
+        /// Unknown, offset 0x25.
+        /// Always 0x00
+        /// </summary>
+        public byte Unknown09 { get => unknown09; set => unknown09 = value; }
+
+        [MarshalAs(UnmanagedType.U1)]
+        byte unknown10 = 0x02;
+        /// <summary>
+        /// Unknown, offset 0x26.
+        /// Always 0x02
+        /// </summary>
+        public byte Unknown10 { get => unknown10; set => unknown10 = value; }
+
+        [MarshalAs(UnmanagedType.U1)]
+        byte unknown11 = 0;
+        /// <summary>
+        /// Unknown, offset 0x27. Speculative: some kind of game information representation?
+        /// </summary>
+        public byte Unknown11 { get => unknown11; set => unknown11 = value; }
+
+        [MarshalAs(UnmanagedType.U1)]
         // Speculative: some kind of game information representation?
-        readonly byte[] unknown10 = { 0, 0, 0, 0, 0 };
+        byte unknown12 = 0;
+        /// <summary>
+        /// Unknown, offset 0x28. Speculative: some kind of game information representation?
+        /// </summary>
+        public byte Unknown12 { get => unknown12; set => unknown12 = value; }
+
+        [MarshalAs(UnmanagedType.U1)]
+        byte unknown13 = 0;
+        /// <summary>
+        /// Unknown, offset 0x29. Speculative: some kind of game information representation?
+        /// </summary>
+        public byte Unknown13 { get => unknown13; set => unknown13 = value; }
+
+        [MarshalAs(UnmanagedType.U1)]
+        byte unknown14 = 0;
+        /// <summary>
+        /// Unknown, offset 0x2A. Speculative: some kind of game information representation?
+        /// </summary>
+        public byte Unknown14 { get => unknown14; set => unknown14 = value; }
+
+        [MarshalAs(UnmanagedType.U1)]
+        byte unknown15 = 0;
+        /// <summary>
+        /// Unknown, offset 0x2B. Speculative: some kind of game information representation?
+        /// </summary>
+        public byte Unknown15 { get => unknown15; set => unknown15 = value; }
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3)]
         byte[] rewrittenDate = { 0, 0, 0 };
@@ -806,7 +919,7 @@ namespace com.clusterrr.Famicom.Containers
             {
                 try
                 {
-                    if (!rewrittenDate.Select(b => b != 0).Any())
+                    if (rewrittenDate.Where(b => b != 0).Any())
                         return new DateTime(
                             ((rewrittenDate[0] & 0x0F) + ((rewrittenDate[0] >> 4) & 0x0F) * 10) + 1925,
                             ((rewrittenDate[1] & 0x0F) + ((rewrittenDate[1] >> 4) & 0x0F) * 10),
@@ -839,11 +952,19 @@ namespace com.clusterrr.Famicom.Containers
         }
 
         [MarshalAs(UnmanagedType.U1)]
-        readonly byte unknown11 = 0x00;
+        byte unknown16 = 0x00;
+        /// <summary>
+        /// Unknown, offset 0x2F
+        /// </summary>
+        public byte Unknown16 { get => unknown16; set => unknown16 = value; }
+
         [MarshalAs(UnmanagedType.U1)]
-        // Raw byte: $80
-        readonly byte unknown12 = 0x80;
-        [MarshalAs(UnmanagedType.U2)]
+        byte unknown17 = 0x80;
+        /// <summary>
+        /// Unknown, offset 0x30.
+        /// Always 0x80
+        /// </summary>
+        public byte Unknown17 { get => unknown17; set => unknown17 = value; }
 
         ushort diskWriterSerialNumber;
         /// <summary>
@@ -852,13 +973,18 @@ namespace com.clusterrr.Famicom.Containers
         public ushort DiskWriterSerialNumber { get => diskWriterSerialNumber; set => diskWriterSerialNumber = value; }
 
         [MarshalAs(UnmanagedType.U1)]
-        // Raw byte: $07
-        readonly byte unknown13 = 0x07;
+        byte unknown18 = 0x07;
+        /// <summary>
+        /// Unknown, offset 0x33, unknown.
+        /// Always 0x07
+        /// </summary>
+        public byte Unknown18 { get => unknown18; set => unknown18 = value; }
 
         [MarshalAs(UnmanagedType.U1)]
         byte diskRewriteCount = 0x00;
         /// <summary>
-        /// Disk rewrite count. 0x00 = Original (no copies)
+        /// Disk rewrite count.
+        /// 0x00 = Original (no copies)
         /// </summary>
         public byte DiskRewriteCount
         {
@@ -880,14 +1006,25 @@ namespace com.clusterrr.Famicom.Containers
         public DiskSides ActualDiskSide { get => (DiskSides)actualDiskSide; set => actualDiskSide = (byte)value; }
 
         [MarshalAs(UnmanagedType.U1)]
-        readonly byte unknown14 = 0x00;
+        byte diskTypeOther = 0x00;
+        /// <summary>
+        /// Disk type (other)
+        /// </summary>
+        public DiskTypesOther DiskTypeOther { get => (DiskTypesOther)diskType; set => diskType = (byte)value; }
 
         [MarshalAs(UnmanagedType.U1)]
         byte price = 0x00;
         /// <summary>
-        /// Price code
+        /// Price code (deprecated, no backing)
         /// </summary>
+        [Obsolete("Use \"DiskVersion\" property")]
         public byte Price { get => price; set => price = value; }
+
+        /// <summary>
+        /// Unknown how this differs from GameVersion. Disk version numbers indicate different software revisions.
+        /// Speculation is that disk version incremented with each disk received from a licensee
+        /// </summary>
+        public byte DiskVersion { get => price; set => price = value; }
 
         /// <summary>
         /// Length of the block

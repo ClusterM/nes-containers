@@ -31,17 +31,17 @@
         </member>
         <member name="T:com.clusterrr.Famicom.Containers.FdsBlockDiskInfo.DiskTypes">
             <summary>
-            Disk type
+            Disk type (FMC)
             </summary>
         </member>
         <member name="F:com.clusterrr.Famicom.Containers.FdsBlockDiskInfo.DiskTypes.FMS">
             <summary>
-            Normal
+            Normal/other
             </summary>
         </member>
         <member name="F:com.clusterrr.Famicom.Containers.FdsBlockDiskInfo.DiskTypes.FSC">
             <summary>
-            With shutter
+            FMC blue-disk releases
             </summary>
         </member>
         <member name="T:com.clusterrr.Famicom.Containers.FdsBlockDiskInfo.Country">
@@ -769,6 +769,26 @@
             A-Wave
             </summary>
         </member>
+        <member name="T:com.clusterrr.Famicom.Containers.FdsBlockDiskInfo.DiskTypesOther">
+            <summary>
+            Disk type (other)
+            </summary>
+        </member>
+        <member name="F:com.clusterrr.Famicom.Containers.FdsBlockDiskInfo.DiskTypesOther.YellowDisk">
+            <summary>
+            Yellow disk
+            </summary>
+        </member>
+        <member name="F:com.clusterrr.Famicom.Containers.FdsBlockDiskInfo.DiskTypesOther.PrototypeSample">
+            <summary>
+            Prototype, sample, or internal-use (white or pink) disk
+            </summary>
+        </member>
+        <member name="F:com.clusterrr.Famicom.Containers.FdsBlockDiskInfo.DiskTypesOther.BlueDisk">
+            <summary>
+            Blue disk
+            </summary>
+        </member>
         <member name="P:com.clusterrr.Famicom.Containers.FdsBlockDiskInfo.ValidTypeID">
             <summary>
             Valid block type ID
@@ -821,9 +841,45 @@
             Disk type. 0x00 = FMC ("normal card"), 0x01 = FSC ("card with shutter"). May correlate with FMC and FSC product codes
             </summary>
         </member>
+        <member name="P:com.clusterrr.Famicom.Containers.FdsBlockDiskInfo.Unknown01">
+            <summary>
+            Unknown, offset 0x18.
+            Always 0x00
+            </summary>
+        </member>
         <member name="P:com.clusterrr.Famicom.Containers.FdsBlockDiskInfo.BootFile">
             <summary>
             Boot read file code. Refers to the file code/file number to load upon boot/start-up
+            </summary>
+        </member>
+        <member name="P:com.clusterrr.Famicom.Containers.FdsBlockDiskInfo.Unknown02">
+            <summary>
+            Unknown, offset 0x1A. 
+            Always 0xFF
+            </summary>
+        </member>
+        <member name="P:com.clusterrr.Famicom.Containers.FdsBlockDiskInfo.Unknown03">
+            <summary>
+            Unknown, offset 0x1B.
+            Always 0xFF
+            </summary>
+        </member>
+        <member name="P:com.clusterrr.Famicom.Containers.FdsBlockDiskInfo.Unknown04">
+            <summary>
+            Unknown, offset 0x1C.
+            Always 0xFF
+            </summary>
+        </member>
+        <member name="P:com.clusterrr.Famicom.Containers.FdsBlockDiskInfo.Unknown05">
+            <summary>
+            Unknown, offset 0x1D.
+            Always 0xFF
+            </summary>
+        </member>
+        <member name="P:com.clusterrr.Famicom.Containers.FdsBlockDiskInfo.Unknown06">
+            <summary>
+            Unknown, offset 0x1E. 
+            Always 0xFF
             </summary>
         </member>
         <member name="P:com.clusterrr.Famicom.Containers.FdsBlockDiskInfo.ManufacturingDate">
@@ -836,10 +892,72 @@
             Country code. 0x49 = Japan
             </summary>
         </member>
+        <member name="P:com.clusterrr.Famicom.Containers.FdsBlockDiskInfo.Unknown07">
+            <summary>
+            Unknown, offset 0x23. 
+            Always 0x61.
+            Speculative: Region code?
+            </summary>
+        </member>
+        <member name="P:com.clusterrr.Famicom.Containers.FdsBlockDiskInfo.Unknown08">
+            <summary>
+            Unknown, offset 0x24. 
+            Always 0x00.
+            Speculative: Location/site?
+            </summary>
+        </member>
+        <member name="P:com.clusterrr.Famicom.Containers.FdsBlockDiskInfo.Unknown09">
+            <summary>
+            Unknown, offset 0x25.
+            Always 0x00
+            </summary>
+        </member>
+        <member name="P:com.clusterrr.Famicom.Containers.FdsBlockDiskInfo.Unknown10">
+            <summary>
+            Unknown, offset 0x26. 
+            Always 0x02
+            </summary>
+        </member>
+        <member name="P:com.clusterrr.Famicom.Containers.FdsBlockDiskInfo.Unknown11">
+            <summary>
+            Unknown, offset 0x27. Speculative: some kind of game information representation?
+            </summary>
+        </member>
+        <member name="P:com.clusterrr.Famicom.Containers.FdsBlockDiskInfo.Unknown12">
+            <summary>
+            Unknown, offset 0x28. Speculative: some kind of game information representation?
+            </summary>
+        </member>
+        <member name="P:com.clusterrr.Famicom.Containers.FdsBlockDiskInfo.Unknown13">
+            <summary>
+            Unknown, offset 0x29. Speculative: some kind of game information representation?
+            </summary>
+        </member>
+        <member name="P:com.clusterrr.Famicom.Containers.FdsBlockDiskInfo.Unknown14">
+            <summary>
+            Unknown, offset 0x2A. Speculative: some kind of game information representation?
+            </summary>
+        </member>
+        <member name="P:com.clusterrr.Famicom.Containers.FdsBlockDiskInfo.Unknown15">
+            <summary>
+            Unknown, offset 0x2B. Speculative: some kind of game information representation?
+            </summary>
+        </member>
         <member name="P:com.clusterrr.Famicom.Containers.FdsBlockDiskInfo.RewrittenDate">
             <summary>
             "Rewritten disk" date. It's speculated this refers to the date the disk was formatted and rewritten by something like a Disk Writer kiosk.
             In the case of an original (non-copied) disk, this should be the same as Manufacturing date
+            </summary>
+        </member>
+        <member name="P:com.clusterrr.Famicom.Containers.FdsBlockDiskInfo.Unknown16">
+            <summary>
+            Unknown, offset 0x2F
+            </summary>
+        </member>
+        <member name="P:com.clusterrr.Famicom.Containers.FdsBlockDiskInfo.Unknown17">
+            <summary>
+            Unknown, offset 0x30. 
+            Always 0x80
             </summary>
         </member>
         <member name="P:com.clusterrr.Famicom.Containers.FdsBlockDiskInfo.DiskWriterSerialNumber">
@@ -847,9 +965,16 @@
             Disk Writer serial number
             </summary>
         </member>
+        <member name="P:com.clusterrr.Famicom.Containers.FdsBlockDiskInfo.Unknown18">
+            <summary>
+            Unknown, offset 0x33, unknown. 
+            Always 0x07
+            </summary>
+        </member>
         <member name="P:com.clusterrr.Famicom.Containers.FdsBlockDiskInfo.DiskRewriteCount">
             <summary>
-            Disk rewrite count. 0x00 = Original (no copies)
+            Disk rewrite count. 
+            0x00 = Original (no copies)
             </summary>
         </member>
         <member name="P:com.clusterrr.Famicom.Containers.FdsBlockDiskInfo.ActualDiskSide">
@@ -857,9 +982,20 @@
             Actual disk side
             </summary>
         </member>
+        <member name="P:com.clusterrr.Famicom.Containers.FdsBlockDiskInfo.DiskTypeOther">
+            <summary>
+            Disk type (other)
+            </summary>
+        </member>
         <member name="P:com.clusterrr.Famicom.Containers.FdsBlockDiskInfo.Price">
             <summary>
-            Price code
+            Price code (deprecated, no backing)
+            </summary>
+        </member>
+        <member name="P:com.clusterrr.Famicom.Containers.FdsBlockDiskInfo.DiskVersion">
+            <summary>
+            Unknown how this differs from GameVersion. Disk version numbers indicate different software revisions. 
+            Speculation is that disk version incremented with each disk received from a licensee
             </summary>
         </member>
         <member name="P:com.clusterrr.Famicom.Containers.FdsBlockDiskInfo.Length">
@@ -1177,19 +1313,14 @@
             Single FDS disk side: disk info block, file amount block and file blocks
             </summary>
         </member>
-        <member name="P:com.clusterrr.Famicom.Containers.FdsDiskSide.DiskInfoBlock">
-            <summary>
-            Disk info block
-            </summary>
-        </member>
         <member name="P:com.clusterrr.Famicom.Containers.FdsDiskSide.DiskVerification">
             <summary>
             Literal ASCII string: *NINTENDO-HVC*
             </summary>
         </member>
-        <member name="P:com.clusterrr.Famicom.Containers.FdsDiskSide.ManufacturerCode">
+        <member name="P:com.clusterrr.Famicom.Containers.FdsDiskSide.LicenseeCode">
             <summary>
-            Manufacturer code. $00 = Unlicensed, $01 = Nintendo
+            Manufacturer code. 0x00 = Unlicensed, 0x01 = Nintendo
             </summary>
         </member>
         <member name="P:com.clusterrr.Famicom.Containers.FdsDiskSide.GameName">
@@ -1199,9 +1330,9 @@
         </member>
         <member name="P:com.clusterrr.Famicom.Containers.FdsDiskSide.GameType">
             <summary>
-            $20 = " " — Normal disk
-            $45 = "E" — Event(e.g.Japanese national DiskFax tournaments)
-            $52 = "R" — Reduction in price via advertising
+            0x20 = " " — Normal disk
+            0x45 = "E" — Event(e.g.Japanese national DiskFax tournaments)
+            0x52 = "R" — Reduction in price via advertising
             </summary>
         </member>
         <member name="P:com.clusterrr.Famicom.Containers.FdsDiskSide.GameVersion">
@@ -1221,12 +1352,48 @@
         </member>
         <member name="P:com.clusterrr.Famicom.Containers.FdsDiskSide.DiskType">
             <summary>
-            Disk type. $00 = FMC ("normal card"), $01 = FSC ("card with shutter"). May correlate with FMC and FSC product codes
+            Disk type. 0x00 = FMC ("normal card"), 0x01 = FSC ("card with shutter"). May correlate with FMC and FSC product codes
+            </summary>
+        </member>
+        <member name="P:com.clusterrr.Famicom.Containers.FdsDiskSide.Unknown01">
+            <summary>
+            Unknown, offset 0x18.
+            Always 0x00
             </summary>
         </member>
         <member name="P:com.clusterrr.Famicom.Containers.FdsDiskSide.BootFile">
             <summary>
             Boot read file code. Refers to the file code/file number to load upon boot/start-up
+            </summary>
+        </member>
+        <member name="P:com.clusterrr.Famicom.Containers.FdsDiskSide.Unknown02">
+            <summary>
+            Unknown, offset 0x1A. 
+            Always 0xFF
+            </summary>
+        </member>
+        <member name="P:com.clusterrr.Famicom.Containers.FdsDiskSide.Unknown03">
+            <summary>
+            Unknown, offset 0x1B.
+            Always 0xFF
+            </summary>
+        </member>
+        <member name="P:com.clusterrr.Famicom.Containers.FdsDiskSide.Unknown04">
+            <summary>
+            Unknown, offset 0x1C.
+            Always 0xFF
+            </summary>
+        </member>
+        <member name="P:com.clusterrr.Famicom.Containers.FdsDiskSide.Unknown05">
+            <summary>
+            Unknown, offset 0x1D.
+            Always 0xFF
+            </summary>
+        </member>
+        <member name="P:com.clusterrr.Famicom.Containers.FdsDiskSide.Unknown06">
+            <summary>
+            Unknown, offset 0x1E. 
+            Always 0xFF
             </summary>
         </member>
         <member name="P:com.clusterrr.Famicom.Containers.FdsDiskSide.ManufacturingDate">
@@ -1236,7 +1403,58 @@
         </member>
         <member name="P:com.clusterrr.Famicom.Containers.FdsDiskSide.CountryCode">
             <summary>
-            Country code. $49 = Japan
+            Country code. 0x49 = Japan
+            </summary>
+        </member>
+        <member name="P:com.clusterrr.Famicom.Containers.FdsDiskSide.Unknown07">
+            <summary>
+            Unknown, offset 0x23. 
+            Always 0x61.
+            Speculative: Region code?
+            </summary>
+        </member>
+        <member name="P:com.clusterrr.Famicom.Containers.FdsDiskSide.Unknown08">
+            <summary>
+            Unknown, offset 0x24. 
+            Always 0x00.
+            Speculative: Location/site?
+            </summary>
+        </member>
+        <member name="P:com.clusterrr.Famicom.Containers.FdsDiskSide.Unknown09">
+            <summary>
+            Unknown, offset 0x25.
+            Always 0x00
+            </summary>
+        </member>
+        <member name="P:com.clusterrr.Famicom.Containers.FdsDiskSide.Unknown10">
+            <summary>
+            Unknown, offset 0x26. 
+            Always 0x02
+            </summary>
+        </member>
+        <member name="P:com.clusterrr.Famicom.Containers.FdsDiskSide.Unknown11">
+            <summary>
+            Unknown, offset 0x27. Speculative: some kind of game information representation?
+            </summary>
+        </member>
+        <member name="P:com.clusterrr.Famicom.Containers.FdsDiskSide.Unknown12">
+            <summary>
+            Unknown, offset 0x28. Speculative: some kind of game information representation?
+            </summary>
+        </member>
+        <member name="P:com.clusterrr.Famicom.Containers.FdsDiskSide.Unknown13">
+            <summary>
+            Unknown, offset 0x29. Speculative: some kind of game information representation?
+            </summary>
+        </member>
+        <member name="P:com.clusterrr.Famicom.Containers.FdsDiskSide.Unknown14">
+            <summary>
+            Unknown, offset 0x2A. Speculative: some kind of game information representation?
+            </summary>
+        </member>
+        <member name="P:com.clusterrr.Famicom.Containers.FdsDiskSide.Unknown15">
+            <summary>
+            Unknown, offset 0x2B. Speculative: some kind of game information representation?
             </summary>
         </member>
         <member name="P:com.clusterrr.Famicom.Containers.FdsDiskSide.RewrittenDate">
@@ -1245,14 +1463,32 @@
             In the case of an original (non-copied) disk, this should be the same as Manufacturing date
             </summary>
         </member>
+        <member name="P:com.clusterrr.Famicom.Containers.FdsDiskSide.Unknown16">
+            <summary>
+            Unknown, offset 0x2F
+            </summary>
+        </member>
+        <member name="P:com.clusterrr.Famicom.Containers.FdsDiskSide.Unknown17">
+            <summary>
+            Unknown, offset 0x30. 
+            Always 0x80
+            </summary>
+        </member>
         <member name="P:com.clusterrr.Famicom.Containers.FdsDiskSide.DiskWriterSerialNumber">
             <summary>
             Disk Writer serial number
             </summary>
         </member>
+        <member name="P:com.clusterrr.Famicom.Containers.FdsDiskSide.Unknown18">
+            <summary>
+            Unknown, offset 0x33, unknown. 
+            Always 0x07
+            </summary>
+        </member>
         <member name="P:com.clusterrr.Famicom.Containers.FdsDiskSide.DiskRewriteCount">
             <summary>
-            Disk rewrite count. $00 = Original (no copies)
+            Disk rewrite count. 
+            0x00 = Original (no copies)
             </summary>
         </member>
         <member name="P:com.clusterrr.Famicom.Containers.FdsDiskSide.ActualDiskSide">
@@ -1260,9 +1496,20 @@
             Actual disk side
             </summary>
         </member>
+        <member name="P:com.clusterrr.Famicom.Containers.FdsDiskSide.DiskTypeOther">
+            <summary>
+            Disk type (other)
+            </summary>
+        </member>
         <member name="P:com.clusterrr.Famicom.Containers.FdsDiskSide.Price">
             <summary>
-            Price code
+            Price code (deprecated, no backing)
+            </summary>
+        </member>
+        <member name="P:com.clusterrr.Famicom.Containers.FdsDiskSide.DiskVersion">
+            <summary>
+            Unknown how this differs from GameVersion. Disk version numbers indicate different software revisions. 
+            Speculation is that disk version incremented with each disk received from a licensee
             </summary>
         </member>
         <member name="P:com.clusterrr.Famicom.Containers.FdsDiskSide.FileAmount">
