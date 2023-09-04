@@ -799,7 +799,7 @@ namespace com.clusterrr.Famicom.Containers
             {
                 try
                 {
-                    if (rewrittenDate.Where(b => b != 0).Any())
+                    if (manufacturingDate.Where(b => b != 0).Any())
                         return new DateTime(
                             ((manufacturingDate[0] & 0x0F) + ((manufacturingDate[0] >> 4) & 0x0F) * 10) + 1925,
                             ((manufacturingDate[1] & 0x0F) + ((manufacturingDate[1] >> 4) & 0x0F) * 10),
@@ -819,9 +819,9 @@ namespace com.clusterrr.Famicom.Containers
                 {
                     manufacturingDate = new byte[]
                     {
-                    (byte)(((value.Value.Year - 1925) % 10) | (((value.Value.Year - 1925) / 10) << 4)),
-                    (byte)(((value.Value.Month) % 10) | (((value.Value.Month) / 10) << 4)),
-                    (byte)(((value.Value.Day) % 10) | (((value.Value.Day) / 10) << 4))
+                        (byte)(((value.Value.Year - 1925) % 10) | (((value.Value.Year - 1925) / 10) << 4)),
+                        (byte)(((value.Value.Month) % 10) | (((value.Value.Month) / 10) << 4)),
+                        (byte)(((value.Value.Day) % 10) | (((value.Value.Day) / 10) << 4))
                     };
                 } else
                 {
@@ -937,7 +937,7 @@ namespace com.clusterrr.Famicom.Containers
             {
                 if (value != null)
                 {
-                    manufacturingDate = new byte[]
+                    rewrittenDate = new byte[]
                     {
                         (byte)(((value.Value.Year - 1925) % 10) | (((value.Value.Year - 1925) / 10) << 4)),
                         (byte)(((value.Value.Month) % 10) | (((value.Value.Month) / 10) << 4)),
@@ -946,7 +946,7 @@ namespace com.clusterrr.Famicom.Containers
                 }
                 else
                 {
-                    manufacturingDate = new byte[3];
+                    rewrittenDate = new byte[3];
                 }
             }
         }
