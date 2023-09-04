@@ -12,6 +12,8 @@ namespace com.clusterrr.Famicom.Containers
     [StructLayout(LayoutKind.Sequential, Size = 16, Pack = 1)]
     public class FdsBlockFileHeader : IFdsBlock, IEquatable<FdsBlockFileHeader>
     {
+        static Encoding textEncoding = Encoding.GetEncoding("ISO-8859-1");
+
         /// <summary>
         /// Kind of the file
         /// </summary>
@@ -57,11 +59,18 @@ namespace com.clusterrr.Famicom.Containers
         public byte FileIndicateCode { get => fileIndicateCode; set => fileIndicateCode = value; }
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 8)]
-        private byte[] fileName = Encoding.ASCII.GetBytes("FILENAME");
+        private byte[] fileName = textEncoding.GetBytes("FILENAME");
         /// <summary>
         /// Filename
         /// </summary>
-        public string FileName { get => Encoding.ASCII.GetString(fileName).Trim(new char[] { '\0', ' ' }); set => fileName = Encoding.ASCII.GetBytes(value.PadRight(8)).Take(8).ToArray(); }
+        public string FileName
+        {
+            get => textEncoding.GetString(fileName).TrimEnd(new char[] { '\0' }); set
+            {
+                if (value.Length > 8) throw new InvalidDataException($"Filename \"{value}\" too long, must be <= 8");
+                fileName = textEncoding.GetBytes(value.PadRight(8, '\0')).Take(8).ToArray();
+            }
+        }
 
         [MarshalAs(UnmanagedType.U2)]
         // the destination address when loading

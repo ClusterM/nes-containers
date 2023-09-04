@@ -12,6 +12,8 @@ namespace com.clusterrr.Famicom.Containers
     [StructLayout(LayoutKind.Sequential, Size = 56, Pack = 1)]
     public class FdsBlockDiskInfo : IFdsBlock, IEquatable<FdsBlockDiskInfo>
     {
+        static Encoding textEncoding = Encoding.GetEncoding("ISO-8859-1");
+
         /// <summary>
         /// Disk side
         /// </summary>
@@ -662,11 +664,11 @@ namespace com.clusterrr.Famicom.Containers
         public bool IsValid { get => blockType == ValidTypeID; }
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 14)]
-        readonly byte[] diskVerification = Encoding.ASCII.GetBytes("*NINTENDO-HVC*");
+        readonly byte[] diskVerification = textEncoding.GetBytes("*NINTENDO-HVC*");
         /// <summary>
         /// Literal ASCII string: *NINTENDO-HVC*
         /// </summary>
-        public string DiskVerification => Encoding.ASCII.GetString(diskVerification).Trim(new char[] { '\0', ' ' }); /*set => diskVerification = value.PadRight(14).ToCharArray(0, value.Length > 14 ? 14 : value.Length);*/
+        public string DiskVerification => textEncoding.GetString(diskVerification).Trim(new char[] { '\0', ' ' }); /*set => diskVerification = value.PadRight(14).ToCharArray(0, value.Length > 14 ? 14 : value.Length);*/
 
         [MarshalAs(UnmanagedType.U1)]
         private byte manufacturerCode;
@@ -680,17 +682,20 @@ namespace com.clusterrr.Famicom.Containers
         /// <summary>
         /// 3-letter ASCII code per game (e.g. ZEL for The Legend of Zelda)
         /// </summary>
-        public string? GameName {
+        public string? GameName
+        {
             get
             {
                 if (gameName.Where(b => b != 0).Any())
-                    return Encoding.ASCII.GetString(gameName).Trim(new char[] { '\0', ' ' });
+                    return textEncoding.GetString(gameName).TrimEnd(new char[] { '\0' });
                 else
-                    return null;                
+                    return null;
             }
-            set {
+            set
+            {
+                if (value?.Length > 3) throw new InvalidDataException($"Game name \"{value}\" too long, must be <= 3");
                 if (value != null)
-                    gameName = Encoding.ASCII.GetBytes(value.PadRight(3)).Take(3).ToArray();
+                    gameName = textEncoding.GetBytes(value.PadRight(3, '\0')).Take(3).ToArray();
                 else
                     gameName = new byte[3];
             }
@@ -823,7 +828,8 @@ namespace com.clusterrr.Famicom.Containers
                         (byte)(((value.Value.Month) % 10) | (((value.Value.Month) / 10) << 4)),
                         (byte)(((value.Value.Day) % 10) | (((value.Value.Day) / 10) << 4))
                     };
-                } else
+                }
+                else
                 {
                     manufacturingDate = new byte[3];
                 }
