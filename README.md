@@ -91,6 +91,8 @@ Full format specifications: https://www.nesdev.org/wiki/FDS_file_format
 https://www.nuget.org/packages/NesContainers/
 
 ## Donate
-https://www.donationalerts.com/r/clustermeerkat
-
-https://boosty.to/cluster
+* [Buy Me A Coffee](https://www.buymeacoffee.com/cluster)
+* [Donation Alerts](https://www.donationalerts.com/r/clustermeerkat)
+* [Boosty](https://boosty.to/cluster)
+* BTC: 1MBYsGczwCypXhMBocoDQWxx7KZT2iiwzJ
+* PayPal is not available in Armenia :(
